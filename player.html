@@ -1,0 +1,781 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Org Game Interface</title>
+    <script src="https://cdn.jsdelivr.net/npm/jsog@1.0.7/lib/JSOG.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <style>
+        .hidden { display: none; }
+        h1, h2, h3 { color: #ff00fb; }
+        button { cursor: pointer; background-color: #4CAF50; color: white; border: none; padding: 10px 15px; }
+        button:hover { background-color: #45a049; }
+/* General body styling */
+body {
+    background-color: #000; /* Black background */
+    color: #00FF00; /* Bright green text */
+    font-family: 'Courier New', Courier, monospace; /* Monospace font for that terminal look */
+    font-size: 16px; /* Slightly larger text */
+    line-height: 1.5;
+    margin: 0;
+    padding: 20px;
+}
+
+/* Links */
+a {
+    color: #00FF00; /* Green links */
+    text-decoration: none;
+}
+
+a:hover {
+    text-decoration: underline; /* Underline on hover to show interactability */
+}
+
+/* Terminal window styling */
+.terminal {
+    background-color: #111; /* Darker black for terminal window */
+    padding: 20px;
+    border-radius: 5px;
+    box-shadow: 0 0 10px rgba(0, 255, 0, 0.5); /* Green glowing effect */
+    border: 1px solid #00FF00; /* Green border */
+}
+
+/* Input fields */
+input, select, button {
+    background-color: #222; /* Slightly lighter black for input fields */
+    color: #00FF00; /* Green text */
+    border: 1px solid #00FF00; /* Green border */
+    padding: 5px;
+    border-radius: 3px;
+    font-family: 'Courier New', Courier, monospace;
+}
+
+input::placeholder {
+    color: #009900; /* Darker green for placeholder text */
+}
+
+button {
+    cursor: pointer; /* Pointer cursor for buttons */
+    transition: background-color 0.2s, color 0.2s;
+}
+
+button:hover {
+    background-color: #00FF00; /* Invert colors on hover */
+    color: #000;
+}
+
+/* Table styling */
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+th, td {
+    border: 1px solid #00FF00; /* Green borders for table cells */
+    padding: 10px;
+    text-align: left;
+}
+
+th {
+    background-color: #111; /* Darker background for table header */
+}
+
+td {
+    background-color: #000; /* Black background for table cells */
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+    width: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background-color: #111;
+}
+
+::-webkit-scrollbar-thumb {
+    background-color: #00FF00;
+    border-radius: 4px;
+}
+
+/* Terminal blinking cursor */
+@keyframes blink {
+    0%, 100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0;
+    }
+}
+
+.cursor {
+    display: inline-block;
+    width: 10px;
+    background-color: #00FF00;
+    animation: blink 1s step-end infinite;
+}
+
+/* Terminal lines */
+.terminal-line {
+    margin-bottom: 10px;
+}
+
+
+#orgList {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); /* Grid layout for org cards */
+    gap: 15px;
+    margin-top: 20px;
+}
+
+.card-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  margin-top: 20px;
+}
+
+.org-card .card .player-card .goal-card {
+    background-color: #222;
+    border: 1px solid #00FF00;
+    border-radius: 8px;
+    padding: 15px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.org-card h3 {
+    margin-top: 0;
+    font-size: 1.2em;
+    color: #00FF00;
+}
+
+.org-card p {
+    margin: 5px 0;
+    color: #00FF00;
+    font-size: 0.9em;
+}
+
+.org-card button {
+    display: block;
+    width: 100%;
+    background-color: #111;
+    color: #00FF00;
+    border: none;
+    padding: 10px;
+    border-radius: 5px;
+    margin-top: 10px;
+    transition: background-color 0.3s ease;
+}
+
+.org-card button:hover {
+    background-color: #2f2f2f;
+}
+
+.org-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+}
+
+#orgDetailView {
+    background-color: #222;
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    margin-top: 20px;
+}
+
+#orgDetailName {
+    color: #00FF00;
+    font-size: 24px;
+    margin-bottom: 15px;
+    border-bottom: 2px solid #00FF00;
+    padding-bottom: 10px;
+}
+
+#orgDetailInfo {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+}
+
+#orgDetailInfo p {
+    margin: 0;
+    padding: 10px;
+    background-color: #2f2f2f;
+    border-radius: 5px;
+    font-size: 14px;
+    color: #00FF00;
+}
+
+#orgDetailInfo h4 {
+    grid-column: 1 / -1;
+    color: #00FF00;
+    margin-top: 20px;
+    margin-bottom: 10px;
+    font-size: 18px;
+}
+
+#orgDetailInfo ul {
+    grid-column: 1 / -1;
+    list-style-type: none;
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+#orgDetailInfo li {
+    background-color: #2f2f2f;
+    padding: 5px 10px;
+    border-radius: 15px;
+    font-size: 12px;
+    color: #00FF00;
+}
+
+/* Additional UI Elements */
+#message, #error {
+    padding: 10px;
+    margin: 10px 0;
+    border-radius: 5px;
+}
+
+#message {
+    background-color: #d4edda;
+    color: #155724;
+}
+
+#error {
+    background-color: #f8d7da;
+    color: #721c24;
+}
+
+
+.hidden { 
+    display: none; 
+}
+
+section { 
+    background-color: #f9f9f9; 
+    padding: 15px; 
+    margin: 15px 0; 
+    border-radius: 5px; 
+    border: 1px solid #ddd;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+    </style>
+</head>
+<body>
+    <div class="terminal">
+        <div class="terminal-line">Social Realization Module</div>
+        <input type="text" id="apiKey" placeholder="Enter API Key">
+        <button id="loginBtn">Log In</button>
+        <br>
+        <br>
+        <input type="text" id="playerName" placeholder="Enter Name">
+        <button id="registerBtn">Register</button>
+        <div class="cursor"></div>
+    </div>
+    <div id="message" class="hidden"></div>
+    <div id="error" class="hidden"></div>
+
+    <div id="orgList" class="hidden">
+    </div>
+
+    <div id="orgDetailView" class="hidden">
+        <h2 id="orgDetailName"></h2>
+        <div id="orgDetailInfo"></div>
+        <div id="currentPhaseActions">
+          <div class="phase-goalExpression">
+            <div id="proposeGoal">
+                <h3>Propose Goal</h3>
+                <input type="text" id="goalDescription" placeholder="Goal Description">
+                <button id="proposeGoalBtn">Propose Goal</button>            
+            </div>
+          </div>
+          <div class="phase-goalAllocation">
+            <div id="allocateToGoal">
+                <h3>Allocate to Goal</h3>
+                <input type="number" id="amountAllocateGoal" placeholder="Amount">
+                <input type="text" id="goalIdAllocate" placeholder="Goal ID">
+                <button id="allocateToGoalBtn">Allocate to Goal</button>
+            </div>
+          </div>
+          <div class="phase-offerExpression">
+            <div id="makeOffer">
+                <h3>Make Offer</h3>
+                <input type="text" id="offerName" placeholder="Offer Name">
+                <input type="text" id="offerDescription" placeholder="Offer Description">
+                <input type="text" id="offerEffects" placeholder="Offer Effects">
+                <input type="number" id="offerAsk" placeholder="Ask Amount">
+                <input type="text" id="targetGoalIds" placeholder="Target Goal IDs (comma-separated)">
+                <button id="makeOfferBtn">Make Offer</button>
+            </div>
+          </div>
+          <div class="phase-offerAllocation">
+            <div id="allocateToOffer">
+                <h3>Allocate to Offer</h3>
+                <input type="number" id="amountAllocateOffer" placeholder="Amount">
+                <input type="text" id="fromGoalId" placeholder="From Goal ID">
+                <input type="text" id="toOfferId" placeholder="To Offer ID">
+                <button id="allocateToOfferBtn">Allocate to Offer</button>
+            </div>
+            <div id="acceptCounterOffer">
+                <h3>Respond to Counter Offer</h3>
+                <input type="text" id="counterOfferId" placeholder="Counter Offer ID">
+                <select id="acceptCounterOfferDecision">
+                    <option value="true">Accept</option>
+                    <option value="false">Reject</option>
+                </select>
+                <button id="acceptCounterOfferBtn">Submit Decision</button>
+            </div>
+          </div>
+          <div class="phase-completions">
+            <div id="claimCompletion">
+                <h3>Claim Completion</h3>
+                <input type="text" id="offerIdClaim" placeholder="Offer ID">
+                <input type="text" id="claimDescription" placeholder="Claim Description">
+                <button id="claimCompletionBtn">Claim Completion</button>
+            </div>
+            <div id="challengeCompletion">
+                <h3>Challenge Completion</h3>
+                <input type="text" id="completionIdChallenge" placeholder="Completion ID">
+                <input type="text" id="challengeDescription" placeholder="Challenge Description">
+                <button id="challengeCompletionBtn">Challenge Completion</button>
+            </div>
+            <div id="supportChallenge">
+                <h3>Support Challenge</h3>
+                <input type="text" id="completionIdSupport" placeholder="Completion ID">
+                <select id="supportDecision">
+                    <option value="true">Support</option>
+                    <option value="false">Oppose</option>
+                </select>
+                <button id="supportChallengeBtn">Submit Support</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    <template id="orgCardTemplate">
+        <div class="org-card">
+            <h3 class="org-name"></h3>
+            <p>ID: <span class="org-id"></span></p>
+            <p>Current Cycle: <span class="org-cycle"></span></p>
+            <p>Current Phase: <span class="org-phase"></span></p>
+            <div class="phase-form"></div>
+            <button class="join-button hidden">Join</button>
+        </div>
+    </template>
+
+    <div id="playerCards" class="card-container">
+        <!-- Player cards will be dynamically inserted here -->
+      </div>
+      
+      <div id="goalCards" class="card-container">
+        <!-- Goal cards will be dynamically inserted here -->
+      </div>
+
+    <div id="leaderboards" class="section hidden">
+        <h2>Get Leaderboards</h2>
+        <button id="goalLeaderboardBtn">Goal Leaderboard</button>
+        <button id="offerLeaderboardBtn">Offer Leaderboard</button>
+        <select id="leaderboardDimension">
+            <option value="potentialValue">Potential Value</option>
+            <option value="realizedValue">Realized Value</option>
+        </select>
+        <button id="getLeaderboardBtn">Get Leaderboard</button>
+        <div id="leaderboardResult"></div>
+    </div>
+
+    <div id="orgManagement" class="section hidden">
+        <h2>Organization Management</h2>
+        <div id="createOrg">
+            <h3>Create Organization</h3>
+            <input type="text" id="orgName" placeholder="Organization Name">
+            <button id="createOrgBtn">Create Org</button>
+        </div>
+        <div id="issueShares">
+            <h3>Issue Shares</h3>
+            <input type="number" id="shareAmount" placeholder="Number of Shares">
+            <button id="issueSharesBtn">Issue Shares</button>
+        </div>
+        <div id="distributeShares">
+            <h3>Distribute Shares</h3>
+            <select id="playerSelect"></select>
+            <input type="number" id="distributeAmount" placeholder="Number of Shares">
+            <button id="distributeSharesBtn">Distribute Shares</button>
+        </div>
+        <div id="runPhaseShift">
+            <h3>Run Phase Shift</h3>
+            <button id="runPhaseShiftBtn">Run Phase Shift</button>
+        </div>
+        <div id="acceptOffer" class="phase-offerAllocation">
+            <h3>Accept Offer</h3>
+            <select id="offerSelect"></select>
+            <button id="acceptOfferBtn">Accept Offer</button>
+        </div>
+    </div>
+
+    <script>
+
+        let apiKey = '';
+        let playerId = '';
+        let currentPhase = '';
+        let currentOrgId = '';
+
+        async function playerAction(actionType, actionParams) {
+            try {
+                const response = await $.post('http://localhost:3000/player-action', {
+                    apiKey: apiKey,
+                    actionType: actionType,
+                    actionParams: actionParams
+                });
+                if (response.success) {
+                    setMessage(actionType + ' successful');
+                    return response.result;
+                } else {
+                    showError(actionType + ' failed: ' + response.error);
+                }
+            } catch (error) {
+                showError('Request failed: ' + error.message);
+            }
+        }
+
+        async function joinOrganization(org) {
+        await playerAction('joinOrg', [org.id], function(data) {
+        if (data.success) {
+            fetchOrgRegistry(); // Refresh the org list
+            fetchAndDisplayOrgDetails(org); // Display updated details
+            displayPlayerCards(org);
+            displayGoalCards(org);
+        }
+    });
+}
+
+        function showError(error) {
+            $('#error').removeClass('hidden')
+            $('#error').text(error).show().fadeOut(5000);
+            $('#error').addClass('hidden')
+        }
+
+        function setMessage(message) {
+            $('#message').removeClass('hidden')
+            $('#message').text(message).show().fadeOut(5000);
+            $('#error').addClass('hidden')
+        }
+
+    function updateVisibility() {
+            $('.phase-' + currentPhase).show();
+            $('.phase-' + currentPhase).siblings().hide();
+            $('.always-visible').show();
+        }
+
+    function fetchOrgRegistry() {
+                $.get('http://localhost:3000/get-org-registry', function(data) {
+                    if (data.success) {
+                        displayOrgList(JSOG.decode(data.registryData));
+                    } else {
+                        showError('Fetched registryData failed: ' + data.error);
+                    }
+            });
+    }
+
+
+// Modified function to display player cards
+async function displayPlayerCards(org) {
+    const playerCardsContainer = document.getElementById('playerCards');
+    playerCardsContainer.innerHTML = '';
+    for (const playerId in org.players) {
+        player = await playerAction('getOrg', [playerId]);
+        console.log('ORG DATA', player)
+        const cycleSpecificOrgData = player.orgData[org.id];
+        if (player) {
+            const card = document.createElement('div');
+            card.className = 'card player-card';
+            card.innerHTML = `
+                <h3>${player.name || 'Unknown Player'}</h3>
+                <p>ID: ${playerId}</p>
+                <p>Shares: ${cycleSpecificOrgData.shares || 0}</p>
+            `;
+            playerCardsContainer.appendChild(card);
+        }
+    }
+}
+
+// Modified function to display goal cards
+async function displayGoalCards(org) {
+    const goalCardsContainer = document.getElementById('goalCards');
+    goalCardsContainer.innerHTML = '';
+    for (const goalId in org.goals) {
+        const goal = await playerAction('getGoal', [goalId]);
+        console.log('GOAOLALALOALALO', goal)
+        const cycleSpecificOrgData = goal.orgData[org.id];
+        if (goal) {
+            const card = document.createElement('div');
+            card.className = 'card goal-card';
+            card.innerHTML = `
+                <h3>Goal: ${goal.description || 'No description'}</h3>
+                <p>ID: ${goalId}</p>
+                <p>Created by: ${goal.createdById || 'Unknown'}</p>
+                <p>Potential Value: ${cycleSpecificOrgData.potentialValue || 0}</p>
+            `;
+            goalCardsContainer.appendChild(card);
+        }
+    }
+}
+
+function displayOrgList(orgs) {
+    const orgList = $('#orgList');
+    $('#orgList').removeClass('hidden');
+    orgList.empty();
+    console.log('ORGS', orgs)
+
+    const sortedOrgs = orgs.sort((a, b) => {
+    if (a.id === playerId && b.id !== playerId) return -1;
+    if (a.id !== playerId && b.id === playerId) return 1;
+
+    const aIncludesPlayer = a.players.hasOwnProperty(playerId);
+    const bIncludesPlayer = b.players.hasOwnProperty(playerId);
+
+    if (aIncludesPlayer && !bIncludesPlayer) return -1;
+    if (!aIncludesPlayer && bIncludesPlayer) return 1;
+
+    return 0;
+});
+
+orgs.forEach(org => {
+        const orgCard = $('<div>').addClass('org-card');
+        orgCard.append($('<h3>').addClass('org-name').text(org.name));
+        orgCard.append($('<p>').text('ID: ' + org.id));
+        orgCard.append($('<p>').text('Phase: ' + org.currentPhase));
+
+        console.log('org', org.players)
+        console.log('playerID', playerId)
+
+        if(!org.players.hasOwnProperty(playerId)) {
+            const joinButton = $('<button>').text('Join').click(function() {
+            currentOrgId = org.id
+            joinOrganization(org)
+            console.log('PLAYERID', playerId)
+            org.players[playerId] = {}
+            updatePhaseActions(org, playerId, org.currentPhase)
+            joinButton.hide()
+            });
+            orgCard.append(joinButton);
+        }
+
+        const detailButton = $('<button>').text('Details').click(function() {
+            currentOrgId = org.id
+            $('#orgDetailName').text(org.name);
+        const detailInfo = $('#orgDetailInfo');
+        detailInfo.empty();
+        detailInfo.append($('<p>').html('<strong>ID:</strong> ' + org.id));
+        detailInfo.append($('<p>').html('<strong>Current Cycle:</strong> ' + org.currentCycle));
+        detailInfo.append($('<p>').html('<strong>Current Phase:</strong> ' + org.currentPhase));
+        detailInfo.append($('<p>').html('<strong>Potential Value:</strong> ' + org.potentialValue));
+        detailInfo.append($('<p>').html('<strong>Shares:</strong> ' + org.shares));
+        detailInfo.append($('<p>').html('<strong>Realized Value:</strong> ' + org.realizedValue));
+
+
+        
+        const playerCardsContainer = document.getElementById('playerCards');
+        playerCardsContainer.innerHTML = '';
+
+        const goalCardsContainer = document.getElementById('goalCards');
+        goalCardsContainer.innerHTML = '';
+            
+        // Display players, goals, and offers
+        if(Object.keys(org.players).length > 0) {
+            console.log(org.players)
+            displayPlayerCards(org);
+        }
+
+        if(Object.keys(org.goals).length > 0) {
+            displayGoalCards(org);
+        }
+
+        if(['offerExpression', 'offerAllocation', 'completions'].includes(org.currentPhase)) {
+            displayListItems(detailInfo, 'Offers', org.offers);
+        }
+
+        updatePhaseActions(org, playerId, org.currentPhase)
+        $('#orgDetailView').removeClass('hidden');
+        });
+        orgCard.append(detailButton);
+
+        orgList.append(orgCard);
+    });
+}
+
+function updatePhaseActions(org, playerId, currentPhase) {
+          // Hide all phase-specific divs
+        const allPhaseDivs = document.querySelectorAll('#currentPhaseActions > div');
+        allPhaseDivs.forEach(div => div.style.display = 'none');
+            // Show the div for the current phase
+        if(org.players.hasOwnProperty(playerId)) {
+            const currentPhaseDiv = document.querySelector(`#currentPhaseActions .phase-${org.currentPhase}`);
+        if (currentPhaseDiv) {
+                currentPhaseDiv.style.display = 'block';
+        }
+}
+}
+
+
+function displayListItems(container, title, items) {
+    container.append($('<h4>').text(title));
+    const list = $('<ul>');
+    items.forEach(item => {
+        list.append($('<li>').text(item));
+    });
+    container.append(list);
+}
+
+$(document).ready(async function() {
+
+        function showView(viewId) {
+                $('.view').addClass('hidden');
+                $(`#${viewId}`).removeClass('hidden');
+        }
+
+        $('#loginBtn').click(function() {
+            apiKey = $('#apiKey').val();
+            $.post('http://localhost:3000/login', { apiKey: apiKey }, function(data) {
+                if (data.success) {
+                    console.log(data.playerId)
+                    playerId = data.playerId;
+                    setMessage('Login successfully. playerID: ' + playerId);
+                    $('#terminal').hide();
+                    fetchOrgRegistry()
+                } else {
+                    showError('Login failed: ' + data.error);
+                }
+            });
+        });
+
+        $('#registerBtn').click(function() {
+            const playerName = $('#playerName').val();
+            $.post('http://localhost:3000/register', { playerName: playerName }, function(data) {
+                if (data.success) {
+                    playerId = data.playerId;
+                    apiKey = data.apiKey;
+                    setMessage('Registered successfully. API Key: ' + apiKey);
+                    $('#terminal').hide();
+                    fetchOrgRegistry()
+                } else {
+                    showError('Registration failed: ' + data.error);
+                }
+            });
+        });
+
+        $('#createOrgBtn').click(async function() {
+            const orgName = $('#orgName').val();
+            await playerAction('createOrg', [orgName]);
+        });
+
+        $('#issueSharesBtn').click(async function() {
+            const shareAmount = $('#shareAmount').val();
+            await playerAction('issueShares', [playerId, parseInt(shareAmount)]);
+        });
+
+        $('#distributeSharesBtn').click(async function() {
+            const playerIdShares = $('#playerIdShares').val();
+            const shareAmountDistribute = $('#shareAmountDistribute').val();
+            await playerAction('distributeShares', [playerId, playerIdShares, parseInt(shareAmountDistribute)]);
+        });
+
+        $('#runPhaseShiftBtn').click(async function() {
+            await playerAction('runPhaseShift', [playerId]);
+        });
+
+        $('#proposeGoalBtn').click(async function() {
+            const goalDescription = $('#goalDescription').val();
+            const result = await playerAction('proposeGoalToOrg', [currentOrgId, goalDescription]);
+            if (result) {
+                // If the goal was successfully proposed, fetch the updated org data
+                const updatedOrg = await playerAction('getOrg', [currentOrgId]);
+                console.log('UPDATED', updatedOrg)
+                if (updatedOrg) {
+                    let org = updatedOrg.cycles[updatedOrg.currentCycle]
+                    console.log('RELEVANT', org)
+                    // Update the goal cards display
+                    displayGoalCards(org);
+                }
+            }
+        });
+
+        $('#allocateToGoalBtn').click(async function() {
+            const amountAllocateGoal = $('#amountAllocateGoal').val();
+            const goalIdAllocate = $('#goalIdAllocate').val();
+            await playerAction('allocateToGoalFromOrg', [currentOrgId, parseInt(amountAllocateGoal), goalIdAllocate]);
+        });
+
+        $('#makeOfferBtn').click(async function() {
+            const offerName = $('#offerName').val();
+            const offerDescription = $('#offerDescription').val();
+            const offerEffects = $('#offerEffects').val();
+            const offerAsk = $('#offerAsk').val();
+            const targetGoalIds = $('#targetGoalIds').val().split(',');
+            await playerAction('offerToOrg', [currentOrgId, offerName, offerDescription, offerEffects, parseInt(offerAsk), targetGoalIds]);
+        });
+
+        $('#allocateToOfferBtn').click(async function() {
+            const amountAllocateOffer = $('#amountAllocateOffer').val();
+            const fromGoalId = $('#fromGoalId').val();
+            const toOfferId = $('#toOfferId').val();
+            await playerAction('allocateToOfferFromGoalInOrg', [currentOrgId, parseInt(amountAllocateOffer), fromGoalId, toOfferId]);
+        });
+
+        $('#acceptOfferBtn').click(async function() {
+            const offerIdAccept = $('#offerIdAccept').val();
+            await playerAction('acceptOffer', [playerId, offerIdAccept]);
+        });
+
+        $('#acceptCounterOfferBtn').click(async function() {
+            const counterOfferId = $('#counterOfferId').val();
+            const acceptCounterOfferDecision = $('#acceptCounterOfferDecision').val() === 'true';
+            await playerAction('acceptCounterOffer', [currentOrgId, counterOfferId, acceptCounterOfferDecision]);
+        });
+
+        $('#claimCompletionBtn').click(async function() {
+            const offerIdClaim = $('#offerIdClaim').val();
+            const claimDescription = $('#claimDescription').val();
+            await playerAction('claimCompletion', [currentOrgId, offerIdClaim, claimDescription]);
+        });
+
+        $('#challengeCompletionBtn').click(async function() {
+            const completionIdChallenge = $('#completionIdChallenge').val();
+            const challengeDescription = $('#challengeDescription').val();
+            await playerAction('challengeCompletion', [currentOrgId, completionIdChallenge, challengeDescription]);
+        });
+
+        $('#supportChallengeBtn').click(async function() {
+            const completionIdSupport = $('#completionIdSupport').val();
+            const supportDecision = $('#supportDecision').val() === 'true';
+            await playerAction('supportChallenge', [currentOrgId, completionIdSupport, supportDecision]);
+        });
+
+        $('#getLeaderboardBtn').click(function() {
+            const leaderboardType = $('#leaderboardType').val();
+            const leaderboardDimension = $('#leaderboardDimension').val();
+            $.post('/player-action', {
+                apiKey: apiKey,
+                actionType: 'getLeaderboard',
+                actionParams: [currentOrgId, leaderboardType, leaderboardDimension]
+            }, function(data) {
+                if (data.success) {
+                    $('#leaderboardResult').html(JSON.stringify(JSOG.decode(data.result), null, 2));
+                } else {
+                    showError('Failed to get leaderboard: ' + data.error);
+                }
+            });
+        });
+
+        // Initialize visibility
+        updateVisibility();
+});
+
+    </script>
+</body>
+</html>
