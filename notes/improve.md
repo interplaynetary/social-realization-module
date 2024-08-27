@@ -1,5 +1,9 @@
 ## Views 
-- We need to refresh the 
+- We need to refresh the goals immediately
+- Make self-card special color.
+- Allow special buttons for self card (shift phase, change self-name etc.)
+- Add search for organizations
+
 
 - Search/View/Join Orgs from Org Registry
     - Each Org in the Org Registry being displayed should be a card showing:
@@ -27,7 +31,6 @@
 
 
 # Fronted
-- Add log in (with API key)/log out
 - Show in the top right corner the currently logged in player Name / ID.
 - Display the current phase for self and other.
 - Create a dropdown input element for IDs by searching through org registery.
