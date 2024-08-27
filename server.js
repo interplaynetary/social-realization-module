@@ -19,16 +19,16 @@ app.use(cors({
 }));
 
 //const names = {}; // mantain ordering, when an org is made, it's reference should be stored here, to have playstate-0, playstate-1 etc. names
-const orgRegistry = {};
-const goalRegistry = {};
-const offerRegistry = {};
-const completionRegistry = {};
+export const orgRegistry = {};
+export const goalRegistry = {};
+export const offerRegistry = {};
+export const completionRegistry = {};
 
 const apiKeyToPlayer = {};
 
 class Element {
-    constructor(id) {
-        this.id = id || uuidv4();
+    constructor() {
+        this.id = uuidv4();
         this.orgData = {};
     }
 
@@ -59,7 +59,7 @@ class Element {
     }
 }
 
-class Goal extends Element {
+export class Goal extends Element {
     constructor(description, createdById) {
         super();
         this.description = description;
@@ -76,7 +76,7 @@ class Goal extends Element {
     }
 }
 
-class Offer extends Element {
+export class Offer extends Element {
     constructor(name, description, effects, createdById) {
         super();
         this.name = name;
@@ -106,7 +106,7 @@ class Offer extends Element {
     }
 }
 
-class Completion {
+export class Completion {
     constructor(offerId, claimDescription, claimedById) {
         this.id = uuidv4();
         this.offerId = offerId;
@@ -132,6 +132,7 @@ class Org extends Element {
         apiKeyToPlayer[apiKey] = this.id;
         console.log(this.name, 'ID:', this.id);
         console.log(this.name, 'API-Key:', apiKey);
+        this.joinOrg(this.id)
         return [apiKey, this];
     }
 
@@ -159,6 +160,7 @@ class Org extends Element {
                 realizedValue: 0
             };
         }
+        return true
     }
 
     getOrg(orgId){
@@ -191,6 +193,7 @@ class Org extends Element {
             this.currentCycle++;
             this.initForSelfCycle();
         }
+        return this.currentPhase
     }
 
     issueShares(amount) {
@@ -298,9 +301,10 @@ class Org extends Element {
                 joinTime: joinTime 
             };
             this.orgData[orgId] = cycleSpecificOrgData;
+            currentOrg.players[this.id] = this;
+            return true
         }
-
-        currentOrg.players[this.id] = this;
+        return false
     }
 
     proposeGoalToOrg(orgId, description) {
@@ -500,14 +504,8 @@ class Org extends Element {
     }
 }
 
-function getPlayerFromApiKey(apiKey) {
-    return apiKeyToPlayer[apiKey];
-}
-
 function playerAction(apiKey, actionType, ...actionParams) {
-    console.log('PLAYER ACTION');
-
-    const playerId = getPlayerFromApiKey(apiKey);
+    const playerId = apiKeyToPlayer[apiKey];
     if (!playerId) {
         throw new Error("Invalid API key");
     }
@@ -520,7 +518,7 @@ function playerAction(apiKey, actionType, ...actionParams) {
 
     const playerCurrentPhase = player.getCurrentPhase();
 
-    const [orgId, ...restParams] = actionParams;
+    const [id, ...restParams] = actionParams;
 
     // Actions allowed in any phase
     const alwaysAvailableActions = [
@@ -530,13 +528,30 @@ function playerAction(apiKey, actionType, ...actionParams) {
     ];
 
     if (alwaysAvailableActions.includes(actionType)) {
-        return player[actionType](...actionParams);
+        console.log('ACTIONTYPE:', actionType)
+
+        // beginning without id
+        if(['getCurrentSelfData', 'getCurrentPhase', 'issueShares', 'runPhaseShift', 'unIssueShares', 'issuePotential', 'calculateRealizedValue', 'getGoalLeaderboard', 'getOfferLeaderboard'].includes(actionType)){
+            console.log('restParams:', restParams)
+            const response = player[actionType](...restParams);
+            console.log(response)
+            return response
+        } else {
+            // beginning with id
+            console.log('actionParams:', restParams)
+            const response = player[actionType](...actionParams);
+            console.log(response)
+            return response
+        }
+
     }
 
 
-    let org = undefined
-    if(orgRegistry[orgId] instanceof Org) {
-        org = orgRegistry[orgId]
+    if(orgRegistry[id] instanceof Org) {
+        let org = orgRegistry[id]
+        if (!org) {
+            throw new Error(`Element with ID ${id} not found`);
+        }
         const orgCurrentPhase = org.getCurrentPhase();
         console.log(`Player Current Phase: ${playerCurrentPhase}`);
         console.log(`Org Current Phase: ${orgCurrentPhase}`);
@@ -576,19 +591,6 @@ function playerAction(apiKey, actionType, ...actionParams) {
             default:
                 throw new Error(`Action ${actionType} not allowed in current phase ${playerCurrentPhase}`);
         }
-    }
-    if(goalRegistry[orgId] instanceof Goal) {
-        org = goalRegistry[orgId]
-    }
-    if(offerRegistry[orgId] instanceof Offer) {
-        org = offerRegistry[orgId]
-    }
-    if(completionRegistry[orgId] instanceof Completion) {
-        org = completionRegistry[orgId]
-    }
-
-    if (!org) {
-        throw new Error(`Element with ID ${orgId} not found`);
     }
 
     throw new Error(`Action ${actionType} is not allowed in the current phase: ${playerCurrentPhase}`);
@@ -720,14 +722,17 @@ console.log("--- Phase 1: Goal Expression ---");
 console.log("Current phase for Org 1:", org1.getCurrentPhase());
 console.log("Current phase for Org 2:", org2.getCurrentPhase());
 
-const goals1 = player1.proposeGoalToOrg(org1.id, "Improve product quality");
-const goals2 = player2.proposeGoalToOrg(org1.id, "Expand market reach");
+const goals1 = player1.proposeGoalToOrg(org1.id, "Enjoy!");
+const goals2 = player2.proposeGoalToOrg(org1.id, "Good Vibes!");
 
 console.log("Goals proposed by Player 1:", goals1);
 console.log("Goals proposed by Player 2:", goals2);
 
 console.log("--- Phase 2: Goal Allocation ---");
 org1.runPhaseShift();
+org1.runPhaseShift();
+org2.runPhaseShift();
+org2.runPhaseShift();
 org2.runPhaseShift();
 console.log("Current phase for Org 1:", org1.getCurrentPhase());
 console.log("Current phase for Org 2:", org2.getCurrentPhase());

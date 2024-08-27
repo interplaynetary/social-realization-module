@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tradeoff Curve Visualization</title>
+    <style>
+        /* Styling */
+        body {
+            background-color: #000; /* Black background */
+            color: #00FF00; /* Bright green text */
+            font-family: 'Courier New', Courier, monospace; /* Monospace font for that terminal look */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        h1 {
+            text-align: center;
+        }
+        #chart {
+            position: relative;
+        }
+    </style>
+    <!-- Include Observable Plot and D3 (required by Observable Plot) -->
+    <script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@observablehq/plot@0.6"></script>
+</head>
+<body>
+    <div>Right Use-Condition</div>
+    <br>
+    <div id="chart"></div>
+
+    <script>
+        // Parameters
+        const P_min = 100;
+        const R_min = 35;
+
+        // Function to calculate potential needed (P) for a given realized value (R)
+        function tradeoffCurve(R, P_min, R_min) {
+            const m = -P_min / R_min;
+            return m * R + P_min;
+        }
+
+        // Generate data points for the plot
+        const data = [];
+        for (let R = 0; R <= R_min; R++) {
+            data.push({
+                Realized: R,
+                Potential: tradeoffCurve(R, P_min, R_min)
+            });
+        }
+
+        // Create the plot
+        const plot = Plot.plot({
+            width: 600,
+            height: 400,
+            marginLeft: 50,
+            marginBottom: 50,
+            marks: [
+                Plot.line(data, {x: "Realized", y: "Potential", stroke: "#00FF00", strokeWidth: 2}),
+            ],
+            x: {
+                label: "Realized Value",
+                grid: true,
+                line: true
+            },
+            y: {
+                label: "Potential Value Needed",
+                grid: true,
+                line: true
+            },
+            style: {
+                background: "#000",
+                color: "#00FF00"
+            }
+        });
+
+        // Append the plot to the DOM
+        document.getElementById('chart').appendChild(plot);
+    </script>
+</body>
+</html>
