@@ -1,3 +1,15 @@
+// Points from each goal should be recognizable a from them in the data structure.
+// Tags on goals in Orgs
+// Collaborators on offers (the ids do not have to be players in the org)
+        // Ideally we actually make it a request for inclusion, an invitation to join an Offer / Goal
+        // Pending acceptance
+        // Each Offer should then include:
+            // Offered Collaborators
+            // Accepted Collaborators
+        // This allows for a natural way to 'join' an organization, you can get a threshold of points from an org before you even try to be a member.
+
+// Add Templates for offer, goal, efforts, completion claims.
+
 import { v4 as uuidv4 } from 'uuid';
 import express from 'express';
 import cors from 'cors';
@@ -14,8 +26,6 @@ app.use(express.static('public')); // Serve static files from 'public' directory
 app.use(cors({
     origin: 'http://127.0.0.1:5501'
 }));
-
-// Add Templates for offer, goal, efforts, completion claims.
 
 export const orgRegistry = {};
 export const goalRegistry = {};
@@ -101,9 +111,21 @@ export class Offer extends Element {
     initForOrg(orgId, ask, targetGoals) {
         super.initForOrg(orgId);
         const orgData = this.getCurrentOtherData(orgId);
+        const totalPotentialPoints = Array.from(targetGoals).reduce((sum, goalId) => {
+            const goal = goalRegistry[goalId];
+            if (!goal) throw new Error("Target goal not found");
+            const goalOrgData = goal.getCurrentOtherData(orgId);
+            return sum + goalOrgData.potentialValue;
+        }, 0);
+    
+        if (ask > totalPotentialPoints) {
+            throw new Error("Offer ask exceeds the aggregate potential points of the target goals");
+        }
+    
         orgData.ask = ask;
         orgData.towardsGoals = new Set(targetGoals);
     }
+    
 }
 
 export class Completion {
@@ -319,20 +341,33 @@ export default class Org extends Element {
     }
 
     offerToOrg(orgId, name, description, effects, ask, targetGoalIds) {
-        if (!name || !description || !effects || ask <= 0 || !targetGoalIds || targetGoalIds.length === 0) {
-            throw new Error("Invalid offer parameters");
-        }
-        
-        const offer = new Offer(name, description, effects, this.id);
-        
-            const org = orgRegistry[orgId];
-            if (!org) throw new Error(`Organization with ID ${orgId} not found`);
-            const currentOrg = org.getCurrentSelfData();
-            offer.initForOrg(orgId, ask, targetGoalIds);
-            currentOrg.offers[offer.id] = offer;
-        
-        return offer.id;
+    if (!name || !description || !effects || ask <= 0 || !targetGoalIds || targetGoalIds.length === 0) {
+        throw new Error("Invalid offer parameters");
     }
+
+    const org = orgRegistry[orgId];
+    if (!org) throw new Error(`Organization with ID ${orgId} not found`);
+    const currentOrg = org.getCurrentSelfData();
+
+    // Calculate total potential points of the target goals
+    const totalPotentialPoints = targetGoalIds.reduce((sum, goalId) => {
+        const goal = goalRegistry[goalId];
+        if (!goal) throw new Error("Target goal not found");
+        const goalOrgData = goal.getCurrentOtherData(orgId);
+        return sum + goalOrgData.potentialValue;
+    }, 0);
+
+    if (ask > totalPotentialPoints) {
+        throw new Error("Offer ask exceeds the aggregate potential points of the target goals");
+    }
+
+    const offer = new Offer(name, description, effects, this.id);
+    offer.initForOrg(orgId, ask, targetGoalIds);
+    currentOrg.offers[offer.id] = offer;
+
+    return offer.id;
+}
+
 
     allocateToGoalFromOrg(orgId, amount, goalId) {
         const org = orgRegistry[orgId];
@@ -356,8 +391,9 @@ export default class Org extends Element {
             const goalOrgData = goal.getCurrentOtherData(orgId);
             goalOrgData.potentialValue += amount;
             return true;
+        } else {
+            throw new Error("Insufficient allocation rights.");
         }
-        return false;
     }
 
     allocateToOfferFromGoalInOrg(orgId, amount, fromId, toId) {
@@ -389,9 +425,114 @@ export default class Org extends Element {
             const offerOrgData = offer.getCurrentOtherData(orgId);
             offerOrgData.potentialValue += amount;
             return true;
+        } else {
+            throw new Error("Insufficient allocation rights.");
         }
-        return false;
     }
+
+    // Shifts allocated points from one goal to another within the same organization.
+shiftPointsBetweenGoalsInOrg(orgId, amount, fromGoalId, toGoalId) {
+    const org = orgRegistry[orgId];
+    const currentOrg = org.getCurrentSelfData();
+
+    const fromGoal = currentOrg.goals[fromGoalId];
+    const toGoal = currentOrg.goals[toGoalId];
+    if (!fromGoal || !toGoal) throw new Error("One or both goals not found");
+
+    const fromGoalOrgData = fromGoal.getCurrentOtherData(orgId);
+    const toGoalOrgData = toGoal.getCurrentOtherData(orgId);
+
+    if (fromGoalOrgData.potentialValue < amount) {
+        throw new Error("Insufficient points in the source goal to shift");
+    }
+
+    // Shift points
+    fromGoalOrgData.potentialValue -= amount;
+    toGoalOrgData.potentialValue += amount;
+
+    return true;
+}
+
+// Unallocates points from a specific goal.
+unallocatePointsFromGoalInOrg(orgId, amount, goalId) {
+    const org = orgRegistry[orgId];
+    const currentOrg = org.getCurrentSelfData();
+
+    const goal = currentOrg.goals[goalId];
+    if (!goal) throw new Error("Goal not found");
+
+    const goalOrgData = goal.getCurrentOtherData(orgId);
+
+    if (goalOrgData.potentialValue < amount) {
+        throw new Error("Insufficient points in the goal to unallocate");
+    }
+
+    // Unallocate points
+    goalOrgData.potentialValue -= amount;
+    currentOrg.potentialValueDistributedFromSelfToGoals -= amount;
+
+    return true;
+}
+
+// Shifts allocated points from one offer to another under the same goal.
+shiftPointsBetweenOffersInOrg(orgId, amount, fromOfferId, toOfferId, goalId) {
+    const org = orgRegistry[orgId];
+    const currentOrg = org.getCurrentSelfData();
+
+    const goal = currentOrg.goals[goalId];
+    if (!goal) throw new Error("Goal not found");
+
+    const fromOffer = currentOrg.offers[fromOfferId];
+    const toOffer = currentOrg.offers[toOfferId];
+    if (!fromOffer || !toOffer) throw new Error("One or both offers not found");
+
+    const fromOfferOrgData = fromOffer.getCurrentOtherData(orgId);
+    const toOfferOrgData = toOffer.getCurrentOtherData(orgId);
+
+    if (!fromOfferOrgData.towardsGoals.has(goalId) || !toOfferOrgData.towardsGoals.has(goalId)) {
+        throw new Error("Both offers must be linked to the specified goal");
+    }
+
+    if (fromOfferOrgData.potentialValue < amount) {
+        throw new Error("Insufficient points in the source offer to shift");
+    }
+
+    // Shift points
+    fromOfferOrgData.potentialValue -= amount;
+    toOfferOrgData.potentialValue += amount;
+
+    return true;
+}
+
+// Unallocates points from a specific offer.
+unallocatePointsFromOfferInOrg(orgId, amount, offerId, goalId) {
+    const org = orgRegistry[orgId];
+    const currentOrg = org.getCurrentSelfData();
+
+    const goal = currentOrg.goals[goalId];
+    if (!goal) throw new Error("Goal not found");
+
+    const offer = currentOrg.offers[offerId];
+    if (!offer) throw new Error("Offer not found");
+
+    const offerOrgData = offer.getCurrentOtherData(orgId);
+    const goalOrgData = goal.getCurrentOtherData(orgId);
+
+    if (!offerOrgData.towardsGoals.has(goalId)) {
+        throw new Error("This offer is not linked to the specified goal");
+    }
+
+    if (offerOrgData.potentialValue < amount) {
+        throw new Error("Insufficient points in the offer to unallocate");
+    }
+
+    // Unallocate points
+    offerOrgData.potentialValue -= amount;
+    goalOrgData.potentialValueDistributedFromSelf -= amount;
+
+    return true;
+}
+
 
     acceptCounterOffer(orgId, counterofferId, accepted) {
         const org = orgRegistry[orgId];
