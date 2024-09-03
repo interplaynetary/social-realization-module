@@ -121,12 +121,14 @@
 
     <script>
 
+        // Now our elements have a .type property which allows us to generalize our Card Creation!
+
         let apiKey = '';
         let playerId = '';
         let currentPhase = '';
         let currentOrgId = '';
 
-        async function playerAction(actionType, actionParams) {
+async function playerAction(actionType, actionParams) {
             try {
                 const response = await $.post('http://localhost:3000/player-action', {
                     apiKey: apiKey,
@@ -144,7 +146,7 @@
             }
         }
 
-        async function joinOrganization(org) {
+async function joinOrganization(org) {
         const data = await playerAction('joinOrg', [org.id])
             if (data.success) {
                 fetchOrgRegistry(); // Refresh the org list
@@ -153,19 +155,7 @@
             }
     };
 
-        function showError(error) {
-            $('#error').removeClass('hidden')
-            $('#error').text(error).show().fadeOut(5000);
-            $('#error').addClass('hidden')
-        }
-
-        function setMessage(message) {
-            $('#message').removeClass('hidden')
-            $('#message').text(message).show().fadeOut(5000);
-            $('#error').addClass('hidden')
-        }
-
-    function fetchOrgRegistry() {
+function fetchOrgRegistry() {
                 $.get('http://localhost:3000/get-org-registry', function(data) {
                     if (data.success) {
                         displayOrgList(JSOG.decode(data.registryData));
@@ -175,7 +165,7 @@
             });
     }
     
-    async function refreshOrgData(orgId) {
+async function refreshOrgData(orgId) {
     // Fetch the updated organization data
     const updatedOrg = await playerAction('getOrg', [orgId]);
     // Update the orgCards list
@@ -185,6 +175,7 @@
         updateOrgDetails(updatedOrg);
     }
 }
+
 function updateOrgDetails(org) {
     // Update the organization name
     $('#orgDetailName').text(org.name);
@@ -217,12 +208,11 @@ function updateOrgDetails(org) {
     $('#orgDetailView').removeClass('hidden');
 }
 
-
 function displayOrgList(orgs) {
     const orgList = $('#orgList');
     $('#orgList').removeClass('hidden');
     orgList.empty();
-    console.log('ORGS', orgs)
+    console.log('displayOrgList: orgs', orgs)
 
     const sortedOrgs = orgs.sort((a, b) => {
         if (a.id === playerId && b.id !== playerId) return -1;
@@ -248,14 +238,14 @@ function displayOrgList(orgs) {
         orgCard.append($('<p>').text('ID: ' + org.id));
         orgCard.append($('<p>').text('Phase: ' + org.currentPhase));
 
-        console.log('org', org.players)
-        console.log('playerID', playerId)
+        console.log('displayOrgList: org.players', org.players)
+        console.log('displayOrgList: playerID', playerId)
 
         if(!org.players.hasOwnProperty(playerId)) {
             const joinButton = $('<button>').text('Join').click(function() {
                 currentOrgId = org.id
                 joinOrganization(org)
-                console.log('PLAYERID', playerId)
+                console.log('displayOrgList: playerID', playerId)
                 org.players[playerId] = {}
                 updatePhaseActions(org, playerId, org.currentPhase)
                 joinButton.hide()
@@ -318,7 +308,7 @@ function displayOrgList(orgs) {
             goalCardsContainer.innerHTML = '';
             
             if(Object.keys(org.players).length > 0) {
-                console.log(org.players)
+                console.log('displayOrgList', org.players)
                 displayPlayerCards(org);
             }
 
@@ -344,17 +334,16 @@ function displayOrgList(orgs) {
     });
 }
 
-
 async function displayPlayerCards(org) {
     const playerCardsContainer = document.getElementById('playerCards');
     playerCardsContainer.innerHTML = '';
     playerCardsContainer.append('Players');
 
     for (const playerId in org.players) {
-        console.log('ID:', playerId)
+        console.log('displayPlayerCards: playerId', playerId)
         player = await playerAction('getOrg', [playerId]);
-        console.log('PLAYER DATA', player)
-        console.log('OROGOGOG', org)
+        console.log('displayPlayerCards: player', player)
+        console.log('displayPlayerCards: org', org)
         const cycleSpecificOrgData = player.orgData[org.id][org.currentCycle];
         if (player) {
             const card = document.createElement('div');
@@ -375,8 +364,8 @@ async function displayGoalCards(org) {
     goalCardsContainer.append('Goals');
     for (const goalId in org.goals) {
         const goal = await playerAction('getGoal', [goalId]);
-        console.log('OROGOGOG', org)
-        console.log('GOAOLALALOALALO', goal)
+        console.log('displayGoalCards: org', org)
+        console.log('displayGoalCards: goal', goal)
         const cycleSpecificOrgData = goal.orgData[org.id][org.currentCycle];
         if (goal) {
             const card = document.createElement('div');
@@ -392,7 +381,6 @@ async function displayGoalCards(org) {
     }
 }
 
-
 function updatePhaseActions(org, playerId, currentPhase) {
           // Hide all phase-specific divs
         const allPhaseDivs = document.querySelectorAll('#currentPhaseActions > div');
@@ -406,18 +394,41 @@ function updatePhaseActions(org, playerId, currentPhase) {
 }
 }
 
-
 function displayListItems(container, title, items) {
     container.append($('<h4>').text(title));
     const list = $('<ul>');
         if(items) {
             Object.entries(items).forEach(([key, value]) => {
-                console.log("key, value",(key, value))
-        list.append($('<li>').text(value.description));
+                console.log('displayListItems', "key, value",(key, value))
+            switch (value.type) {
+                case 'Offer': 
+                // I am trying to create a offer elements like player cards
+                list.append($('<li>').text(value.name))
+                list.append($('<li>').text(value.description))
+                list.append($('<li>').text(value.effects))
+                list.append($('<li>').text(value.createdById))
+                    break;
+                case 'Goal': 
+                list.append($('<li>').text(value.description))
+                break;
+            }
     });
         }
     container.append(list);
 }
+
+function showError(error) {
+            $('#error').removeClass('hidden')
+            $('#error').text(error).show().fadeOut(5000);
+            $('#error').addClass('hidden')
+        }
+
+function setMessage(message) {
+            $('#message').removeClass('hidden')
+            $('#message').text(message).show().fadeOut(5000);
+            $('#error').addClass('hidden')
+        }
+
 
 $(document).ready(async function() {
 
@@ -425,7 +436,7 @@ $(document).ready(async function() {
             apiKey = $('#apiKey').val();
             $.post('http://localhost:3000/login', { apiKey: apiKey }, function(data) {
                 if (data.success) {
-                    console.log(data.playerId)
+                    console.log('loginBtn', data.playerId)
                     playerId = data.playerId;
                     setMessage('Login successfully. playerID: ' + playerId);
                     $('#terminal').hide();
@@ -464,7 +475,7 @@ $(document).ready(async function() {
             if (result) {
                 // If the goal was successfully proposed, fetch the updated org data
                 const updatedOrg = await playerAction('getOrg', [currentOrgId]);
-                console.log('UPDATED', updatedOrg)
+                console.log('proposeGoal: updatedOrg', updatedOrg)
                 displayGoalCards(updatedOrg);
                 await refreshOrgData(currentOrgId);     
             }

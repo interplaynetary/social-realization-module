@@ -40,6 +40,7 @@ class Element {
     constructor() {
         this.id = uuidv4();
         this.orgData = {};
+        this.type = this.constructor.name; // Add the .type property
     }
 
     initForOrg(orgId) {
@@ -239,10 +240,10 @@ export default class Org extends Element {
         if (amount > (org.shares - org.sharesDistributed)) throw new Error("Not enough shares to distribute");
         const player = org.players[playerId];
         if (!player) throw new Error("Player not found");
-        console.log(player);
-        console.log(this.id);
+        console.log('distributeShares: player', player);
+        console.log('distributeShares: id', this.id);
         const playerOrgData = player.getCurrentOtherData(this.id);
-        console.log(playerOrgData);
+        console.log('distributeShares: playerOrgData', playerOrgData);
         playerOrgData.shares += amount;
         org.sharesDistributed += amount;
         return playerOrgData.shares;
@@ -377,8 +378,8 @@ export default class Org extends Element {
         const allocatorOrgData = allocator.getCurrentOtherData(orgId);
 
         const goal = currentOrg.goals[goalId];
-        console.log(org);
-        console.log('Entry',  goalId);
+        console.log('allocateToGoalFromOrg: org', org);
+        console.log('allocateToGoalFromOrg: goalId',  goalId);
         if (!goal) throw new Error("Goal not found");
 
         const remainingPotentialValue = currentOrg.potentialValue - currentOrg.potentialValueDistributedFromSelfToGoals;
