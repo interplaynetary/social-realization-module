@@ -1,12 +1,9 @@
-// Add Templates for offer, goal, efforts, completion claims.
-
-//introduce name counter into Org class so names don't repeat with a dash, and are followed with -0, -1
-
 import { v4 as uuidv4 } from 'uuid';
 import express from 'express';
 import cors from 'cors';
 import bodyParser from 'body-parser';
 import JSOG from 'jsog';
+//import { dataLayer } from './DataAccessLayer.js';
 
 const app = express();
 app.use(cors());
@@ -18,13 +15,16 @@ app.use(cors({
     origin: 'http://127.0.0.1:5501'
 }));
 
-//const names = {}; // mantain ordering, when an org is made, it's reference should be stored here, to have playstate-0, playstate-1 etc. names
+// Add Templates for offer, goal, efforts, completion claims.
+
 export const orgRegistry = {};
 export const goalRegistry = {};
 export const offerRegistry = {};
 export const completionRegistry = {};
+export const apiKeyToPlayer = {};
 
-const apiKeyToPlayer = {};
+//const names = {}; // mantain ordering, when an org is made, it's reference should be stored here, to have playstate-0, playstate-1 etc. names
+//introduce name counter into Org class so names don't repeat with a dash, and are followed with -0, -1
 
 class Element {
     constructor() {
@@ -119,7 +119,7 @@ export class Completion {
     }
 }
 
-class Org extends Element {
+export default class Org extends Element {
     constructor(name) {
         super();
         this.name = name;
@@ -504,98 +504,6 @@ class Org extends Element {
     }
 }
 
-function playerAction(apiKey, actionType, ...actionParams) {
-    const playerId = apiKeyToPlayer[apiKey];
-    if (!playerId) {
-        throw new Error("Invalid API key");
-    }
-    
-    const player = orgRegistry[playerId];
-    if (!player) {
-        throw new Error("Player not found");
-    }
-    console.log('PLAYER', player);
-
-    const playerCurrentPhase = player.getCurrentPhase();
-
-    const [id, ...restParams] = actionParams;
-
-    // Actions allowed in any phase
-    const alwaysAvailableActions = [
-        'runPhaseShift', 'getCurrentPhase', 'getOrg', 'getGoal', 'getOffer', 'issueShares', 'unIssueShares', 
-        'distributeShares', 'joinOrg', 'getCurrentSelfData', 'getCurrentOtherData', 
-        'getOtherData', 'getGoalLeaderboard', 'getOfferLeaderboard'
-    ];
-
-    if (alwaysAvailableActions.includes(actionType)) {
-        console.log('ACTIONTYPE:', actionType)
-
-        // beginning without id
-        if(['getCurrentSelfData', 'getCurrentPhase', 'issueShares', 'runPhaseShift', 'unIssueShares', 'issuePotential', 'calculateRealizedValue', 'getGoalLeaderboard', 'getOfferLeaderboard'].includes(actionType)){
-            console.log('restParams:', restParams)
-            const response = player[actionType](...restParams);
-            console.log(response)
-            return response
-        } else {
-            // beginning with id
-            console.log('actionParams:', restParams)
-            const response = player[actionType](...actionParams);
-            console.log(response)
-            return response
-        }
-
-    }
-
-
-    if(orgRegistry[id] instanceof Org) {
-        let org = orgRegistry[id]
-        if (!org) {
-            throw new Error(`Element with ID ${id} not found`);
-        }
-        const orgCurrentPhase = org.getCurrentPhase();
-        console.log(`Player Current Phase: ${playerCurrentPhase}`);
-        console.log(`Org Current Phase: ${orgCurrentPhase}`);
-        console.log('APIKEY:', apiKey);
-        console.log('ACTIONTYPE:', actionType);
-        console.log('ACTIONPARAM:', ...actionParams);
-
-        switch (orgCurrentPhase) {
-            case 'goalExpression':
-                if (actionType === 'proposeGoalToOrg') {
-                    return player.proposeGoalToOrg(...actionParams);
-                }
-                break;
-            case 'goalAllocation':
-                if (actionType === 'allocateToGoalFromOrg') {
-                    return player.allocateToGoalFromOrg(...actionParams);
-                }
-                break;
-            case 'offerExpression':
-                if (actionType === 'offerToOrg') {
-                    return player.offerToOrg(...actionParams);
-                }
-                break;
-            case 'offerAllocation':
-                if (actionType === 'allocateToOfferFromGoalInOrg' || actionType === 'acceptCounterOffer') {
-                    return player[actionType](...actionParams);
-                }
-                break;
-            case 'completions':
-                if (['claimCompletion', 'challengeCompletion', 'supportChallenge'].includes(actionType)) {
-                    return player[actionType](...actionParams);
-                }
-                if (actionType === 'calculateRealizedValue' && player instanceof Org) {
-                    return player.calculateRealizedValue(...restParams);
-                }
-                break;
-            default:
-                throw new Error(`Action ${actionType} not allowed in current phase ${playerCurrentPhase}`);
-        }
-    }
-
-    throw new Error(`Action ${actionType} is not allowed in the current phase: ${playerCurrentPhase}`);
-}
-
 app.use((err, req, res, next) => {
     const errorId = uuidv4();
     const timestamp = new Date().toISOString();
@@ -655,7 +563,7 @@ app.post('/register', (req, res) => {
 app.post('/player-action', (req, res) => {
     const { apiKey, actionType, actionParams } = req.body;
     try {
-        const result = playerAction(apiKey, actionType, ...actionParams);
+        const result = playerAction(apiKey, actionType, actionParams);
         
         // Encode the result using JSOG
         const jsogEncodedResult = JSOG.encode(result);
@@ -688,59 +596,231 @@ app.get('/get-org-registry', (req, res) => {
         // Encode the registryData using JSOG
         const jsogEncodedData = JSOG.encode(registryData);
         
-        return res.json({ success: true, registryData: jsogEncodedData });
+        res.json({ success: true, registryData: jsogEncodedData });
     } catch (error) {
-        res.json({ success: false, error: error.message });
+        console.error('Error in /get-org-registry:', error);
+        res.status(500).json({ success: false, error: error.message });
     }
 });
 
-// Example usage and extended testing
 
-console.log("--- Initializing Organizations and Players ---");
-const [org1apiKey, org1] = new Org('Playnet');
+function playerAction(apiKey, actionType, ...actionParams) {
+    console.log('ACTIONPARAM', actionParams)
+    const playerId = apiKeyToPlayer[apiKey];
+    if (!playerId) {
+        throw new Error("Invalid API key");
+    }
 
-const [org2apiKey, org2] = new Org('ECSA');
+    const player = orgRegistry[playerId];
+    if (!player) {
+        throw new Error("Player not found");
+    }
 
-org1.issueShares(100);
-org2.issueShares(200);
+    const playerCurrentPhase = player.getCurrentPhase();
 
-const [player1apiKey, player1] = new Org("Ruz");
+    // Actions that don't require an orgId
+    const noOrgIdActions = ['getCurrentSelfData', 'getCurrentPhase', 'issueShares', 'runPhaseShift', 'unIssueShares', 'issuePotential', 'calculateRealizedValue', 'getGoalLeaderboard', 'getOfferLeaderboard', 'acceptOffer'];
+    
+    if (noOrgIdActions.includes(actionType)) {
+        return player[actionType](...actionParams);
+    }
 
-const [player2apiKey, player2] = new Org("Kyle");
+    // Actions that require an orgId as the first parameter
+    const orgId = actionParams[0]
+    const org = orgRegistry[orgId];
+    if (!org) {
+        throw new Error(`Organization with ID ${orgId} not found`);
+    }
 
-player1.joinOrg(org1.id);
-player1.joinOrg(org2.id);
-player2.joinOrg(org1.id);
-player2.joinOrg(org2.id);
+    const orgCurrentPhase = org.getCurrentPhase();
 
-org1.distributeShares(player1.id, 50);
-org2.distributeShares(player1.id, 100);
-org1.distributeShares(player2.id, 50);
-org2.distributeShares(player2.id, 100);
+    // Phase-specific actions
+    const phaseActions = {
+        'goalExpression': ['proposeGoalToOrg'],
+        'goalAllocation': ['allocateToGoalFromOrg'],
+        'offerExpression': ['offerToOrg'],
+        'offerAllocation': ['allocateToOfferFromGoalInOrg', 'acceptCounterOffer'],
+        'completions': ['claimCompletion', 'challengeCompletion', 'supportChallenge']
+    };
 
-console.log("--- Phase 1: Goal Expression ---");
-console.log("Current phase for Org 1:", org1.getCurrentPhase());
-console.log("Current phase for Org 2:", org2.getCurrentPhase());
+    // Always available actions
+    const alwaysAvailableActions = ['getOrg', 'getGoal', 'getOffer', 'distributeShares', 'joinOrg'];
 
-const goals1 = player1.proposeGoalToOrg(org1.id, "Enjoy!");
-const goals2 = player2.proposeGoalToOrg(org1.id, "Good Vibes!");
+    if (alwaysAvailableActions.includes(actionType) || phaseActions[orgCurrentPhase]?.includes(actionType)) {
+        return player[actionType](...actionParams);
+    }
 
-console.log("Goals proposed by Player 1:", goals1);
-console.log("Goals proposed by Player 2:", goals2);
+    throw new Error(`Action ${actionType} is not allowed in the current phase: ${orgCurrentPhase}`);
+}
 
-console.log("--- Phase 2: Goal Allocation ---");
-org1.runPhaseShift();
-org1.runPhaseShift();
-org2.runPhaseShift();
-org2.runPhaseShift();
-org2.runPhaseShift();
-console.log("Current phase for Org 1:", org1.getCurrentPhase());
-console.log("Current phase for Org 2:", org2.getCurrentPhase());
+    console.log("--- Running Phase Tests ---");
 
-org1.issuePotential(1000);
-org2.issuePotential(2000);
+    // Create test organizations and players
+    const [org1ApiKey, org1] = new Org('Playnet');
+    const [org2ApiKey, org2] = new Org('ECSA');
+    const [org3ApiKey, org3] = new Org('MOOS');
+    const [org4ApiKey, org4] = new Org('Germany');
+    const [org5ApiKey, org5] = new Org('Tanzania');
+
+    const [player1ApiKey, player1] = new Org("Ruzgar");
+    const [player2ApiKey, player2] = new Org("Felipe");
+
+    // Test Phase 1: Goal Expression
+    console.log("--- Testing Phase 1: Goal Expression ---");
+    testGoalExpression(org1, player1, player2);
+
+    // Test Phase 2: Goal Allocation
+    console.log("--- Testing Phase 2: Goal Allocation ---");
+    testGoalAllocation(org2, player1, player2);
+
+    // Test Phase 3: Offer Expression
+    console.log("--- Testing Phase 3: Offer Expression ---");
+    testOfferExpression(org3, player1, player2);
+
+    // Test Phase 4: Offer Allocation
+    console.log("--- Testing Phase 4: Offer Allocation ---");
+    testOfferAllocation(org4, player1, player2);
+
+    // Test Phase 5: Completions
+    console.log("--- Testing Phase 5: Completions ---");
+    testCompletions(org5, player1, player2);
+
+    console.log("--- Phase Tests Completed ---");
+
+
+function testGoalExpression(org, player1, player2) {
+    player1.joinOrg(org.id);
+    player2.joinOrg(org.id);
+
+    org.issueShares(100);
+    org.distributeShares(player1.id, 50);
+    org.distributeShares(player2.id, 50);
+
+    const goal1 = player1.proposeGoalToOrg(org.id, "Test Goal 1");
+    const goal2 = player2.proposeGoalToOrg(org.id, "Test Goal 2");
+
+    console.log(`Org ${org.name} current phase: ${org.getCurrentPhase()}`);
+    console.log(`Goals proposed: ${goal1}, ${goal2}`);
+}
+
+function testGoalAllocation(org, player1, player2) {
+    player1.joinOrg(org.id);
+    player2.joinOrg(org.id);
+
+    org.issueShares(100);
+    org.distributeShares(player1.id, 50);
+    org.distributeShares(player2.id, 50);
+
+    const goal1 = player1.proposeGoalToOrg(org.id, "Test Goal 1");
+    const goal2 = player2.proposeGoalToOrg(org.id, "Test Goal 2");
+
+    org.runPhaseShift(); // Move to Goal Allocation phase
+    org.issuePotential(1000);
+
+    player1.allocateToGoalFromOrg(org.id, 250, goal1);
+    player2.allocateToGoalFromOrg(org.id, 250, goal2);
+
+    console.log(`Org ${org.name} current phase: ${org.getCurrentPhase()}`);
+    console.log(`Allocated to goals: ${goal1}, ${goal2}`);
+}
+
+function testOfferExpression(org, player1, player2) {
+    player1.joinOrg(org.id);
+    player2.joinOrg(org.id);
+
+    org.issueShares(100);
+    org.distributeShares(player1.id, 50);
+    org.distributeShares(player2.id, 50);
+
+    const goal1 = player1.proposeGoalToOrg(org.id, "Test Goal 1");
+    const goal2 = player2.proposeGoalToOrg(org.id, "Test Goal 2");
+
+    org.runPhaseShift(); // Move to Goal Allocation phase
+    org.issuePotential(1000);
+    player1.allocateToGoalFromOrg(org.id, 250, goal1);
+    player2.allocateToGoalFromOrg(org.id, 250, goal2);
+
+    org.runPhaseShift(); // Move to Offer Expression phase
+
+    const offer1 = player1.offerToOrg(org.id, "Offer 1", "Test Offer 1", "Effect 1", 100, [goal1]);
+    const offer2 = player2.offerToOrg(org.id, "Offer 2", "Test Offer 2", "Effect 2", 100, [goal2]);
+
+    console.log(`Org ${org.name} current phase: ${org.getCurrentPhase()}`);
+    console.log(`Offers made: ${offer1}, ${offer2}`);
+}
+
+function testOfferAllocation(org, player1, player2) {
+    player1.joinOrg(org.id);
+    player2.joinOrg(org.id);
+
+    org.issueShares(100);
+    org.distributeShares(player1.id, 50);
+    org.distributeShares(player2.id, 50);
+
+    const goal1 = player1.proposeGoalToOrg(org.id, "Test Goal 1");
+    const goal2 = player2.proposeGoalToOrg(org.id, "Test Goal 2");
+
+    org.runPhaseShift(); // Move to Goal Allocation phase
+    org.issuePotential(1000);
+    player1.allocateToGoalFromOrg(org.id, 250, goal1);
+    player2.allocateToGoalFromOrg(org.id, 250, goal2);
+
+    org.runPhaseShift(); // Move to Offer Expression phase
+    const offer1 = player1.offerToOrg(org.id, "Offer 1", "Test Offer 1", "Effect 1", 100, [goal1]);
+    const offer2 = player2.offerToOrg(org.id, "Offer 2", "Test Offer 2", "Effect 2", 100, [goal2]);
+
+    org.runPhaseShift(); // Move to Offer Allocation phase
+
+    player1.allocateToOfferFromGoalInOrg(org.id, 50, goal1, offer1);
+    player2.allocateToOfferFromGoalInOrg(org.id, 50, goal2, offer2);
+
+    console.log(`Org ${org.name} current phase: ${org.getCurrentPhase()}`);
+    console.log(`Allocated to offers: ${offer1}, ${offer2}`);
+}
+
+function testCompletions(org, player1, player2) {
+    player1.joinOrg(org.id);
+    player2.joinOrg(org.id);
+
+    org.issueShares(100);
+    org.distributeShares(player1.id, 50);
+    org.distributeShares(player2.id, 50);
+
+    const goal1 = player1.proposeGoalToOrg(org.id, "Test Goal 1");
+    const goal2 = player2.proposeGoalToOrg(org.id, "Test Goal 2");
+
+    org.runPhaseShift(); // Move to Goal Allocation phase
+    org.issuePotential(1000);
+    player1.allocateToGoalFromOrg(org.id, 250, goal1);
+    player2.allocateToGoalFromOrg(org.id, 250, goal2);
+
+    org.runPhaseShift(); // Move to Offer Expression phase
+    const offer1 = player1.offerToOrg(org.id, "Offer 1", "Test Offer 1", "Effect 1", 100, [goal1]);
+    const offer2 = player2.offerToOrg(org.id, "Offer 2", "Test Offer 2", "Effect 2", 100, [goal2]);
+
+    org.runPhaseShift(); // Move to Offer Allocation phase
+    player1.allocateToOfferFromGoalInOrg(org.id, 50, goal1, offer1);
+    player2.allocateToOfferFromGoalInOrg(org.id, 50, goal2, offer2);
+
+    org.runPhaseShift(); // Move to Completions phase
+
+    const completion1 = player1.claimCompletion(org.id, offer1, "Completed Offer 1");
+    const completion2 = player2.claimCompletion(org.id, offer2, "Completed Offer 2");
+
+    player2.challengeCompletion(org.id, completion1, "Challenge for Completion 1");
+    player1.challengeCompletion(org.id, completion2, "Challenge for Completion 2");
+
+    player1.supportChallenge(org.id, completion2, true);
+    player2.supportChallenge(org.id, completion1, false);
+
+    console.log(`Org ${org.name} current phase: ${org.getCurrentPhase()}`);
+    console.log(`Completions claimed: ${completion1}, ${completion2}`);
+    console.log(`Completion 1 status: ${org.getCurrentSelfData().completions[completion1].status}`);
+    console.log(`Completion 2 status: ${org.getCurrentSelfData().completions[completion2].status}`);
+}
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
 });
+
