@@ -1,31 +1,49 @@
 // Points from each goal should be recognizable a from them in the data structure.
 // Tags on goals in Orgs
 // Collaborators on offers (the ids do not have to be players in the org)
-        // Ideally we actually make it a request for inclusion, an invitation to join an Offer / Goal
-        // Pending acceptance
-        // Each Offer should then include:
-            // Offered Collaborators
-            // Accepted Collaborators
-        // This allows for a natural way to 'join' an organization, you can get a threshold of points from an org before you even try to be a member.
+// Ideally we actually make it a request for inclusion, an invitation to join an Offer / Goal
+// Pending acceptance
+// Each Offer should then include:
+// Offered Collaborators
+// Accepted Collaborators
+// This allows for a natural way to 'join' an organization, you can get a threshold of points from an org before you even try to be a member.
 
 // Add Templates for offer, goal, efforts, completion claims.
 
-import { v4 as uuidv4 } from 'uuid';
-import express from 'express';
-import cors from 'cors';
-import bodyParser from 'body-parser';
-import JSOG from 'jsog';
+import { v4 as uuidv4 } from "uuid";
+import express from "express";
+import cors from "cors";
+import bodyParser from "body-parser";
+import JSOG from "jsog";
 //import { dataLayer } from './DataAccessLayer.js';
 
 const app = express();
 app.use(cors());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
-app.use(express.static('public')); // Serve static files from 'public' directory
+app.use(express.static("public")); // Serve static files from 'public' directory
 
-app.use(cors({
-    origin: 'http://127.0.0.1:5501'
-}));
+// Set up CORS middleware to allow multiple origins
+const allowedOrigins = ["http://127.0.0.1:5501", "http://localhost:1234"];
+
+app.use(
+    cors({
+        origin: function (origin, callback) {
+            // Allow requests with no origin (like mobile apps or curl requests)
+            if (!origin) return callback(null, true);
+
+            // Check if the origin is in the allowedOrigins array
+            if (allowedOrigins.indexOf(origin) === -1) {
+                const msg =
+                    "The CORS policy for this site does not allow access from the specified origin.";
+                return callback(new Error(msg), false);
+            }
+
+            // If the origin is allowed, pass the request
+            return callback(null, true);
+        },
+    })
+);
 
 export const orgRegistry = {};
 export const goalRegistry = {};
@@ -82,7 +100,7 @@ export class Goal extends Element {
         return {
             potentialValue: 0,
             potentialValueDistributedFromSelf: 0,
-            offersTowardsSelf: new Set()
+            offersTowardsSelf: new Set(),
         };
     }
 }
@@ -105,28 +123,32 @@ export class Offer extends Element {
             distributedFromSelf: 0,
             credits: 0,
             realizedValue: 0,
-            status: 'active',
+            status: "active",
         };
     }
 
     initForOrg(orgId, ask, targetGoals) {
         super.initForOrg(orgId);
         const orgData = this.getCurrentOtherData(orgId);
-        const totalPotentialPoints = Array.from(targetGoals).reduce((sum, goalId) => {
-            const goal = goalRegistry[goalId];
-            if (!goal) throw new Error("Target goal not found");
-            const goalOrgData = goal.getCurrentOtherData(orgId);
-            return sum + goalOrgData.potentialValue;
-        }, 0);
-    
+        const totalPotentialPoints = Array.from(targetGoals).reduce(
+            (sum, goalId) => {
+                const goal = goalRegistry[goalId];
+                if (!goal) throw new Error("Target goal not found");
+                const goalOrgData = goal.getCurrentOtherData(orgId);
+                return sum + goalOrgData.potentialValue;
+            },
+            0
+        );
+
         if (ask > totalPotentialPoints) {
-            throw new Error("Offer ask exceeds the aggregate potential points of the target goals");
+            throw new Error(
+                "Offer ask exceeds the aggregate potential points of the target goals"
+            );
         }
-    
+
         orgData.ask = ask;
         orgData.towardsGoals = new Set(targetGoals);
     }
-    
 }
 
 export class Completion {
@@ -135,7 +157,7 @@ export class Completion {
         this.offerId = offerId;
         this.claimDescription = claimDescription;
         this.claimedById = claimedById;
-        this.status = 'pending';
+        this.status = "pending";
         this.challenges = {};
         this.supportVotes = {};
         goalRegistry[this.id] = this;
@@ -147,15 +169,15 @@ export default class Org extends Element {
         super();
         this.name = name;
         this.currentCycle = 0;
-        this.currentPhase = 'goalExpression';
+        this.currentPhase = "goalExpression";
         this.cycles = {};
         this.initForSelfCycle();
         orgRegistry[this.id] = this;
         const apiKey = uuidv4();
         apiKeyToPlayer[apiKey] = this.id;
-        console.log(this.name, 'ID:', this.id);
-        console.log(this.name, 'API-Key:', apiKey);
-        this.joinOrg(this.id)
+        console.log(this.name, "ID:", this.id);
+        console.log(this.name, "API-Key:", apiKey);
+        this.joinOrg(this.id);
         return [apiKey, this];
     }
 
@@ -165,7 +187,7 @@ export default class Org extends Element {
             potentialValue: 0,
             potentialValueDistributedFromOrgToGoals: 0,
             potentialValueDistributedFromGoalToOffers: {},
-            joinTime: new Date()
+            joinTime: new Date(),
         };
     }
 
@@ -180,21 +202,21 @@ export default class Org extends Element {
                 shares: 0,
                 sharesDistributed: 0,
                 completions: {},
-                realizedValue: 0
+                realizedValue: 0,
             };
         }
-        return true
+        return true;
     }
 
-    getOrg(orgId){
+    getOrg(orgId) {
         return orgRegistry[orgId];
     }
 
-    getGoal(goalId){
+    getGoal(goalId) {
         return goalRegistry[goalId];
     }
 
-    getOffer(offerId){
+    getOffer(offerId) {
         return offerRegistry[offerId];
     }
 
@@ -209,14 +231,20 @@ export default class Org extends Element {
 
     // These Methods are as an Org:
     runPhaseShift() {
-        const phases = ['goalExpression', 'goalAllocation', 'offerExpression', 'offerAllocation', 'completions'];
+        const phases = [
+            "goalExpression",
+            "goalAllocation",
+            "offerExpression",
+            "offerAllocation",
+            "completions",
+        ];
         const currentIndex = phases.indexOf(this.currentPhase);
         this.currentPhase = phases[(currentIndex + 1) % phases.length];
-        if (this.currentPhase === 'goalExpression') {
+        if (this.currentPhase === "goalExpression") {
             this.currentCycle++;
             this.initForSelfCycle();
         }
-        return this.currentPhase
+        return this.currentPhase;
     }
 
     issueShares(amount) {
@@ -229,7 +257,8 @@ export default class Org extends Element {
     unIssueShares(amount) {
         const org = this.getCurrentSelfData();
         if (amount <= 0) throw new Error("Amount must be positive");
-        if (amount > org.shares) throw new Error("Not enough shares to un-issue");
+        if (amount > org.shares)
+            throw new Error("Not enough shares to un-issue");
         org.shares -= amount;
         return org.shares;
     }
@@ -237,18 +266,19 @@ export default class Org extends Element {
     distributeShares(playerId, amount) {
         const org = this.getCurrentSelfData();
         if (amount <= 0) throw new Error("Amount must be positive");
-        if (amount > (org.shares - org.sharesDistributed)) throw new Error("Not enough shares to distribute");
+        if (amount > org.shares - org.sharesDistributed)
+            throw new Error("Not enough shares to distribute");
         const player = org.players[playerId];
         if (!player) throw new Error("Player not found");
-        console.log('distributeShares: player', player);
-        console.log('distributeShares: id', this.id);
+        console.log("distributeShares: player", player);
+        console.log("distributeShares: id", this.id);
         const playerOrgData = player.getCurrentOtherData(this.id);
-        console.log('distributeShares: playerOrgData', playerOrgData);
+        console.log("distributeShares: playerOrgData", playerOrgData);
         playerOrgData.shares += amount;
         org.sharesDistributed += amount;
         return playerOrgData.shares;
     }
-    
+
     issuePotential(amount) {
         const org = this.getCurrentSelfData();
         if (amount <= 0) throw new Error("Amount must be positive");
@@ -265,24 +295,35 @@ export default class Org extends Element {
         const recievedPotentialValue = offerOrgData.potentialValue;
 
         if (recievedPotentialValue >= offerOrgData.ask) {
-            offerOrgData.status = 'accepted';
-            return { status: 'accepted', credits: offerOrgData.credits };
+            offerOrgData.status = "accepted";
+            return { status: "accepted", credits: offerOrgData.credits };
         } else {
             const counterofferId = uuidv4();
-            const counteroffer = new Offer(offer.name, offer.description, offer.effects, offer.createdById);
-            counteroffer.initForOrg(this.id, recievedPotentialValue, Array.from(offerOrgData.towardsGoals));
-            const counterofferOrgData = counteroffer.getCurrentOtherData(this.id);
-            counterofferOrgData.status = 'counteroffered';
+            const counteroffer = new Offer(
+                offer.name,
+                offer.description,
+                offer.effects,
+                offer.createdById
+            );
+            counteroffer.initForOrg(
+                this.id,
+                recievedPotentialValue,
+                Array.from(offerOrgData.towardsGoals)
+            );
+            const counterofferOrgData = counteroffer.getCurrentOtherData(
+                this.id
+            );
+            counterofferOrgData.status = "counteroffered";
             counterofferOrgData.originalOfferId = offerId;
             org.offers[counterofferId] = counteroffer;
-            
-            offerOrgData.status = 'counteroffered';
+
+            offerOrgData.status = "counteroffered";
             offerOrgData.counterofferId = counterofferId;
 
-            return { 
-                status: 'counteroffered', 
+            return {
+                status: "counteroffered",
                 counterofferId: counterofferId,
-                newAsk: recievedPotentialValue
+                newAsk: recievedPotentialValue,
             };
         }
     }
@@ -292,7 +333,7 @@ export default class Org extends Element {
         let realizedValue = 0;
         for (const completionId in org.completions) {
             const completion = org.completions[completionId];
-            if (completion.status === 'accepted') {
+            if (completion.status === "accepted") {
                 const offer = org.offers[completion.offerId];
                 if (offer) {
                     const offerOrgData = offer.getCurrentOtherData(this.id);
@@ -301,7 +342,7 @@ export default class Org extends Element {
                 }
             }
         }
-        
+
         org.realizedValue += realizedValue;
         return org.realizedValue;
     }
@@ -309,66 +350,74 @@ export default class Org extends Element {
     // These Methods are as a Player:
     joinOrg(orgId) {
         const org = orgRegistry[orgId];
-        console.log(this.name, 'JOINED', org);
+        console.log(this.name, "JOINED", org);
         const currentOrg = org.getCurrentSelfData();
         if (!org) throw new Error("Organization not found");
         const joinTime = new Date();
 
-        if(!this.orgData[orgId]){
+        if (!this.orgData[orgId]) {
             const cycleSpecificOrgData = {};
             cycleSpecificOrgData[org.currentCycle] = {
                 shares: 0,
                 potentialValue: 0,
                 potentialValueDistributedFromOrgToGoals: 0,
                 potentialValueDistributedFromGoalToOffers: {},
-                joinTime: joinTime 
+                joinTime: joinTime,
             };
             this.orgData[orgId] = cycleSpecificOrgData;
             currentOrg.players[this.id] = this;
-            return true
+            return true;
         }
-        return false
+        return false;
     }
 
     proposeGoalToOrg(orgId, description) {
         if (!description) throw new Error("Description is required");
         const goal = new Goal(description, this.id);
-            const org = orgRegistry[orgId];
-            if (!org) throw new Error(`Organization with ID ${orgId} not found`);
-            const currentOrg = org.getCurrentSelfData();
-            goal.initForOrg(orgId);
-            currentOrg.goals[goal.id] = goal;
+        const org = orgRegistry[orgId];
+        if (!org) throw new Error(`Organization with ID ${orgId} not found`);
+        const currentOrg = org.getCurrentSelfData();
+        goal.initForOrg(orgId);
+        currentOrg.goals[goal.id] = goal;
         return goal.id;
     }
 
     offerToOrg(orgId, name, description, effects, ask, targetGoalIds) {
-    if (!name || !description || !effects || ask <= 0 || !targetGoalIds || targetGoalIds.length === 0) {
-        throw new Error("Invalid offer parameters");
+        if (
+            !name ||
+            !description ||
+            !effects ||
+            ask <= 0 ||
+            !targetGoalIds ||
+            targetGoalIds.length === 0
+        ) {
+            throw new Error("Invalid offer parameters");
+        }
+
+        const org = orgRegistry[orgId];
+        if (!org) throw new Error(`Organization with ID ${orgId} not found`);
+        const currentOrg = org.getCurrentSelfData();
+
+        // Calculate total potential points of the target goals
+        const totalPotentialPoints = targetGoalIds.reduce((sum, goalId) => {
+            const goal = goalRegistry[goalId];
+            if (!goal) throw new Error("Target goal not found");
+            const goalOrgData = goal.getCurrentOtherData(orgId);
+            return sum + goalOrgData.potentialValue;
+        }, 0);
+
+        if (ask > totalPotentialPoints) {
+            throw new Error(
+                "Offer ask exceeds the aggregate potential points of the target goals"
+            );
+        }
+
+        const offer = new Offer(name, description, effects, this.id);
+        offer.initForOrg(orgId, ask, targetGoalIds);
+        currentOrg.offers[offer.id] = offer;
+
+        return offer.id;
     }
-
-    const org = orgRegistry[orgId];
-    if (!org) throw new Error(`Organization with ID ${orgId} not found`);
-    const currentOrg = org.getCurrentSelfData();
-
-    // Calculate total potential points of the target goals
-    const totalPotentialPoints = targetGoalIds.reduce((sum, goalId) => {
-        const goal = goalRegistry[goalId];
-        if (!goal) throw new Error("Target goal not found");
-        const goalOrgData = goal.getCurrentOtherData(orgId);
-        return sum + goalOrgData.potentialValue;
-    }, 0);
-
-    if (ask > totalPotentialPoints) {
-        throw new Error("Offer ask exceeds the aggregate potential points of the target goals");
-    }
-
-    const offer = new Offer(name, description, effects, this.id);
-    offer.initForOrg(orgId, ask, targetGoalIds);
-    currentOrg.offers[offer.id] = offer;
-
-    return offer.id;
-}
-
 
     allocateToGoalFromOrg(orgId, amount, goalId) {
         const org = orgRegistry[orgId];
@@ -378,13 +427,18 @@ export default class Org extends Element {
         const allocatorOrgData = allocator.getCurrentOtherData(orgId);
 
         const goal = currentOrg.goals[goalId];
-        console.log('allocateToGoalFromOrg: org', org);
-        console.log('allocateToGoalFromOrg: goalId',  goalId);
+        console.log("allocateToGoalFromOrg: org", org);
+        console.log("allocateToGoalFromOrg: goalId", goalId);
         if (!goal) throw new Error("Goal not found");
 
-        const remainingPotentialValue = currentOrg.potentialValue - currentOrg.potentialValueDistributedFromSelfToGoals;
-        const allocatorPortion = remainingPotentialValue * (allocatorOrgData.shares / currentOrg.shares);
-        const alreadyDistributed = allocatorOrgData.potentialValueDistributedFromOrgToGoals;
+        const remainingPotentialValue =
+            currentOrg.potentialValue -
+            currentOrg.potentialValueDistributedFromSelfToGoals;
+        const allocatorPortion =
+            remainingPotentialValue *
+            (allocatorOrgData.shares / currentOrg.shares);
+        const alreadyDistributed =
+            allocatorOrgData.potentialValueDistributedFromOrgToGoals;
 
         if (amount <= allocatorPortion - alreadyDistributed) {
             currentOrg.potentialValueDistributedFromSelfToGoals += amount;
@@ -416,13 +470,21 @@ export default class Org extends Element {
         }
 
         const goalOrgData = goal.getCurrentOtherData(orgId);
-        const remainingPotentialValue = goalOrgData.potentialValue - goalOrgData.potentialValueDistributedFromSelf;
-        const allocatorPortion = remainingPotentialValue * (allocatorOrgData.shares / currentOrg.shares);
-        const alreadyDistributed = allocatorOrgData.potentialValueDistributedFromGoalToOffers[fromId] || 0;
+        const remainingPotentialValue =
+            goalOrgData.potentialValue -
+            goalOrgData.potentialValueDistributedFromSelf;
+        const allocatorPortion =
+            remainingPotentialValue *
+            (allocatorOrgData.shares / currentOrg.shares);
+        const alreadyDistributed =
+            allocatorOrgData.potentialValueDistributedFromGoalToOffers[
+                fromId
+            ] || 0;
 
         if (amount <= allocatorPortion - alreadyDistributed) {
             goalOrgData.potentialValueDistributedFromSelf += amount;
-            allocatorOrgData.potentialValueDistributedFromGoalToOffers[fromId] = alreadyDistributed + amount;
+            allocatorOrgData.potentialValueDistributedFromGoalToOffers[fromId] =
+                alreadyDistributed + amount;
             const offerOrgData = offer.getCurrentOtherData(orgId);
             offerOrgData.potentialValue += amount;
             return true;
@@ -432,108 +494,118 @@ export default class Org extends Element {
     }
 
     // Shifts allocated points from one goal to another within the same organization.
-shiftPointsBetweenGoalsInOrg(orgId, amount, fromGoalId, toGoalId) {
-    const org = orgRegistry[orgId];
-    const currentOrg = org.getCurrentSelfData();
+    shiftPointsBetweenGoalsInOrg(orgId, amount, fromGoalId, toGoalId) {
+        const org = orgRegistry[orgId];
+        const currentOrg = org.getCurrentSelfData();
 
-    const fromGoal = currentOrg.goals[fromGoalId];
-    const toGoal = currentOrg.goals[toGoalId];
-    if (!fromGoal || !toGoal) throw new Error("One or both goals not found");
+        const fromGoal = currentOrg.goals[fromGoalId];
+        const toGoal = currentOrg.goals[toGoalId];
+        if (!fromGoal || !toGoal)
+            throw new Error("One or both goals not found");
 
-    const fromGoalOrgData = fromGoal.getCurrentOtherData(orgId);
-    const toGoalOrgData = toGoal.getCurrentOtherData(orgId);
+        const fromGoalOrgData = fromGoal.getCurrentOtherData(orgId);
+        const toGoalOrgData = toGoal.getCurrentOtherData(orgId);
 
-    if (fromGoalOrgData.potentialValue < amount) {
-        throw new Error("Insufficient points in the source goal to shift");
+        if (fromGoalOrgData.potentialValue < amount) {
+            throw new Error("Insufficient points in the source goal to shift");
+        }
+
+        // Shift points
+        fromGoalOrgData.potentialValue -= amount;
+        toGoalOrgData.potentialValue += amount;
+
+        return true;
     }
 
-    // Shift points
-    fromGoalOrgData.potentialValue -= amount;
-    toGoalOrgData.potentialValue += amount;
+    // Unallocates points from a specific goal.
+    unallocatePointsFromGoalInOrg(orgId, amount, goalId) {
+        const org = orgRegistry[orgId];
+        const currentOrg = org.getCurrentSelfData();
 
-    return true;
-}
+        const goal = currentOrg.goals[goalId];
+        if (!goal) throw new Error("Goal not found");
 
-// Unallocates points from a specific goal.
-unallocatePointsFromGoalInOrg(orgId, amount, goalId) {
-    const org = orgRegistry[orgId];
-    const currentOrg = org.getCurrentSelfData();
+        const goalOrgData = goal.getCurrentOtherData(orgId);
 
-    const goal = currentOrg.goals[goalId];
-    if (!goal) throw new Error("Goal not found");
+        if (goalOrgData.potentialValue < amount) {
+            throw new Error("Insufficient points in the goal to unallocate");
+        }
 
-    const goalOrgData = goal.getCurrentOtherData(orgId);
+        // Unallocate points
+        goalOrgData.potentialValue -= amount;
+        currentOrg.potentialValueDistributedFromSelfToGoals -= amount;
 
-    if (goalOrgData.potentialValue < amount) {
-        throw new Error("Insufficient points in the goal to unallocate");
+        return true;
     }
 
-    // Unallocate points
-    goalOrgData.potentialValue -= amount;
-    currentOrg.potentialValueDistributedFromSelfToGoals -= amount;
+    // Shifts allocated points from one offer to another under the same goal.
+    shiftPointsBetweenOffersInOrg(
+        orgId,
+        amount,
+        fromOfferId,
+        toOfferId,
+        goalId
+    ) {
+        const org = orgRegistry[orgId];
+        const currentOrg = org.getCurrentSelfData();
 
-    return true;
-}
+        const goal = currentOrg.goals[goalId];
+        if (!goal) throw new Error("Goal not found");
 
-// Shifts allocated points from one offer to another under the same goal.
-shiftPointsBetweenOffersInOrg(orgId, amount, fromOfferId, toOfferId, goalId) {
-    const org = orgRegistry[orgId];
-    const currentOrg = org.getCurrentSelfData();
+        const fromOffer = currentOrg.offers[fromOfferId];
+        const toOffer = currentOrg.offers[toOfferId];
+        if (!fromOffer || !toOffer)
+            throw new Error("One or both offers not found");
 
-    const goal = currentOrg.goals[goalId];
-    if (!goal) throw new Error("Goal not found");
+        const fromOfferOrgData = fromOffer.getCurrentOtherData(orgId);
+        const toOfferOrgData = toOffer.getCurrentOtherData(orgId);
 
-    const fromOffer = currentOrg.offers[fromOfferId];
-    const toOffer = currentOrg.offers[toOfferId];
-    if (!fromOffer || !toOffer) throw new Error("One or both offers not found");
+        if (
+            !fromOfferOrgData.towardsGoals.has(goalId) ||
+            !toOfferOrgData.towardsGoals.has(goalId)
+        ) {
+            throw new Error("Both offers must be linked to the specified goal");
+        }
 
-    const fromOfferOrgData = fromOffer.getCurrentOtherData(orgId);
-    const toOfferOrgData = toOffer.getCurrentOtherData(orgId);
+        if (fromOfferOrgData.potentialValue < amount) {
+            throw new Error("Insufficient points in the source offer to shift");
+        }
 
-    if (!fromOfferOrgData.towardsGoals.has(goalId) || !toOfferOrgData.towardsGoals.has(goalId)) {
-        throw new Error("Both offers must be linked to the specified goal");
+        // Shift points
+        fromOfferOrgData.potentialValue -= amount;
+        toOfferOrgData.potentialValue += amount;
+
+        return true;
     }
 
-    if (fromOfferOrgData.potentialValue < amount) {
-        throw new Error("Insufficient points in the source offer to shift");
+    // Unallocates points from a specific offer.
+    unallocatePointsFromOfferInOrg(orgId, amount, offerId, goalId) {
+        const org = orgRegistry[orgId];
+        const currentOrg = org.getCurrentSelfData();
+
+        const goal = currentOrg.goals[goalId];
+        if (!goal) throw new Error("Goal not found");
+
+        const offer = currentOrg.offers[offerId];
+        if (!offer) throw new Error("Offer not found");
+
+        const offerOrgData = offer.getCurrentOtherData(orgId);
+        const goalOrgData = goal.getCurrentOtherData(orgId);
+
+        if (!offerOrgData.towardsGoals.has(goalId)) {
+            throw new Error("This offer is not linked to the specified goal");
+        }
+
+        if (offerOrgData.potentialValue < amount) {
+            throw new Error("Insufficient points in the offer to unallocate");
+        }
+
+        // Unallocate points
+        offerOrgData.potentialValue -= amount;
+        goalOrgData.potentialValueDistributedFromSelf -= amount;
+
+        return true;
     }
-
-    // Shift points
-    fromOfferOrgData.potentialValue -= amount;
-    toOfferOrgData.potentialValue += amount;
-
-    return true;
-}
-
-// Unallocates points from a specific offer.
-unallocatePointsFromOfferInOrg(orgId, amount, offerId, goalId) {
-    const org = orgRegistry[orgId];
-    const currentOrg = org.getCurrentSelfData();
-
-    const goal = currentOrg.goals[goalId];
-    if (!goal) throw new Error("Goal not found");
-
-    const offer = currentOrg.offers[offerId];
-    if (!offer) throw new Error("Offer not found");
-
-    const offerOrgData = offer.getCurrentOtherData(orgId);
-    const goalOrgData = goal.getCurrentOtherData(orgId);
-
-    if (!offerOrgData.towardsGoals.has(goalId)) {
-        throw new Error("This offer is not linked to the specified goal");
-    }
-
-    if (offerOrgData.potentialValue < amount) {
-        throw new Error("Insufficient points in the offer to unallocate");
-    }
-
-    // Unallocate points
-    offerOrgData.potentialValue -= amount;
-    goalOrgData.potentialValueDistributedFromSelf -= amount;
-
-    return true;
-}
-
 
     acceptCounterOffer(orgId, counterofferId, accepted) {
         const org = orgRegistry[orgId];
@@ -543,21 +615,25 @@ unallocatePointsFromOfferInOrg(orgId, amount, offerId, goalId) {
         if (!counteroffer) throw new Error("Counteroffer not found");
 
         const counterofferOrgData = counteroffer.getCurrentOtherData(orgId);
-        if (counterofferOrgData.status !== 'counteroffered') {
+        if (counterofferOrgData.status !== "counteroffered") {
             throw new Error("This offer is not in a counteroffered state");
         }
 
-        const originalOffer = currentOrg.offers[counterofferOrgData.originalOfferId];
+        const originalOffer =
+            currentOrg.offers[counterofferOrgData.originalOfferId];
         const originalOfferOrgData = originalOffer.getCurrentOtherData(orgId);
 
         if (accepted) {
-            counterofferOrgData.status = 'accepted';
-            originalOfferOrgData.status = 'replaced';
-            return { status: 'accepted', offerId: counterofferId };
+            counterofferOrgData.status = "accepted";
+            originalOfferOrgData.status = "replaced";
+            return { status: "accepted", offerId: counterofferId };
         } else {
-            counterofferOrgData.status = 'rejected';
-            originalOfferOrgData.status = 'active';
-            return { status: 'rejected', offerId: originalOfferOrgData.originalOfferId };
+            counterofferOrgData.status = "rejected";
+            originalOfferOrgData.status = "active";
+            return {
+                status: "rejected",
+                offerId: originalOfferOrgData.originalOfferId,
+            };
         }
     }
 
@@ -591,46 +667,53 @@ unallocatePointsFromOfferInOrg(orgId, amount, offerId, goalId) {
         completion.supportVotes[this.id] = support;
 
         const totalVotes = Object.keys(completion.supportVotes).length;
-        const supportVotes = Object.values(completion.supportVotes).filter(v => v).length;
+        const supportVotes = Object.values(completion.supportVotes).filter(
+            (v) => v
+        ).length;
         const supportRatio = supportVotes / totalVotes;
 
         const acceptanceThreshold = 0.5;
 
-        completion.status = supportRatio >= acceptanceThreshold ? 'accepted' : 'rejected';
+        completion.status =
+            supportRatio >= acceptanceThreshold ? "accepted" : "rejected";
         return completion.status;
     }
 
-    getGoalLeaderboard(dimension = 'potentialValue') {
+    getGoalLeaderboard(dimension = "potentialValue") {
         const org = orgRegistry[orgId];
         if (!org) throw new Error("Organization not found");
         const currentOrg = org.getCurrentSelfData();
-        if (!['potentialValue', 'realizedValue'].includes(dimension)) {
-            throw new Error("Invalid dimension. Use 'potentialValue' or 'realizedValue'.");
+        if (!["potentialValue", "realizedValue"].includes(dimension)) {
+            throw new Error(
+                "Invalid dimension. Use 'potentialValue' or 'realizedValue'."
+            );
         }
 
-        const leaderboard = Object.values(currentOrg.goals).map(goal => {
+        const leaderboard = Object.values(currentOrg.goals).map((goal) => {
             const goalOrgData = goal.getCurrentOtherData(this.id);
             return {
                 id: goal.id,
                 description: goal.description,
                 createdById: goal.createdById,
                 potentialValue: goalOrgData.potentialValue,
-                realizedValue: goalOrgData.realizedValue || 0  // Add this property if not already present
+                realizedValue: goalOrgData.realizedValue || 0, // Add this property if not already present
             };
         });
 
         return leaderboard.sort((a, b) => b[dimension] - a[dimension]);
     }
 
-    getOfferLeaderboard(dimension = 'potentialValue') {
+    getOfferLeaderboard(dimension = "potentialValue") {
         const org = orgRegistry[orgId];
         if (!org) throw new Error("Organization not found");
         const currentOrg = org.getCurrentSelfData();
-        if (!['potentialValue', 'realizedValue'].includes(dimension)) {
-            throw new Error("Invalid dimension. Use 'potentialValue' or 'realizedValue'.");
+        if (!["potentialValue", "realizedValue"].includes(dimension)) {
+            throw new Error(
+                "Invalid dimension. Use 'potentialValue' or 'realizedValue'."
+            );
         }
 
-        const leaderboard = Object.values(currentOrg.offers).map(offer => {
+        const leaderboard = Object.values(currentOrg.offers).map((offer) => {
             const offerOrgData = offer.getCurrentOtherData(this.id);
             return {
                 id: offer.id,
@@ -638,7 +721,7 @@ unallocatePointsFromOfferInOrg(orgId, amount, offerId, goalId) {
                 description: offer.description,
                 createdById: offer.createdById,
                 potentialValue: offerOrgData.potentialValue,
-                realizedValue: offerOrgData.realizedValue || 0
+                realizedValue: offerOrgData.realizedValue || 0,
             };
         });
 
@@ -661,32 +744,31 @@ app.use((err, req, res, next) => {
     res.status(statusCode).json({
         success: false,
         errorId,
-        message: err.message || 'An unexpected error occurred',
-        status: statusCode
+        message: err.message || "An unexpected error occurred",
+        status: statusCode,
     });
 });
 
-app.post('/login', (req, res) => {
-    console.log('Received login request. Body:', req.body);
+app.post("/login", (req, res) => {
+    console.log("Received login request. Body:", req.body);
     try {
         const { apiKey } = req.body;
         if (!apiKey) {
             throw new Error("API-key is required");
         }
         const player = apiKeyToPlayer[apiKey];
-        if(player) {
-            console.log('Login successful for player:', player);
+        if (player) {
+            console.log("Login successful for player:", player);
             res.json({ success: true, playerId: player });
         }
-
     } catch (error) {
-        console.error('Login error:', error.message);
+        console.error("Login error:", error.message);
         res.status(400).json({ success: false, error: error.message });
     }
 });
 
-app.post('/register', (req, res) => {
-    console.log('Received registration request. Body:', req.body);
+app.post("/register", (req, res) => {
+    console.log("Received registration request. Body:", req.body);
     try {
         const { playerName } = req.body;
         if (!playerName) {
@@ -694,30 +776,29 @@ app.post('/register', (req, res) => {
         }
         const [apiKey, player] = new Org(playerName);
         const playerId = player.id;
-        console.log('Registration successful for player:', playerName);
+        console.log("Registration successful for player:", playerName);
         res.json({ success: true, playerId, apiKey });
     } catch (error) {
-        console.error('Registration error:', error.message);
+        console.error("Registration error:", error.message);
         res.status(400).json({ success: false, error: error.message });
     }
 });
 
-app.post('/player-action', (req, res) => {
+app.post("/player-action", (req, res) => {
     const { apiKey, actionType, actionParams } = req.body;
     try {
         const result = playerAction(apiKey, actionType, actionParams);
-        
+
         // Encode the result using JSOG
         const jsogEncodedResult = JSOG.encode(result);
-        
+
         res.json({ success: true, result: jsogEncodedResult });
     } catch (error) {
         res.status(400).json({ success: false, error: error.message });
     }
 });
 
-
-app.get('/get-org-registry', (req, res) => {
+app.get("/get-org-registry", (req, res) => {
     try {
         const registryData = Object.entries(orgRegistry).map(([id, org]) => {
             const currentCycleData = org.getCurrentSelfData();
@@ -731,23 +812,22 @@ app.get('/get-org-registry', (req, res) => {
                 offers: currentCycleData.offers,
                 potentialValue: currentCycleData.potentialValue,
                 shares: currentCycleData.shares,
-                realizedValue: currentCycleData.realizedValue
+                realizedValue: currentCycleData.realizedValue,
             };
         });
-        
+
         // Encode the registryData using JSOG
         const jsogEncodedData = JSOG.encode(registryData);
-        
+
         res.json({ success: true, registryData: jsogEncodedData });
     } catch (error) {
-        console.error('Error in /get-org-registry:', error);
+        console.error("Error in /get-org-registry:", error);
         res.status(500).json({ success: false, error: error.message });
     }
 });
 
-
 function playerAction(apiKey, actionType, ...actionParams) {
-    console.log('ACTIONPARAM', actionParams)
+    console.log("ACTIONPARAM", actionParams);
     const playerId = apiKeyToPlayer[apiKey];
     if (!playerId) {
         throw new Error("Invalid API key");
@@ -761,14 +841,25 @@ function playerAction(apiKey, actionType, ...actionParams) {
     const playerCurrentPhase = player.getCurrentPhase();
 
     // Actions that don't require an orgId
-    const noOrgIdActions = ['getCurrentSelfData', 'getCurrentPhase', 'issueShares', 'runPhaseShift', 'unIssueShares', 'issuePotential', 'calculateRealizedValue', 'getGoalLeaderboard', 'getOfferLeaderboard', 'acceptOffer'];
-    
+    const noOrgIdActions = [
+        "getCurrentSelfData",
+        "getCurrentPhase",
+        "issueShares",
+        "runPhaseShift",
+        "unIssueShares",
+        "issuePotential",
+        "calculateRealizedValue",
+        "getGoalLeaderboard",
+        "getOfferLeaderboard",
+        "acceptOffer",
+    ];
+
     if (noOrgIdActions.includes(actionType)) {
         return player[actionType](...actionParams);
     }
 
     // Actions that require an orgId as the first parameter
-    const orgId = actionParams[0]
+    const orgId = actionParams[0];
     const org = orgRegistry[orgId];
     if (!org) {
         throw new Error(`Organization with ID ${orgId} not found`);
@@ -778,57 +869,71 @@ function playerAction(apiKey, actionType, ...actionParams) {
 
     // Phase-specific actions
     const phaseActions = {
-        'goalExpression': ['proposeGoalToOrg'],
-        'goalAllocation': ['allocateToGoalFromOrg'],
-        'offerExpression': ['offerToOrg'],
-        'offerAllocation': ['allocateToOfferFromGoalInOrg', 'acceptCounterOffer'],
-        'completions': ['claimCompletion', 'challengeCompletion', 'supportChallenge']
+        goalExpression: ["proposeGoalToOrg"],
+        goalAllocation: ["allocateToGoalFromOrg"],
+        offerExpression: ["offerToOrg"],
+        offerAllocation: ["allocateToOfferFromGoalInOrg", "acceptCounterOffer"],
+        completions: [
+            "claimCompletion",
+            "challengeCompletion",
+            "supportChallenge",
+        ],
     };
 
     // Always available actions
-    const alwaysAvailableActions = ['getOrg', 'getGoal', 'getOffer', 'distributeShares', 'joinOrg'];
+    const alwaysAvailableActions = [
+        "getOrg",
+        "getGoal",
+        "getOffer",
+        "distributeShares",
+        "joinOrg",
+    ];
 
-    if (alwaysAvailableActions.includes(actionType) || phaseActions[orgCurrentPhase]?.includes(actionType)) {
+    if (
+        alwaysAvailableActions.includes(actionType) ||
+        phaseActions[orgCurrentPhase]?.includes(actionType)
+    ) {
         return player[actionType](...actionParams);
     }
 
-    throw new Error(`Action ${actionType} is not allowed in the current phase: ${orgCurrentPhase}`);
+    throw new Error(
+        `Action ${actionType} is not allowed in the current phase: ${orgCurrentPhase}`
+    );
 }
 
-    console.log("--- Running Phase Tests ---");
+console.log("--- Running Phase Tests ---");
 
-    // Create test organizations and players
-    const [org1ApiKey, org1] = new Org('Playnet');
-    const [org2ApiKey, org2] = new Org('ECSA');
-    const [org3ApiKey, org3] = new Org('MOOS');
-    const [org4ApiKey, org4] = new Org('Germany');
-    const [org5ApiKey, org5] = new Org('Tanzania');
+// Create test organizations and players
+const [org1ApiKey, org1] = new Org("Playnet");
+const [org2ApiKey, org2] = new Org("ECSA");
+const [org3ApiKey, org3] = new Org("MOOS");
+const [org4ApiKey, org4] = new Org("Germany");
+const [org5ApiKey, org5] = new Org("Tanzania");
 
-    const [player1ApiKey, player1] = new Org("Ruzgar");
-    const [player2ApiKey, player2] = new Org("Felipe");
+const [player1ApiKey, player1] = new Org("Ruzgar");
+const [player2ApiKey, player2] = new Org("Felipe");
 
-    // Test Phase 1: Goal Expression
-    console.log("--- Testing Phase 1: Goal Expression ---");
-    testGoalExpression(org1, player1, player2);
+// Test Phase 1: Goal Expression
+console.log("--- Testing Phase 1: Goal Expression ---");
+testGoalExpression(org1, player1, player2);
 
-    // Test Phase 2: Goal Allocation
-    console.log("--- Testing Phase 2: Goal Allocation ---");
-    testGoalAllocation(org2, player1, player2);
+// Test Phase 2: Goal Allocation
+console.log("--- Testing Phase 2: Goal Allocation ---");
+testGoalAllocation(org2, player1, player2);
 
-    // Test Phase 3: Offer Expression
-    console.log("--- Testing Phase 3: Offer Expression ---");
-    testOfferExpression(org3, player1, player2);
+// Test Phase 3: Offer Expression
+console.log("--- Testing Phase 3: Offer Expression ---");
+testOfferExpression(org3, player1, player2);
 
-    // Test Phase 4: Offer Allocation
-    console.log("--- Testing Phase 4: Offer Allocation ---");
-    testOfferAllocation(org4, player1, player2);
+// Test Phase 4: Offer Allocation
+console.log("--- Testing Phase 4: Offer Allocation ---");
+testOfferAllocation(org4, player1, player2);
 
-    // Test Phase 5: Completions
-    console.log("--- Testing Phase 5: Completions ---");
-    testCompletions(org5, player1, player2);
+// Test Phase 5: Completions
+console.log("--- Testing Phase 5: Completions ---");
+testCompletions(org5, player1, player2);
 
-    console.log("--- Phase Tests Completed ---");
-
+console.log("--- Phase Tests Completed ---");
 
 function testGoalExpression(org, player1, player2) {
     player1.joinOrg(org.id);
@@ -884,8 +989,22 @@ function testOfferExpression(org, player1, player2) {
 
     org.runPhaseShift(); // Move to Offer Expression phase
 
-    const offer1 = player1.offerToOrg(org.id, "Offer 1", "Test Offer 1", "Effect 1", 100, [goal1]);
-    const offer2 = player2.offerToOrg(org.id, "Offer 2", "Test Offer 2", "Effect 2", 100, [goal2]);
+    const offer1 = player1.offerToOrg(
+        org.id,
+        "Offer 1",
+        "Test Offer 1",
+        "Effect 1",
+        100,
+        [goal1]
+    );
+    const offer2 = player2.offerToOrg(
+        org.id,
+        "Offer 2",
+        "Test Offer 2",
+        "Effect 2",
+        100,
+        [goal2]
+    );
 
     console.log(`Org ${org.name} current phase: ${org.getCurrentPhase()}`);
     console.log(`Offers made: ${offer1}, ${offer2}`);
@@ -908,8 +1027,22 @@ function testOfferAllocation(org, player1, player2) {
     player2.allocateToGoalFromOrg(org.id, 250, goal2);
 
     org.runPhaseShift(); // Move to Offer Expression phase
-    const offer1 = player1.offerToOrg(org.id, "Offer 1", "Test Offer 1", "Effect 1", 100, [goal1]);
-    const offer2 = player2.offerToOrg(org.id, "Offer 2", "Test Offer 2", "Effect 2", 100, [goal2]);
+    const offer1 = player1.offerToOrg(
+        org.id,
+        "Offer 1",
+        "Test Offer 1",
+        "Effect 1",
+        100,
+        [goal1]
+    );
+    const offer2 = player2.offerToOrg(
+        org.id,
+        "Offer 2",
+        "Test Offer 2",
+        "Effect 2",
+        100,
+        [goal2]
+    );
 
     org.runPhaseShift(); // Move to Offer Allocation phase
 
@@ -937,8 +1070,22 @@ function testCompletions(org, player1, player2) {
     player2.allocateToGoalFromOrg(org.id, 250, goal2);
 
     org.runPhaseShift(); // Move to Offer Expression phase
-    const offer1 = player1.offerToOrg(org.id, "Offer 1", "Test Offer 1", "Effect 1", 100, [goal1]);
-    const offer2 = player2.offerToOrg(org.id, "Offer 2", "Test Offer 2", "Effect 2", 100, [goal2]);
+    const offer1 = player1.offerToOrg(
+        org.id,
+        "Offer 1",
+        "Test Offer 1",
+        "Effect 1",
+        100,
+        [goal1]
+    );
+    const offer2 = player2.offerToOrg(
+        org.id,
+        "Offer 2",
+        "Test Offer 2",
+        "Effect 2",
+        100,
+        [goal2]
+    );
 
     org.runPhaseShift(); // Move to Offer Allocation phase
     player1.allocateToOfferFromGoalInOrg(org.id, 50, goal1, offer1);
@@ -946,23 +1093,46 @@ function testCompletions(org, player1, player2) {
 
     org.runPhaseShift(); // Move to Completions phase
 
-    const completion1 = player1.claimCompletion(org.id, offer1, "Completed Offer 1");
-    const completion2 = player2.claimCompletion(org.id, offer2, "Completed Offer 2");
+    const completion1 = player1.claimCompletion(
+        org.id,
+        offer1,
+        "Completed Offer 1"
+    );
+    const completion2 = player2.claimCompletion(
+        org.id,
+        offer2,
+        "Completed Offer 2"
+    );
 
-    player2.challengeCompletion(org.id, completion1, "Challenge for Completion 1");
-    player1.challengeCompletion(org.id, completion2, "Challenge for Completion 2");
+    player2.challengeCompletion(
+        org.id,
+        completion1,
+        "Challenge for Completion 1"
+    );
+    player1.challengeCompletion(
+        org.id,
+        completion2,
+        "Challenge for Completion 2"
+    );
 
     player1.supportChallenge(org.id, completion2, true);
     player2.supportChallenge(org.id, completion1, false);
 
     console.log(`Org ${org.name} current phase: ${org.getCurrentPhase()}`);
     console.log(`Completions claimed: ${completion1}, ${completion2}`);
-    console.log(`Completion 1 status: ${org.getCurrentSelfData().completions[completion1].status}`);
-    console.log(`Completion 2 status: ${org.getCurrentSelfData().completions[completion2].status}`);
+    console.log(
+        `Completion 1 status: ${
+            org.getCurrentSelfData().completions[completion1].status
+        }`
+    );
+    console.log(
+        `Completion 2 status: ${
+            org.getCurrentSelfData().completions[completion2].status
+        }`
+    );
 }
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
 });
-
