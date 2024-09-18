@@ -7,7 +7,7 @@ const App = () => {
   const [playerId, setPlayerId] = useState("");
 
   return (
-    <div>xxx
+    <div>
       {!apiKey ? (
         <Login setApiKey={setApiKey} setPlayerId={setPlayerId} />
       ) : (
@@ -18,3 +18,4 @@ const App = () => {
 };
 
 export default App;
+

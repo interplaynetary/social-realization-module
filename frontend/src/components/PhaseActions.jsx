@@ -21,6 +21,7 @@ const PhaseActions = ({ org, apiKey, playerId }) => {
       }),
     });
     const data = await response.json();
+
     if (data.success) {
       // Handle success
     }
@@ -43,7 +44,9 @@ const PhaseActions = ({ org, apiKey, playerId }) => {
         ],
       }),
     });
+
     const data = await response.json();
+    
     if (data.success) {
       // Handle success
     }

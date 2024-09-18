@@ -10,7 +10,9 @@ const Login = ({ setApiKey, setPlayerId }) => {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ apiKey: apiKeyInput }),
     });
+
     const data = await response.json();
+
     if (data.success) {
       setApiKey(apiKeyInput);
       setPlayerId(data.playerId);
@@ -25,7 +27,9 @@ const Login = ({ setApiKey, setPlayerId }) => {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ playerName }),
     });
+
     const data = await response.json();
+
     if (data.success) {
       setApiKey(data.apiKey);
       setPlayerId(data.playerId);
