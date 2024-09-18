@@ -42,7 +42,9 @@ const OrgList = ({ apiKey, playerId }) => {
       {orgs.map((org) => (
         <div key={org.id}>
           <h3>{org.name}</h3>
+
           <p>Phase: {org.currentPhase}</p>
+
           {org.players.hasOwnProperty(playerId) ? (
             <button onClick={() => setCurrentOrg(org)}>View Org</button>
           ) : (

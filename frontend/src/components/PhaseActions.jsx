@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 
-const PhaseActions= ({ org, apiKey, playerId }) => {
+const PhaseActions = ({ org, apiKey, playerId }) => {
   const [goalDescription, setGoalDescription] = useState("");
   const [offerDetails, setOfferDetails] = useState({
     offerName: "",

@@ -4,6 +4,7 @@ const PlayerCard = ({ org }) => {
   return (
     <div>
       <h4>Players</h4>
+
       {Object.keys(org.players).map((playerId) => (
         <div key={playerId} className="card">
           <h3>{org.players[playerId].name || "Unknown Player"}</h3>
