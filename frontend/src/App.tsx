@@ -2,14 +2,14 @@ import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
 import LoginView from "./views/LoginView";
 import DashboardView from "./views/DashboardView";
 import { RecoilRoot } from "recoil";
-import Logo from "./components/ui/Logo/Logo";
+import Header from "./components/Header/Header";
 
 const App = () => {
     return (
         <RecoilRoot>
-            <Logo />
-
             <Router>
+                <Header />
+
                 <Routes>
                     <Route path="/" element={<LoginView />} />
                     <Route path="/dashboard" element={<DashboardView />} />
