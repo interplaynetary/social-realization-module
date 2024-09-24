@@ -26,7 +26,7 @@ app.use(express.static("public")); // Serve static files from 'public' directory
 // Set up CORS middleware to allow multiple origins
 const allowedOrigins = [
     "http://127.0.0.1:5501",
-    "http://localhost:1234,  http://localhost:57303",
+    "http://localhost:1234"
 ];
 
 app.use(

@@ -43,30 +43,32 @@ const Login = ({ setApiKey, setPlayerId }) => {
     };
 
     return (
-        <Card className={styles.login}>
-            <TextInput
-                value={apiKeyInput}
-                onChange={(e) => setApiKeyInput(e.target.value)}
-                placeholder="Enter API Key"
-            />
+        <div className={styles.login}>
+            <Card>
+                <TextInput
+                    value={apiKeyInput}
+                    onChange={(e) => setApiKeyInput(e.target.value)}
+                    placeholder="Enter API Key"
+                />
 
-            <Button variant="primary" onClick={handleLogin}>
-                Log In
-            </Button>
+                <Button variant="primary" onClick={handleLogin}>
+                    Log In
+                </Button>
 
-            <hr />
-            <span>or create an account</span>
+                <hr />
+                <span>or create an account</span>
 
-            <TextInput
-                value={playerName}
-                onChange={(e) => setPlayerName(e.target.value)}
-                placeholder="Enter Name"
-            />
+                <TextInput
+                    value={playerName}
+                    onChange={(e) => setPlayerName(e.target.value)}
+                    placeholder="Enter Name"
+                />
 
-            <Button variant="secondary" onClick={handleRegister}>
-                Register
-            </Button>
-        </Card>
+                <Button variant="secondary" onClick={handleRegister}>
+                    Register
+                </Button>
+            </Card>
+        </div>
     );
 };
 
