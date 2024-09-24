@@ -1,12 +1,23 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom"; // Import useNavigate
 import Button from "../ui/Button/Button";
 import Card from "../ui/Card/Card";
 import TextInput from "../ui/TextInput/TextInput";
+import { useSetRecoilState } from "recoil";
+import { apiKeyAtom } from "../../state/atoms/apiKeyAtom";
+import { playerDataAtom } from "../../state/atoms/playerDataAtom"; // Adjusted import
+
 import * as styles from "./LogIn.module.css";
 
-const Login = ({ setApiKey, setPlayerId }) => {
+const Login = () => {
     const [playerName, setPlayerName] = useState("");
     const [apiKeyInput, setApiKeyInput] = useState("");
+
+    // Use Recoil setters to update global state
+    const setApiKey = useSetRecoilState(apiKeyAtom);
+    const setPlayerId = useSetRecoilState(playerDataAtom); // Ensure this is an atom
+
+    const navigate = useNavigate(); // Initialize useNavigate
 
     const handleLogin = async () => {
         const response = await fetch("http://localhost:3000/login", {
@@ -18,8 +29,11 @@ const Login = ({ setApiKey, setPlayerId }) => {
         const data = await response.json();
 
         if (data.success) {
-            setApiKey(apiKeyInput);
-            setPlayerId(data.playerId);
+            setApiKey(apiKeyInput); // Set API key in Recoil state
+            setPlayerId(data.playerId); // Set player ID in Recoil state
+
+            // Navigate to the dashboard page
+            navigate("/dashboard"); // Adjust the path to your dashboard route
         } else {
             alert("Login failed: " + data.error);
         }
@@ -35,8 +49,11 @@ const Login = ({ setApiKey, setPlayerId }) => {
         const data = await response.json();
 
         if (data.success) {
-            setApiKey(data.apiKey);
-            setPlayerId(data.playerId);
+            setApiKey(data.apiKey); // Set API key in Recoil state
+            setPlayerId(data.playerId); // Set player ID in Recoil state
+
+            // Navigate to the dashboard page
+            navigate("/dashboard"); // Adjust the path to your dashboard route
         } else {
             alert("Registration failed: " + data.error);
         }

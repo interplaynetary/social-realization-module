@@ -1,22 +1,21 @@
-import { useState } from "react";
-import Login from "./components/LogIn/LogIn";
-import OrgList from "./components/OrgList/OrgList";
+import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
+import LoginView from "./views/LoginView";
+import DashboardView from "./views/DashboardView";
+import { RecoilRoot } from "recoil";
 import Logo from "./components/ui/Logo/Logo";
 
 const App = () => {
-    const [apiKey, setApiKey] = useState("");
-    const [playerId, setPlayerId] = useState("");
-
     return (
-        <div>
+        <RecoilRoot>
             <Logo />
 
-            {!apiKey ? (
-                <Login setApiKey={setApiKey} setPlayerId={setPlayerId} />
-            ) : (
-                <OrgList apiKey={apiKey} playerId={playerId} />
-            )}
-        </div>
+            <Router>
+                <Routes>
+                    <Route path="/" element={<LoginView />} />
+                    <Route path="/dashboard" element={<DashboardView />} />
+                </Routes>
+            </Router>
+        </RecoilRoot>
     );
 };
 

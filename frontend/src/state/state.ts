@@ -5,37 +5,17 @@ import {
     fetchPlayerPhase,
     fetchOrgData,
     fetchOrgPhase,
-    fetchAvailableActions,
-} from "./api"; // Assume these API functions are defined elsewhere
+} from "../api/api"; // Assume these API functions are defined elsewhere
+import { apiKeyAtom } from "./atoms/apiKeyAtom";
+import { playerDataAtom } from "./atoms/playerDataAtom";
 
-// 1. Atom for storing the API key
-export const apiKeyState = atom({
-    key: "apiKeyState",
-    default: "", // API key is initially empty
-});
-
-// 2. Selector to fetch player data based on API key
-export const playerDataState = selector({
-    key: "playerDataState",
-    get: async ({ get }) => {
-        const apiKey = get(apiKeyState);
-        if (!apiKey) throw new Error("Invalid API key");
-
-        try {
-            const playerData = await fetchPlayerData(apiKey);
-            if (!playerData) throw new Error("Player not found");
-            return playerData;
-        } catch (error) {
-            throw new Error(error.message);
-        }
-    },
-});
 
 // 3. Selector for player's current phase
 export const playerPhaseState = selector({
     key: "playerPhaseState",
     get: async ({ get }) => {
-        const playerData = get(playerDataState);
+        const playerData = get(playerDataAtom);
+        
         try {
             const phase = await fetchPlayerPhase(playerData.id);
             return phase;
@@ -94,6 +74,7 @@ export const availableActionsState = selector({
         if (playerPhase === "Goal Expression Phase") {
             actions.push("proposeGoalToOrg");
         }
+
         if (playerPhase === "Offer Expression Phase") {
             actions.push("offerToOrg");
         }
@@ -122,6 +103,7 @@ export const errorState = selector({
         } catch (error) {
             return error.message;
         }
+
         return null; // No errors
     },
 });

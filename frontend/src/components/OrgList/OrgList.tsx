@@ -1,4 +1,7 @@
 import { useState, useEffect } from "react";
+import { useRecoilValue } from "recoil";
+import { apiKeyAtom } from "../../state/atoms/apiKeyAtom";
+import { playerDataAtom } from "../../state/atoms/playerDataAtom";
 import OrgDetail from "../OrgDetail";
 import Button from "../ui/Button/Button";
 import Card from "../ui/Card/Card";
@@ -6,17 +9,22 @@ import Container from "../ui/Container/Container";
 
 import * as styles from "./OrgList.module.css";
 
-const OrgList = ({ apiKey, playerId }) => {
+const OrgList = () => {
     const [orgs, setOrgs] = useState([]);
     const [currentOrg, setCurrentOrg] = useState(null);
 
+    const apiKey = useRecoilValue(apiKeyAtom);
+    const playerId = useRecoilValue(playerDataAtom);
+
     useEffect(() => {
+        console.log({ apiKey, playerId });
         fetchOrgRegistry();
     }, []);
 
     const fetchOrgRegistry = async () => {
         const response = await fetch("http://localhost:3000/get-org-registry");
         const data = await response.json();
+        
         if (data.success) {
             setOrgs(data.registryData);
         } else {
