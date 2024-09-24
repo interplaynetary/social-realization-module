@@ -1,23 +1,22 @@
 {
-  "name": "frontend",
-  "version": "1.0.0",
-  "main": "index.js",
-  "scripts": {
-    "start": "parcel src/index.html",
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "author": "",
-  "license": "ISC",
-  "description": "",
-  "dependencies": {
-    "react": "^18.3.1",
-    "react-dom": "^18.3.1",
-    "react-router-dom": "^6.26.2",
-    "recoil": "^0.7.7"
-  },
-  "devDependencies": {
-    "parcel": "^2.12.0",
-    "process": "^0.11.10"
-  },
-  "proxy": "http://localhost:3000"
+    "name": "frontend",
+    "version": "1.0.0",
+    "scripts": {
+        "start": "parcel src/index.html && parcel watch src/index.html",
+        "test": "echo \"Error: no test specified\" && exit 1"
+    },
+    "author": "",
+    "license": "ISC",
+    "description": "",
+    "dependencies": {
+        "react": "^18.3.1",
+        "react-dom": "^18.3.1",
+        "react-router-dom": "^6.26.2",
+        "recoil": "^0.7.7"
+    },
+    "devDependencies": {
+        "parcel": "^2.12.0",
+        "process": "^0.11.10"
+    },
+    "proxy": "http://localhost:3000"
 }

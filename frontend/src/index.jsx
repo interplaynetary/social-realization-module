@@ -9,15 +9,15 @@ import "./styles/index.css";
 const root = ReactDOM.createRoot(document.getElementById("root"));
 
 function App() {
-  return <CharacterCounter />;
+    return <CharacterCounter />;
 }
 
 root.render(
-  <React.StrictMode>
-    <RecoilRoot>
-      <Router>
-        <App />
-      </Router>
-    </RecoilRoot>
-  </React.StrictMode>
+    <React.StrictMode>
+        <RecoilRoot>
+            <Router>
+                <App />
+            </Router>
+        </RecoilRoot>
+    </React.StrictMode>
 );
