@@ -1,6 +1,6 @@
 import { useState } from "react";
 import Login from "./components/LogIn/LogIn";
-import OrgList from "./components/OrgList";
+import OrgList from "./components/OrgList/OrgList";
 import Logo from "./components/ui/Logo/Logo";
 
 const App = () => {

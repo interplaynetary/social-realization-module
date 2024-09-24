@@ -1,7 +1,10 @@
 import { useState, useEffect } from "react";
-import OrgDetail from "./OrgDetail";
-import Button from "./ui/Button/Button";
-import Container from "./ui/Container/Container";
+import OrgDetail from "../OrgDetail";
+import Button from "../ui/Button/Button";
+import Card from "../ui/Card/Card";
+import Container from "../ui/Container/Container";
+
+import * as styles from "./OrgList.module.css";
 
 const OrgList = ({ apiKey, playerId }) => {
     const [orgs, setOrgs] = useState([]);
@@ -33,7 +36,7 @@ const OrgList = ({ apiKey, playerId }) => {
         });
 
         const data = await response.json();
-        
+
         if (data.success) {
             fetchOrgRegistry(); // Refresh the org list after joining
         } else {
@@ -43,31 +46,35 @@ const OrgList = ({ apiKey, playerId }) => {
 
     return (
         <Container>
-            {orgs.map((org) => (
-                <div key={org.id}>
-                    <h3>{org.name}</h3>
+            <div className={styles.orgs}>
+                {orgs.map((org) => (
+                    <Card>
+                        <div key={org.id}>
+                            <h3>{org.name}</h3>
 
-                    <p>Phase: {org.currentPhase}</p>
+                            <p>Phase: {org.currentPhase}</p>
 
-                    {org.players.hasOwnProperty(playerId) ? (
-                        <Button onClick={() => setCurrentOrg(org)}>
-                            View Org
-                        </Button>
-                    ) : (
-                        <Button onClick={() => handleJoinOrg(org.id)}>
-                            Join Org
-                        </Button>
-                    )}
-                </div>
-            ))}
+                            {org.players.hasOwnProperty(playerId) ? (
+                                <Button onClick={() => setCurrentOrg(org)}>
+                                    View Org
+                                </Button>
+                            ) : (
+                                <Button onClick={() => handleJoinOrg(org.id)}>
+                                    Join Org
+                                </Button>
+                            )}
+                        </div>
+                    </Card>
+                ))}
 
-            {currentOrg && (
-                <OrgDetail
-                    org={currentOrg}
-                    apiKey={apiKey}
-                    playerId={playerId}
-                />
-            )}
+                {currentOrg && (
+                    <OrgDetail
+                        org={currentOrg}
+                        apiKey={apiKey}
+                        playerId={playerId}
+                    />
+                )}
+            </div>
         </Container>
     );
 };
