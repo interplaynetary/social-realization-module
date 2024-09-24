@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import OrgDetail from "./OrgDetail";
 import Button from "./ui/Button/Button";
 import Container from "./ui/Container/Container";
@@ -31,7 +31,9 @@ const OrgList = ({ apiKey, playerId }) => {
                 actionParams: [orgId],
             }),
         });
+
         const data = await response.json();
+        
         if (data.success) {
             fetchOrgRegistry(); // Refresh the org list after joining
         } else {

@@ -55,8 +55,9 @@ const Login = ({ setApiKey, setPlayerId }) => {
                     Log In
                 </Button>
 
-                <hr />
-                <span>or create an account</span>
+                <span style={{ textAlign: "center" }}>
+                    or create an account
+                </span>
 
                 <TextInput
                     value={playerName}
