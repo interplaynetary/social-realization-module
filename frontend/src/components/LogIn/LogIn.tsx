@@ -1,6 +1,8 @@
 import { useState } from "react";
-import Button from "./ui/Button/Button";
-import TextInput from "./ui/TextInput/TextInput";
+import Button from "../ui/Button/Button";
+import Card from "../ui/Card/Card";
+import TextInput from "../ui/TextInput/TextInput";
+import * as styles from "./LogIn.module.css";
 
 const Login = ({ setApiKey, setPlayerId }) => {
     const [playerName, setPlayerName] = useState("");
@@ -41,7 +43,7 @@ const Login = ({ setApiKey, setPlayerId }) => {
     };
 
     return (
-        <div>
+        <Card className={styles.login}>
             <TextInput
                 value={apiKeyInput}
                 onChange={(e) => setApiKeyInput(e.target.value)}
@@ -57,7 +59,7 @@ const Login = ({ setApiKey, setPlayerId }) => {
             />
 
             <Button onClick={handleRegister}>Register</Button>
-        </div>
+        </Card>
     );
 };
 
