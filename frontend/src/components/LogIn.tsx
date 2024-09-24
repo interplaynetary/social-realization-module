@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import Button from "./ui/Button/Button";
 
 const Login = ({ setApiKey, setPlayerId }) => {

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import  { useState } from "react";
 
 const Leaderboard = ({ apiKey, currentOrgId }) => {
   const [leaderboardData, setLeaderboardData] = useState([]);
