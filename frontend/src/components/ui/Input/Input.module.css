@@ -1,5 +1,6 @@
 .input {
-    padding: 12px;
-    background: white;
+    border: 1px solid #bfbfbf;
     border-radius: 12px;
+    background: white;
+    padding: 12px;
 }
