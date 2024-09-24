@@ -1,0 +1,7 @@
+.button {
+    background: hotpink;
+    padding: 12px;
+    color: white;
+    border-radius: 16px;
+    border: 1px solid hotpink;
+}

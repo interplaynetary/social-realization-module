@@ -1,5 +1,6 @@
 import { useState } from "react";
 import Button from "./ui/Button/Button";
+import TextInput from "./ui/TextInput/TextInput";
 
 const Login = ({ setApiKey, setPlayerId }) => {
     const [playerName, setPlayerName] = useState("");
@@ -41,8 +42,7 @@ const Login = ({ setApiKey, setPlayerId }) => {
 
     return (
         <div>
-            <input
-                type="text"
+            <TextInput
                 value={apiKeyInput}
                 onChange={(e) => setApiKeyInput(e.target.value)}
                 placeholder="Enter API Key"
@@ -50,10 +50,7 @@ const Login = ({ setApiKey, setPlayerId }) => {
 
             <Button onClick={handleLogin}>Log In</Button>
 
-            <br />
-
-            <input
-                type="text"
+            <TextInput
                 value={playerName}
                 onChange={(e) => setPlayerName(e.target.value)}
                 placeholder="Enter Name"
