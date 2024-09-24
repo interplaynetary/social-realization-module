@@ -50,7 +50,12 @@ const Login = ({ setApiKey, setPlayerId }) => {
                 placeholder="Enter API Key"
             />
 
-            <Button onClick={handleLogin}>Log In</Button>
+            <Button variant="primary" onClick={handleLogin}>
+                Log In
+            </Button>
+
+            <hr />
+            <span>or create an account</span>
 
             <TextInput
                 value={playerName}
@@ -58,7 +63,9 @@ const Login = ({ setApiKey, setPlayerId }) => {
                 placeholder="Enter Name"
             />
 
-            <Button onClick={handleRegister}>Register</Button>
+            <Button variant="secondary" onClick={handleRegister}>
+                Register
+            </Button>
         </Card>
     );
 };
