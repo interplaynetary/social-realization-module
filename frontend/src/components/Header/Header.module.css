@@ -19,3 +19,8 @@
     font-weight: 600;
     font-size: 11px;
 }
+
+.back {
+    cursor: pointer;
+    margin-top: calc(3 * var(--page-padding))
+}

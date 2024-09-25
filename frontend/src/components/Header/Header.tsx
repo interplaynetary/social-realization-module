@@ -26,16 +26,9 @@ const Header: React.FC<HeaderProps> = (props) => {
 
             <Container>
                 {location.pathname !== "/" && ( // Conditionally render the back link
-                    <span
-                        onClick={handleBackClick}
-                        style={{
-                            cursor: "pointer",
-                            display: "block",
-                            marginTop: "var(--page-padding)",
-                        }}
-                    >
+                    <div onClick={handleBackClick} className={styles.back}>
                         ← back
-                    </span>
+                    </div>
                 )}
             </Container>
         </Fragment>
