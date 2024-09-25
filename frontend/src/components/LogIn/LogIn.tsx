@@ -3,19 +3,20 @@ import { useNavigate } from "react-router-dom"; // Import useNavigate
 import Button from "../ui/Button/Button";
 import Card from "../ui/Card/Card";
 import TextInput from "../ui/TextInput/TextInput";
-import { useSetRecoilState } from "recoil";
+import { useRecoilValue, useSetRecoilState } from "recoil";
 import { apiKeyAtom } from "../../state/atoms/apiKeyAtom";
 import { playerDataAtom } from "../../state/atoms/playerDataAtom"; // Adjusted import
 
 import * as styles from "./LogIn.module.css";
 
 const Login = () => {
-    const [playerName, setPlayerName] = useState("");
-    const [apiKeyInput, setApiKeyInput] = useState("");
+    const apiKey = useRecoilValue(apiKeyAtom);
 
-    // Use Recoil setters to update global state
     const setApiKey = useSetRecoilState(apiKeyAtom);
     const setPlayerId = useSetRecoilState(playerDataAtom); // Ensure this is an atom
+
+    const [playerName, setPlayerName] = useState("");
+    const [apiKeyInput, setApiKeyInput] = useState(apiKey || "");
 
     const navigate = useNavigate(); // Initialize useNavigate
 
@@ -72,9 +73,16 @@ const Login = () => {
                     Log In
                 </Button>
 
-                <span style={{ textAlign: "center" }}>
+                <div
+                    style={{
+                        textAlign: "center",
+                        marginTop: "24px",
+                        marginBottom: "24px",
+                        fontSize: 14,
+                    }}
+                >
                     or create an account
-                </span>
+                </div>
 
                 <TextInput
                     value={playerName}
