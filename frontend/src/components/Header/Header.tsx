@@ -6,6 +6,9 @@ import * as styles from "./Header.module.css";
 
 interface HeaderProps extends HTMLAttributes<HTMLDivElement> {}
 
+// conditonally show, take first letter of organisation? idea
+const showAvatar = true;
+
 const Header: React.FC<HeaderProps> = (props) => {
     const navigate = useNavigate(); // Initialize useNavigate
 
@@ -32,7 +35,7 @@ const Header: React.FC<HeaderProps> = (props) => {
                 )}
             </Container>
 
-            <span className={styles.avatar}>D</span>
+            {showAvatar && <span className={styles.avatar}>D</span>}
         </header>
     );
 };
