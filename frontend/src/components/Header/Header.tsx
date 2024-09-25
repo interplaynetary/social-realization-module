@@ -31,6 +31,8 @@ const Header: React.FC<HeaderProps> = (props) => {
                     </span>
                 )}
             </Container>
+
+            <span className={styles.avatar}>D</span>
         </header>
     );
 };

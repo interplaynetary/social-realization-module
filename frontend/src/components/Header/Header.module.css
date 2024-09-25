@@ -1,0 +1,21 @@
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-right: var(--page-padding);
+}
+
+.avatar {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    margin-top: 10px;
+    border-radius: 50%;
+    background: #eaeaea;
+    padding: 11px;
+    width: 10px;
+    height: 10px;
+    font-weight: 600;
+    font-size: 11px;
+}
