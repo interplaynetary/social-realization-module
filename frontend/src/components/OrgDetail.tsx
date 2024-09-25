@@ -2,8 +2,14 @@ import React from "react";
 import PhaseActions from "./PhaseActions";
 import PlayerCard from "./PlayerCard";
 import GoalCard from "./GoalCard";
+import { useRecoilValue } from "recoil";
+import { apiKeyAtom } from "../state/atoms/apiKeyAtom";
+import { playerDataAtom } from "../state/atoms/playerDataAtom";
 
-const OrgDetail = ({ org, apiKey, playerId }) => {
+const OrgDetail = ({ org }) => {
+    const apiKey = useRecoilValue(apiKeyAtom); // Get the apiKey from Recoil
+    const playerId = useRecoilValue(playerDataAtom); // Get the playerId from Recoil
+
     const handlePhaseShift = async () => {
         const response = await fetch("http://localhost:3000/player-action", {
             method: "POST",

@@ -9,6 +9,13 @@ import Container from "../ui/Container/Container";
 
 import * as styles from "./OrgList.module.css";
 
+type org = {
+    id: string;
+    name: string;
+    currentPhase: string;
+    players: any;
+};
+
 const OrgList = () => {
     const [orgs, setOrgs] = useState([]);
     const [currentOrg, setCurrentOrg] = useState(null);
@@ -24,7 +31,7 @@ const OrgList = () => {
     const fetchOrgRegistry = async () => {
         const response = await fetch("http://localhost:3000/get-org-registry");
         const data = await response.json();
-        
+
         if (data.success) {
             setOrgs(data.registryData);
         } else {
@@ -55,15 +62,18 @@ const OrgList = () => {
     return (
         <Container>
             <div className={styles.orgs}>
-                {orgs.map((org) => (
+                {orgs.map((org, i) => (
                     <Card>
-                        <div key={org.id}>
+                        <div key={org.name + i}>
                             <h3>{org.name}</h3>
 
                             <p>Phase: {org.currentPhase}</p>
 
                             {org.players.hasOwnProperty(playerId) ? (
-                                <Button onClick={() => setCurrentOrg(org)}>
+                                <Button
+                                    variant="primary"
+                                    onClick={() => setCurrentOrg(org)}
+                                >
                                     View Org
                                 </Button>
                             ) : (
@@ -75,13 +85,7 @@ const OrgList = () => {
                     </Card>
                 ))}
 
-                {currentOrg && (
-                    <OrgDetail
-                        org={currentOrg}
-                        apiKey={apiKey}
-                        playerId={playerId}
-                    />
-                )}
+                {currentOrg && <OrgDetail org={currentOrg} />}
             </div>
         </Container>
     );
