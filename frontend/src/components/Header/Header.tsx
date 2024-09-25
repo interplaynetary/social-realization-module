@@ -1,4 +1,4 @@
-import React, { HTMLAttributes } from "react";
+import React, { Fragment, HTMLAttributes } from "react";
 import { useNavigate } from "react-router-dom"; // Import useNavigate
 import Container from "../ui/Container/Container";
 import Logo from "../ui/Logo/Logo";
@@ -17,8 +17,12 @@ const Header: React.FC<HeaderProps> = (props) => {
     };
 
     return (
-        <header {...props} className={styles.header}>
-            <Logo />
+        <Fragment>
+            <header {...props} className={styles.header}>
+                <Logo />
+
+                {showAvatar && <span className={styles.avatar}>D</span>}
+            </header>
 
             <Container>
                 {location.pathname !== "/" && ( // Conditionally render the back link
@@ -34,9 +38,7 @@ const Header: React.FC<HeaderProps> = (props) => {
                     </span>
                 )}
             </Container>
-
-            {showAvatar && <span className={styles.avatar}>D</span>}
-        </header>
+        </Fragment>
     );
 };
 
