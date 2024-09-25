@@ -14,6 +14,19 @@ const apiClient = axios.create({
     },
 });
 
+// Login
+export const authenticate = async (apiKey: string) => {
+    const response = await apiClient.post("/login", { apiKey });
+    return response.data;
+};
+
+
+// Register
+export const registerUser = async (playerName: string) => {
+    const response = await apiClient.post("/register", { playerName });
+    return response.data;
+};
+
 // Fetch player data
 export const fetchPlayerData = async (playerId: string) => {
     const response = await apiClient.get(`/players/${playerId}`);

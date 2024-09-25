@@ -8,6 +8,7 @@ import { apiKeyAtom } from "../../state/atoms/apiKeyAtom";
 import { playerDataAtom } from "../../state/atoms/playerDataAtom"; // Adjusted import
 
 import * as styles from "./LogIn.module.css";
+import { authenticate, registerUser } from "../../api/api";
 
 const Login = () => {
     const apiKey = useRecoilValue(apiKeyAtom);
@@ -21,40 +22,30 @@ const Login = () => {
     const navigate = useNavigate(); // Initialize useNavigate
 
     const handleLogin = async () => {
-        const response = await fetch("http://localhost:3000/login", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ apiKey: apiKeyInput }),
-        });
+        const data = await authenticate(apiKeyInput);
 
-        const data = await response.json();
+        console.log(data, "datax");
 
         if (data.success) {
-            setApiKey(apiKeyInput); // Set API key in Recoil state
-            setPlayerId(data.playerId); // Set player ID in Recoil state
+            // Set in Recoil state
+            setApiKey(data.apiKey);
+            setPlayerId(data.playerId);
 
-            // Navigate to the dashboard page
-            navigate("/dashboard"); // Adjust the path to your dashboard route
+            navigate("/dashboard");
         } else {
             alert("Login failed: " + data.error);
         }
     };
 
     const handleRegister = async () => {
-        const response = await fetch("http://localhost:3000/register", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ playerName }),
-        });
-
-        const data = await response.json();
+        const data = await registerUser(playerName);
 
         if (data.success) {
-            setApiKey(data.apiKey); // Set API key in Recoil state
-            setPlayerId(data.playerId); // Set player ID in Recoil state
+            // Set in Recoil state
+            setApiKey(data.apiKey);
+            setPlayerId(data.playerId);
 
-            // Navigate to the dashboard page
-            navigate("/dashboard"); // Adjust the path to your dashboard route
+            navigate("/dashboard");
         } else {
             alert("Registration failed: " + data.error);
         }
