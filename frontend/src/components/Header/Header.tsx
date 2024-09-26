@@ -1,5 +1,7 @@
 import React, { Fragment, HTMLAttributes } from "react";
 import { useNavigate } from "react-router-dom"; // Import useNavigate
+import { useRecoilValue } from "recoil";
+import { selectedOrgAtom } from "../../state/atoms/selectedOrgAtom";
 import Container from "../ui/Container/Container";
 import Logo from "../ui/Logo/Logo";
 import * as styles from "./Header.module.css";
@@ -10,7 +12,8 @@ interface HeaderProps extends HTMLAttributes<HTMLDivElement> {}
 const showAvatar = true;
 
 const Header: React.FC<HeaderProps> = (props) => {
-    const navigate = useNavigate(); // Initialize useNavigate
+    const selectedOrg = useRecoilValue(selectedOrgAtom);
+    const navigate = useNavigate();
 
     const handleBackClick = () => {
         navigate("/"); // Navigate to the login page
@@ -21,7 +24,11 @@ const Header: React.FC<HeaderProps> = (props) => {
             <header {...props} className={styles.header}>
                 <Logo />
 
-                {showAvatar && <span className={styles.avatar}>D</span>}
+                {showAvatar && (
+                    <span className={styles.avatar}>
+                        {selectedOrg?.name ? selectedOrg.name.charAt(0) : ""}
+                    </span>
+                )}
             </header>
 
             <Container>

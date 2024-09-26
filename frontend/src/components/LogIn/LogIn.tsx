@@ -14,7 +14,7 @@ const Login = () => {
     const apiKey = useRecoilValue(apiKeyAtom);
 
     const setApiKey = useSetRecoilState(apiKeyAtom);
-    const setPlayerId = useSetRecoilState(playerDataAtom); // Ensure this is an atom
+    const setPlayerData = useSetRecoilState(playerDataAtom); // Ensure this is an atom
 
     const [playerName, setPlayerName] = useState("");
     const [apiKeyInput, setApiKeyInput] = useState(apiKey || "");
@@ -24,12 +24,15 @@ const Login = () => {
     const handleLogin = async () => {
         const data = await authenticate(apiKeyInput);
 
-        console.log(data, "datax");
-
         if (data.success) {
             // Set in Recoil state
             setApiKey(data.apiKey);
-            setPlayerId(data.playerId);
+
+            console.log(data, "???");
+            setPlayerData({
+                id: data.playerId,
+                name: data.name,
+            });
 
             navigate("/dashboard");
         } else {
@@ -43,7 +46,10 @@ const Login = () => {
         if (data.success) {
             // Set in Recoil state
             setApiKey(data.apiKey);
-            setPlayerId(data.playerId);
+            setPlayerData({
+                id: data.id,
+                name: data.name,
+            });
 
             navigate("/dashboard");
         } else {

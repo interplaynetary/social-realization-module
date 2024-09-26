@@ -1,15 +1,13 @@
-import React from "react";
 import PhaseActions from "./PhaseActions";
 import PlayerCard from "./PlayerCard";
 import GoalCard from "./GoalCard";
 import { useRecoilValue } from "recoil";
 import { apiKeyAtom } from "../state/atoms/apiKeyAtom";
 import { playerDataAtom } from "../state/atoms/playerDataAtom";
+import Card from "./ui/Card/Card";
+import Button from "./ui/Button/Button";
 
-const OrgDetail = ({ org }) => {
-    const apiKey = useRecoilValue(apiKeyAtom); // Get the apiKey from Recoil
-    const playerId = useRecoilValue(playerDataAtom); // Get the playerId from Recoil
-
+const OrgDetail = ({ org, apiKey, playerId }) => {
     const handlePhaseShift = async () => {
         const response = await fetch("http://localhost:3000/player-action", {
             method: "POST",
@@ -31,7 +29,7 @@ const OrgDetail = ({ org }) => {
     };
 
     return (
-        <div>
+        <Card>
             <h2>{org.name}</h2>
             <p>Cycle: {org.currentCycle}</p>
             <p>Phase: {org.currentPhase}</p>
@@ -41,12 +39,15 @@ const OrgDetail = ({ org }) => {
 
             <PhaseActions org={org} apiKey={apiKey} playerId={playerId} />
             <PlayerCard org={org} />
-            <GoalCard org={org} />
+
+            {false && <GoalCard org={org} />}
 
             {playerId === org.id && (
-                <button onClick={handlePhaseShift}>Shift Phase</button>
+                <Button variant="secondary" onClick={handlePhaseShift}>
+                    Shift Phase
+                </Button>
             )}
-        </div>
+        </Card>
     );
 };
 

@@ -1,6 +1,14 @@
 import { atom } from "recoil";
 
-export const playerDataAtom = atom({
+type PlayerData = {
+    id: string;
+    name: string;
+};
+
+export const playerDataAtom = atom<PlayerData>({
     key: "playerDataAtom", // unique ID
-    default: {}, // initial value
+    default: {
+        id: "",
+        name: "",
+    }, // initial value
 });

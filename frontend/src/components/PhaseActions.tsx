@@ -1,4 +1,6 @@
 import React, { useState } from "react";
+import Button from "./ui/Button/Button";
+import TextInput from "./ui/TextInput/TextInput";
 
 const PhaseActions = ({ org, apiKey, playerId }) => {
     const [goalDescription, setGoalDescription] = useState("");
@@ -57,13 +59,15 @@ const PhaseActions = ({ org, apiKey, playerId }) => {
             {org.currentPhase === "goalExpression" && (
                 <div>
                     <h3>Propose Goal</h3>
-                    <input
-                        type="text"
+                    <TextInput
                         value={goalDescription}
                         onChange={(e) => setGoalDescription(e.target.value)}
                         placeholder="Goal Description"
                     />
-                    <button onClick={handleProposeGoal}>Propose Goal</button>
+                    
+                    <Button variant="secondary" onClick={handleProposeGoal}>
+                        Propose Goal
+                    </Button>
                 </div>
             )}
 

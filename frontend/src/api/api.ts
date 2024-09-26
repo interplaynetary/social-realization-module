@@ -20,10 +20,15 @@ export const authenticate = async (apiKey: string) => {
     return response.data;
 };
 
-
 // Register
 export const registerUser = async (playerName: string) => {
     const response = await apiClient.post("/register", { playerName });
+    return response.data;
+};
+
+// Fetch Orgs
+export const fetchOrgs = async () => {
+    const response = await apiClient.get("/get-org-registry");
     return response.data;
 };
 

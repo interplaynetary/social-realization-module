@@ -1,78 +1,123 @@
 import { useState, useEffect } from "react";
-import { useRecoilValue } from "recoil";
+import { useSetRecoilState, useRecoilValue } from "recoil";
+import { fetchOrgs } from "../../api/api";
 import { apiKeyAtom } from "../../state/atoms/apiKeyAtom";
 import { playerDataAtom } from "../../state/atoms/playerDataAtom";
+import { selectedOrgAtom } from "../../state/atoms/selectedOrgAtom"; // New atom for the current organization
 import OrgDetail from "../OrgDetail";
 import Button from "../ui/Button/Button";
 import Card from "../ui/Card/Card";
 import Container from "../ui/Container/Container";
-
 import * as styles from "./OrgList.module.css";
 
-type org = {
+type Org = {
     id: string;
     name: string;
     currentPhase: string;
-    players: any;
+    players: Record<string, any>;
 };
 
 const OrgList = () => {
-    const [orgs, setOrgs] = useState([]);
-    const [currentOrg, setCurrentOrg] = useState(null);
+    const [orgs, setOrgs] = useState<Org[]>([]);
+    const [loading, setLoading] = useState<boolean>(true);
+    const [error, setError] = useState<string | null>(null);
+
+    const [showOrgDetails, setShowOrgDetails] = useState(false);
+
+    const setPlayerData = useSetRecoilState(playerDataAtom); // Ensure this is an atom
+    const setSelectedOrg = useSetRecoilState(selectedOrgAtom); // New Recoil setter for selected org
 
     const apiKey = useRecoilValue(apiKeyAtom);
-    const playerId = useRecoilValue(playerDataAtom);
+    const playerData = useRecoilValue(playerDataAtom);
+    const selectedOrg = useRecoilValue(selectedOrgAtom); // New Recoil value for selected org
 
     useEffect(() => {
-        console.log({ apiKey, playerId });
         fetchOrgRegistry();
     }, []);
 
-    const fetchOrgRegistry = async () => {
-        const response = await fetch("http://localhost:3000/get-org-registry");
-        const data = await response.json();
+    useEffect(() => {
+        if (orgs.length > 0 && !selectedOrg) {
+            // Find the first organization where the player is a member
+            const orgWithPlayer = orgs.find((org) =>
+                org.players.hasOwnProperty(playerData.id)
+            );
 
-        if (data.success) {
-            setOrgs(data.registryData);
-        } else {
-            alert("Failed to fetch organizations");
+            if (orgWithPlayer) {
+                setSelectedOrg(orgWithPlayer); // Automatically set the current organization
+            }
+        }
+
+        console.log(selectedOrg);
+    }, [orgs, playerData.id, selectedOrg, setSelectedOrg]);
+
+    const fetchOrgRegistry = async () => {
+        setLoading(true);
+
+        try {
+            const data = await fetchOrgs();
+
+            if (data.success) {
+                setOrgs(data.registryData);
+                setError(null); // Reset error if fetch is successful
+            } else {
+                setError("Failed to fetch organizations");
+            }
+        } catch (err) {
+            setError("An error occurred while fetching organizations");
+        } finally {
+            setLoading(false);
         }
     };
 
-    const handleJoinOrg = async (orgId) => {
-        const response = await fetch("http://localhost:3000/player-action", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-                apiKey: apiKey,
-                actionType: "joinOrg",
-                actionParams: [orgId],
-            }),
-        });
+    const handleJoinOrg = async (orgId: string) => {
+        try {
+            const response = await fetch(
+                "http://localhost:3000/player-action",
+                {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        apiKey: apiKey,
+                        actionType: "joinOrg",
+                        actionParams: [orgId],
+                    }),
+                }
+            );
 
-        const data = await response.json();
+            const data = await response.json();
 
-        if (data.success) {
-            fetchOrgRegistry(); // Refresh the org list after joining
-        } else {
-            alert("Failed to join organization");
+            if (data.success) {
+                fetchOrgRegistry(); // Refresh the org list after joining
+            } else {
+                alert("Failed to join organization");
+            }
+        } catch (err) {
+            alert("An error occurred while joining the organization");
         }
+    };
+
+    const handleViewOrg = (org: Org) => {
+        setSelectedOrg(org); // Set the selected organization to Recoil atom
+        setShowOrgDetails(!showOrgDetails);
     };
 
     return (
         <Container>
             <div className={styles.orgs}>
-                {orgs.map((org, i) => (
-                    <Card>
-                        <div key={org.name + i}>
-                            <h3>{org.name}</h3>
+                {loading && <p>Loading organizations...</p>}
 
+                {error && <p>{error}</p>}
+
+                {orgs.map((org) => (
+                    <Card key={org.id}>
+                        <div>
+                            <h3>{org.name}</h3>
                             <p>Phase: {org.currentPhase}</p>
 
-                            {org.players.hasOwnProperty(playerId) ? (
+                            {org.players.hasOwnProperty(playerData.id) ? (
                                 <Button
                                     variant="primary"
-                                    onClick={() => setCurrentOrg(org)}
+                                    onClick={() => handleViewOrg(org)}
                                 >
                                     View Org
                                 </Button>
@@ -84,9 +129,15 @@ const OrgList = () => {
                         </div>
                     </Card>
                 ))}
-
-                {currentOrg && <OrgDetail org={currentOrg} />}
             </div>
+
+            {showOrgDetails && (
+                <OrgDetail
+                    org={selectedOrg}
+                    apiKey={apiKey}
+                    playerId={playerData.id}
+                />
+            )}
         </Container>
     );
 };

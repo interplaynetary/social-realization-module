@@ -18,9 +18,11 @@
     height: 10px;
     font-weight: 600;
     font-size: 11px;
+    text-transform: uppercase;
 }
 
 .back {
     cursor: pointer;
-    margin-top: calc(3 * var(--page-padding))
+    margin-top: calc(3 * var(--page-padding));
+    margin-bottom: var(--page-padding);
 }
