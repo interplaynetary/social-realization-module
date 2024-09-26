@@ -1,6 +1,7 @@
 import React, { Fragment, HTMLAttributes } from "react";
 import { useNavigate } from "react-router-dom"; // Import useNavigate
 import { useRecoilValue } from "recoil";
+import { playerDataAtom } from "../../state/atoms/playerDataAtom";
 import { selectedOrgAtom } from "../../state/atoms/selectedOrgAtom";
 import Container from "../ui/Container/Container";
 import Logo from "../ui/Logo/Logo";
@@ -12,7 +13,7 @@ interface HeaderProps extends HTMLAttributes<HTMLDivElement> {}
 const showAvatar = true;
 
 const Header: React.FC<HeaderProps> = (props) => {
-    const selectedOrg = useRecoilValue(selectedOrgAtom);
+    const playerData = useRecoilValue(playerDataAtom);
     const navigate = useNavigate();
 
     const handleBackClick = () => {
@@ -26,7 +27,7 @@ const Header: React.FC<HeaderProps> = (props) => {
 
                 {showAvatar && (
                     <span className={styles.avatar}>
-                        {selectedOrg?.name ? selectedOrg.name.charAt(0) : ""}
+                        {playerData?.name ? playerData.name.charAt(0) : ''}
                     </span>
                 )}
             </header>

@@ -2,7 +2,7 @@ import { atom } from "recoil";
 
 type PlayerData = {
     id: string;
-    name: string;
+    name?: string;
 };
 
 export const playerDataAtom = atom<PlayerData>({

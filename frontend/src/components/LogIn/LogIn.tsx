@@ -31,7 +31,6 @@ const Login = () => {
             console.log(data, "???");
             setPlayerData({
                 id: data.playerId,
-                name: data.name,
             });
 
             navigate("/dashboard");
@@ -48,7 +47,7 @@ const Login = () => {
             setApiKey(data.apiKey);
             setPlayerData({
                 id: data.id,
-                name: data.name,
+                name: playerName,
             });
 
             navigate("/dashboard");
