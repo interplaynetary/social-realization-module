@@ -20,39 +20,19 @@ type Org = {
 // first i fetch all orgs
 // then player can "join" org, as a post,
 // then i fetch again all orgs, to get the changes
-
 const OrgList = () => {
     const [orgs, setOrgs] = useState<Org[]>([]);
     const [loading, setLoading] = useState<boolean>(true);
     const [error, setError] = useState<string | null>(null);
 
-    const [showOrgDetails, setShowOrgDetails] = useState(false);
-
-    const setPlayerData = useSetRecoilState(playerDataAtom); // Ensure this is an atom
-    const setSelectedOrg = useSetRecoilState(selectedOrgAtom); // New Recoil setter for selected org
-
     const apiKey = useRecoilValue(apiKeyAtom);
     const playerData = useRecoilValue(playerDataAtom);
     const selectedOrg = useRecoilValue(selectedOrgAtom); // New Recoil value for selected org
+    const setSelectedOrg = useSetRecoilState(selectedOrgAtom); // Recoil setter for selected org
 
     useEffect(() => {
         fetchOrgRegistry();
     }, []);
-
-    useEffect(() => {
-        if (orgs.length > 0 && !selectedOrg) {
-            // Find the first organization where the player is a member
-            const orgWithPlayer = orgs.find((org) =>
-                org.players.hasOwnProperty(playerData.id)
-            );
-
-            if (orgWithPlayer) {
-                setSelectedOrg(orgWithPlayer); // Automatically set the current organization
-            }
-        }
-
-        console.log(selectedOrg);
-    }, [orgs, playerData.id, selectedOrg, setSelectedOrg]);
 
     const fetchOrgRegistry = async () => {
         setLoading(true);
@@ -73,7 +53,7 @@ const OrgList = () => {
         }
     };
 
-    const handleJoinOrg = async (orgId: string, apiKey: string) => {
+    const handleJoinOrg = async (orgId: string) => {
         try {
             const data = await joinOrg(orgId, apiKey);
 
@@ -88,8 +68,12 @@ const OrgList = () => {
     };
 
     const handleViewOrg = (org: Org) => {
-        setSelectedOrg(org); // Set the selected organization to Recoil atom
-        setShowOrgDetails(!showOrgDetails);
+        // Toggle the organization details when the same org is clicked again
+        if (selectedOrg?.id === org.id) {
+            setSelectedOrg(null); // Deselect the org (close the details view)
+        } else {
+            setSelectedOrg(org); // Set the new org and show its details
+        }
     };
 
     return (
@@ -110,7 +94,9 @@ const OrgList = () => {
                                     variant="primary"
                                     onClick={() => handleViewOrg(org)}
                                 >
-                                    View Org
+                                    {selectedOrg?.id === org.id
+                                        ? "Close Org"
+                                        : "View Org"}
                                 </Button>
                             ) : (
                                 <Button onClick={() => handleJoinOrg(org.id)}>
@@ -122,7 +108,7 @@ const OrgList = () => {
                 ))}
             </div>
 
-            {showOrgDetails && (
+            {selectedOrg && (
                 <OrgDetail
                     org={selectedOrg}
                     apiKey={apiKey}
