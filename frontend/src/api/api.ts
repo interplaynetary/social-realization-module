@@ -14,6 +14,21 @@ const apiClient = axios.create({
     },
 });
 
+// Global error handling using interceptors ( improve this one to handle more elegantly all FE errors )
+apiClient.interceptors.response.use(
+    (response) => response, // Pass through if response is successful
+    (error) => {
+        // Handle all errors globally here
+        console.error(
+            "API Error:",
+            error.response ? error.response.data : error.message
+        );
+
+        // You can throw the error again if you want specific calls to handle it, or customize responses
+        return Promise.reject(error);
+    }
+);
+
 // Login
 export const authenticate = async (apiKey: string) => {
     const response = await apiClient.post("/login", { apiKey });
@@ -29,6 +44,16 @@ export const registerUser = async (playerName: string) => {
 // Fetch Orgs
 export const fetchOrgs = async () => {
     const response = await apiClient.get("/get-org-registry");
+    return response.data;
+};
+
+// Join organization
+export const joinOrg = async (orgId: string, apiKey: string) => {
+    const response = await apiClient.post("/player-action", {
+        apiKey: apiKey,
+        actionType: "joinOrg",
+        actionParams: [orgId],
+    });
     return response.data;
 };
 

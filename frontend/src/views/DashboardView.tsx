@@ -1,4 +1,5 @@
 import OrgList from "../components/OrgList/OrgList";
+import PlayerInfo from "../components/PlayerInfo/PlayerInfo";
 import Container from "../components/ui/Container/Container";
 
 const Dashboard = () => {
@@ -9,6 +10,7 @@ const Dashboard = () => {
             </Container>
 
             <OrgList />
+            <PlayerInfo />
         </div>
     );
 };

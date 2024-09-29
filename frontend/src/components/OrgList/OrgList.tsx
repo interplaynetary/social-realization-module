@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useSetRecoilState, useRecoilValue } from "recoil";
-import { fetchOrgs } from "../../api/api";
+import { fetchOrgs, joinOrg } from "../../api/api";
 import { apiKeyAtom } from "../../state/atoms/apiKeyAtom";
 import { playerDataAtom } from "../../state/atoms/playerDataAtom";
 import { selectedOrgAtom } from "../../state/atoms/selectedOrgAtom"; // New atom for the current organization
@@ -16,6 +16,10 @@ type Org = {
     currentPhase: string;
     players: Record<string, any>;
 };
+
+// first i fetch all orgs
+// then player can "join" org, as a post,
+// then i fetch again all orgs, to get the changes
 
 const OrgList = () => {
     const [orgs, setOrgs] = useState<Org[]>([]);
@@ -69,29 +73,16 @@ const OrgList = () => {
         }
     };
 
-    const handleJoinOrg = async (orgId: string) => {
+    const handleJoinOrg = async (orgId: string, apiKey: string) => {
         try {
-            const response = await fetch(
-                "http://localhost:3000/player-action",
-                {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({
-                        apiKey: apiKey,
-                        actionType: "joinOrg",
-                        actionParams: [orgId],
-                    }),
-                }
-            );
-
-            const data = await response.json();
+            const data = await joinOrg(orgId, apiKey);
 
             if (data.success) {
-                fetchOrgRegistry(); // Refresh the org list after joining
+                fetchOrgRegistry();
             } else {
                 alert("Failed to join organization");
             }
-        } catch (err) {
+        } catch (error) {
             alert("An error occurred while joining the organization");
         }
     };

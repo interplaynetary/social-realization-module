@@ -1,4 +1,9 @@
+import { useEffect } from "react";
+
 const PlayerCard = ({ org }) => {
+    useEffect(() => {
+        console.log(org.players);
+    }, [org.players]);
     return (
         <div>
             <h4>Players</h4>
