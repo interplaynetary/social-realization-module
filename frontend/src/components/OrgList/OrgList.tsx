@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useSetRecoilState, useRecoilValue } from "recoil";
 import { fetchOrgs, joinOrg } from "../../api/api";
+import { getPlayersNameById } from "../../helpers/helpers";
 import { apiKeyAtom } from "../../state/atoms/apiKeyAtom";
 import { playerDataAtom } from "../../state/atoms/playerDataAtom";
 import { selectedOrgAtom } from "../../state/atoms/selectedOrgAtom"; // New atom for the current organization
@@ -27,8 +28,9 @@ const OrgList = () => {
 
     const apiKey = useRecoilValue(apiKeyAtom);
     const playerData = useRecoilValue(playerDataAtom);
-    const selectedOrg = useRecoilValue(selectedOrgAtom); // New Recoil value for selected org
-    const setSelectedOrg = useSetRecoilState(selectedOrgAtom); // Recoil setter for selected org
+    const selectedOrg = useRecoilValue(selectedOrgAtom);
+    const setSelectedOrg = useSetRecoilState(selectedOrgAtom);
+    const setPlayerData = useSetRecoilState(playerDataAtom);
 
     useEffect(() => {
         fetchOrgRegistry();
@@ -40,11 +42,16 @@ const OrgList = () => {
         try {
             const data = await fetchOrgs();
 
-            console.log(data, "???");
-
             if (data.success) {
                 setOrgs(data.registryData);
-                console.log("get fetched orgs:", data.registryData); // Log to check data
+
+                const name = getPlayersNameById(orgs, playerData.id);
+
+                setPlayerData({
+                    id: playerData.id,
+                    name,
+                });
+
                 setError(null); // Reset error if fetch is successful
             } else {
                 setError("Failed to fetch organizations");

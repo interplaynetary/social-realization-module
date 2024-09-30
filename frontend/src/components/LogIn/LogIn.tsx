@@ -28,11 +28,7 @@ const Login = () => {
         if (data.success) {
             // Set in Recoil state
             setApiKey(apiKeyInput);
-
-            console.log(data, "Login Data");
-            setPlayerData({
-                id: data.playerId,
-            });
+            setPlayerData({ id: data.playerId });
 
             navigate("/dashboard");
         } else {
@@ -44,9 +40,10 @@ const Login = () => {
         const data = await registerUser(playerName);
 
         if (data.success) {
-            console.log(data.apiKey, "registerKey!");
             // Set in Recoil state
             setApiKey(data.apiKey);
+
+            // todo get id by name?
             setPlayerData({
                 id: data.id,
                 name: playerName,

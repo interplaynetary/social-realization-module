@@ -1,4 +1,4 @@
-import React, { Fragment, HTMLAttributes } from "react";
+import React, { Fragment, HTMLAttributes, useEffect } from "react";
 import { useNavigate } from "react-router-dom"; // Import useNavigate
 import { useRecoilValue } from "recoil";
 import { playerDataAtom } from "../../state/atoms/playerDataAtom";
@@ -13,7 +13,7 @@ interface HeaderProps extends HTMLAttributes<HTMLDivElement> {}
 const showAvatar = true;
 
 const Header: React.FC<HeaderProps> = (props) => {
-    const playerData = useRecoilValue(playerDataAtom);
+    const { name } = useRecoilValue(playerDataAtom);
     const navigate = useNavigate();
 
     const handleBackClick = () => {
@@ -27,7 +27,7 @@ const Header: React.FC<HeaderProps> = (props) => {
 
                 {showAvatar && (
                     <span className={styles.avatar}>
-                        {playerData?.name ? playerData.name.charAt(0) : ''}
+                        {name ? name.charAt(0) : ""}
                     </span>
                 )}
             </header>
