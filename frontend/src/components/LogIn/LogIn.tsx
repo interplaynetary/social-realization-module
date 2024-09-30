@@ -28,7 +28,7 @@ const Login = () => {
             // Set in Recoil state
             setApiKey(data.apiKey);
 
-            console.log(data, "???");
+            console.log(data, "Login Data");
             setPlayerData({
                 id: data.playerId,
             });
@@ -43,6 +43,7 @@ const Login = () => {
         const data = await registerUser(playerName);
 
         if (data.success) {
+            console.log(data.apiKey, "registerKey!");
             // Set in Recoil state
             setApiKey(data.apiKey);
             setPlayerData({

@@ -42,6 +42,7 @@ const OrgList = () => {
 
             if (data.success) {
                 setOrgs(data.registryData);
+                console.log("Fetched orgs:", data.registryData); // Log to check data
                 setError(null); // Reset error if fetch is successful
             } else {
                 setError("Failed to fetch organizations");
@@ -58,7 +59,19 @@ const OrgList = () => {
             const data = await joinOrg(orgId, apiKey);
 
             if (data.success) {
-                fetchOrgRegistry();
+                setOrgs((prevOrgs) =>
+                    prevOrgs.map((org) =>
+                        org.id === orgId
+                            ? {
+                                  ...org,
+                                  players: {
+                                      ...org.players,
+                                      [playerData.id]: true,
+                                  }, // Add player to org
+                              }
+                            : org
+                    )
+                );
             } else {
                 alert("Failed to join organization");
             }
