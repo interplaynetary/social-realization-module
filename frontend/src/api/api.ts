@@ -1,10 +1,7 @@
 import axios from "axios";
 
-/* 
-    this can later, based on .env varibales can point to an actual server
-*/
-
-const API_BASE_URL = "http://localhost:3000"; // Replace with your actual API URL
+//  This can later, based on .env variables, point to an actual server
+const API_BASE_URL = process.env.API_BASE_URL || "http://localhost:3000";
 
 // Create an Axios instance
 const apiClient = axios.create({
@@ -84,5 +81,16 @@ export const fetchOrgPhase = async (orgId: string) => {
 // Fetch available actions
 export const fetchAvailableActions = async (playerId: string) => {
     const response = await apiClient.get(`/players/${playerId}/actions`);
+    return response.data;
+};
+
+// Run phase shift (your specific function)
+export const runPhaseShift = async (apiKey: string) => {
+    const response = await apiClient.post("/player-action", {
+        apiKey: apiKey,
+        actionType: "runPhaseShift",
+        actionParams: [],
+    });
+
     return response.data;
 };

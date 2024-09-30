@@ -40,6 +40,8 @@ const OrgList = () => {
         try {
             const data = await fetchOrgs();
 
+            console.log(data, "???");
+
             if (data.success) {
                 setOrgs(data.registryData);
                 console.log("Fetched orgs:", data.registryData); // Log to check data
@@ -59,19 +61,7 @@ const OrgList = () => {
             const data = await joinOrg(orgId, apiKey);
 
             if (data.success) {
-                setOrgs((prevOrgs) =>
-                    prevOrgs.map((org) =>
-                        org.id === orgId
-                            ? {
-                                  ...org,
-                                  players: {
-                                      ...org.players,
-                                      [playerData.id]: true,
-                                  }, // Add player to org
-                              }
-                            : org
-                    )
-                );
+                fetchOrgRegistry();
             } else {
                 alert("Failed to join organization");
             }

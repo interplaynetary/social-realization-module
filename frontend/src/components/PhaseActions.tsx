@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import Button from "./ui/Button/Button";
 import TextInput from "./ui/TextInput/TextInput";
 
@@ -59,12 +59,13 @@ const PhaseActions = ({ org, apiKey, playerId }) => {
             {org.currentPhase === "goalExpression" && (
                 <div>
                     <h3>Propose Goal</h3>
+
                     <TextInput
                         value={goalDescription}
                         onChange={(e) => setGoalDescription(e.target.value)}
                         placeholder="Goal Description"
                     />
-                    
+
                     <Button variant="secondary" onClick={handleProposeGoal}>
                         Propose Goal
                     </Button>
@@ -74,8 +75,8 @@ const PhaseActions = ({ org, apiKey, playerId }) => {
             {org.currentPhase === "offerExpression" && (
                 <div>
                     <h3>Make Offer</h3>
-                    <input
-                        type="text"
+
+                    <TextInput
                         value={offerDetails.offerName}
                         onChange={(e) =>
                             setOfferDetails({
@@ -85,8 +86,8 @@ const PhaseActions = ({ org, apiKey, playerId }) => {
                         }
                         placeholder="Offer Name"
                     />
-                    <input
-                        type="text"
+
+                    <TextInput
                         value={offerDetails.offerDescription}
                         onChange={(e) =>
                             setOfferDetails({
@@ -96,7 +97,8 @@ const PhaseActions = ({ org, apiKey, playerId }) => {
                         }
                         placeholder="Offer Description"
                     />
-                    <input
+
+                    <TextInput
                         type="text"
                         value={offerDetails.offerEffects}
                         onChange={(e) =>
@@ -107,7 +109,9 @@ const PhaseActions = ({ org, apiKey, playerId }) => {
                         }
                         placeholder="Offer Effects"
                     />
-                    <input
+
+                    {/* TODO: check to create number input? */}
+                    <TextInput
                         type="number"
                         value={offerDetails.offerAsk}
                         onChange={(e) =>
@@ -118,8 +122,8 @@ const PhaseActions = ({ org, apiKey, playerId }) => {
                         }
                         placeholder="Offer Ask Amount"
                     />
-                    <input
-                        type="text"
+
+                    <TextInput
                         value={offerDetails.targetGoals}
                         onChange={(e) =>
                             setOfferDetails({
@@ -129,7 +133,7 @@ const PhaseActions = ({ org, apiKey, playerId }) => {
                         }
                         placeholder="Target Goal IDs (comma-separated)"
                     />
-                    <button onClick={handleMakeOffer}>Make Offer</button>
+                    <Button onClick={handleMakeOffer}>Make Offer</Button>
                 </div>
             )}
 
