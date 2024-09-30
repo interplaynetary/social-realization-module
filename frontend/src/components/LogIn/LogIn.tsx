@@ -21,12 +21,13 @@ const Login = () => {
 
     const navigate = useNavigate(); // Initialize useNavigate
 
+    // login currently works with api key
     const handleLogin = async () => {
         const data = await authenticate(apiKeyInput);
 
         if (data.success) {
             // Set in Recoil state
-            setApiKey(data.apiKey);
+            setApiKey(apiKeyInput);
 
             console.log(data, "Login Data");
             setPlayerData({

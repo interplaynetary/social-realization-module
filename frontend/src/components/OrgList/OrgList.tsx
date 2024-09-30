@@ -4,7 +4,7 @@ import { fetchOrgs, joinOrg } from "../../api/api";
 import { apiKeyAtom } from "../../state/atoms/apiKeyAtom";
 import { playerDataAtom } from "../../state/atoms/playerDataAtom";
 import { selectedOrgAtom } from "../../state/atoms/selectedOrgAtom"; // New atom for the current organization
-import OrgDetail from "../OrgDetail";
+import OrgDetail from "../OrgDetail/OrgDetail";
 import Button from "../ui/Button/Button";
 import Card from "../ui/Card/Card";
 import Container from "../ui/Container/Container";
@@ -44,7 +44,7 @@ const OrgList = () => {
 
             if (data.success) {
                 setOrgs(data.registryData);
-                console.log("Fetched orgs:", data.registryData); // Log to check data
+                console.log("get fetched orgs:", data.registryData); // Log to check data
                 setError(null); // Reset error if fetch is successful
             } else {
                 setError("Failed to fetch organizations");
@@ -61,7 +61,20 @@ const OrgList = () => {
             const data = await joinOrg(orgId, apiKey);
 
             if (data.success) {
-                fetchOrgRegistry();
+                // Update the org state without refetching all organizations
+                setOrgs((prevOrgs) =>
+                    prevOrgs.map((org) =>
+                        org.id === orgId
+                            ? {
+                                  ...org,
+                                  players: {
+                                      ...org.players,
+                                      [playerData.id]: true,
+                                  },
+                              } // Update the players
+                            : org
+                    )
+                );
             } else {
                 alert("Failed to join organization");
             }

@@ -14,7 +14,10 @@ const App = () => {
                 <Routes>
                     <Route path="/" element={<LoginView />} />
                     <Route path="/dashboard" element={<DashboardView />} />
-                    <Route path="/orgdetail" element={<OrgDetailView />} />
+                    <Route
+                        path="/orgdetail/:orgId"
+                        element={<OrgDetailView />}
+                    />
                 </Routes>
             </Router>
         </RecoilRoot>
