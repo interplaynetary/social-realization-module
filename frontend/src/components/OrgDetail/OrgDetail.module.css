@@ -1,0 +1,19 @@
+.orgInfo {
+    margin-top: 12px;
+}
+
+@media (min-width: 900px) {
+    .orgInfo {
+        display: flex;
+    }
+}
+
+@media (min-width: 900px) {
+    .orgInfoItem {
+        padding-left: 6px;
+        padding-right: 6px;
+        margin-right: 12px;
+        border: 1px solid #06050547;
+        border-radius: 9px;
+    }
+}

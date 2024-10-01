@@ -57,12 +57,21 @@ const Login = () => {
         }
     };
 
+    const handleKeyPress = (e: any) => {
+        if (e.key === "Enter") {
+            if (e.target.name === "login") handleLogin();
+            if (e.target.name === "playerName") handleRegister();
+        }
+    };
+    
     return (
         <div className={styles.login}>
             <Card>
                 <TextInput
+                    name="login"
                     value={apiKeyInput}
                     onChange={(e) => setApiKeyInput(e.target.value)}
+                    onKeyDown={handleKeyPress}
                     placeholder="Enter API Key"
                 />
 
@@ -82,8 +91,10 @@ const Login = () => {
                 </div>
 
                 <TextInput
+                    name="register"
                     value={playerName}
                     onChange={(e) => setPlayerName(e.target.value)}
+                    onKeyDown={handleKeyPress} // fires when any key is pressed
                     placeholder="Enter Name"
                 />
 

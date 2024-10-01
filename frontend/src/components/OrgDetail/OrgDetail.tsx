@@ -28,22 +28,36 @@ const OrgDetail = ({ org, apiKey, playerId }) => {
         <div className={classes.orgDetails}>
             <h2>{org.name}</h2>
 
-                <p>Cycle: {org.currentCycle}</p>
-                <p>Phase: {org.currentPhase}</p>
-                <p>Potential Value: {org.potentialValue}</p>
-                <p>Shares: {org.shares}</p>
+            {/* TODO: sort this, prioritize what is most important */}
+            <div className={classes.orgInfo}>
+                <span className={classes.orgInfoItem}>
+                    Cycle: {org.currentCycle}
+                </span>
 
-                <PhaseActions org={org} apiKey={apiKey} playerId={playerId} />
+                <span className={classes.orgInfoItem}>
+                    Phase: {org.currentPhase}
+                </span>
 
-                <PlayerCard org={org} />
+                <span className={classes.orgInfoItem}>
+                    Potential Value: {org.potentialValue}
+                </span>
 
-                {false && <GoalCard org={org} />}
+                <span className={classes.orgInfoItem}>
+                    Shares: {org.shares}
+                </span>
+            </div>
 
-                {playerId === org.id && (
-                    <Button variant="secondary" onClick={handlePhaseShift}>
-                        Shift Phase
-                    </Button>
-                )}
+            <PhaseActions org={org} apiKey={apiKey} playerId={playerId} />
+
+            <PlayerCard org={org} />
+
+            {false && <GoalCard org={org} />}
+
+            {playerId === org.id && (
+                <Button variant="secondary" onClick={handlePhaseShift}>
+                    Shift Phase
+                </Button>
+            )}
         </div>
     );
 };
