@@ -18,6 +18,12 @@ type Org = {
     name: string;
     currentPhase: string;
     players: Record<string, any>;
+    currentCycle: string;
+    goals: Record<string, any>;
+    offers: Record<string, any>;
+    potentialValue: number;
+    realizedValue: number;
+    shares: number;
 };
 
 type OrgParams = {

@@ -51,7 +51,7 @@ const OrgDetail = ({ org, apiKey, playerId }) => {
 
             <PlayerCard org={org} />
 
-            {false && <GoalCard org={org} />}
+            <GoalCard org={org} />
 
             {playerId === org.id && (
                 <Button variant="secondary" onClick={handlePhaseShift}>

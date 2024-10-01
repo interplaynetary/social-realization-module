@@ -2,9 +2,8 @@ const GoalCard = ({ org }) => {
     return (
         <div>
             <h4>Goals</h4>
-
             {Object.keys(org.goals).map((goalId) => (
-                <div key={goaId} className="card">
+                <div key={goalId} className="card">
                     <h3>
                         Goal:{" "}
                         {org.goals[goalId].description || "No Description"}
