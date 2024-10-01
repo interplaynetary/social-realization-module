@@ -44,14 +44,7 @@ const OrgList = () => {
 
             if (data.success) {
                 setOrgs(data.registryData);
-
-                const name = getPlayersNameById(orgs, playerData.id);
-
-                setPlayerData({
-                    id: playerData.id,
-                    name,
-                });
-
+                setPlayersName();
                 setError(null); // Reset error if fetch is successful
             } else {
                 setError("Failed to fetch organizations");
@@ -96,6 +89,17 @@ const OrgList = () => {
             setSelectedOrg(null); // Deselect the org (close the details view)
         } else {
             setSelectedOrg(org); // Set the new org and show its details
+        }
+    };
+
+    const setPlayersName = () => {
+        const { id, name: playerName } = playerData;
+        const registryName = getPlayersNameById(orgs, id);
+        const name = playerName || registryName;
+
+        // Only update if there's a change in player data
+        if (playerName !== name) {
+            setPlayerData({ id, name });
         }
     };
 
