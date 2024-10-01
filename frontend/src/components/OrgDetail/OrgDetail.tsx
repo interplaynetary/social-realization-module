@@ -1,5 +1,4 @@
 import PhaseActions from "../PhaseActions";
-import PlayerCard from "../PlayerCard";
 import GoalCard from "../GoalCard";
 import { useRecoilValue } from "recoil";
 import { apiKeyAtom } from "../../state/atoms/apiKeyAtom";
@@ -9,6 +8,7 @@ import { playerDataAtom } from "../../state/atoms/playerDataAtom";
 import { runPhaseShift } from "../../api/api";
 
 import * as classes from "./OrgDetail.module.css";
+import PlayerCard from "../PlayerCard/PlayerCard";
 
 const OrgDetail = ({ org, apiKey, playerId }) => {
     console.log({ apiKey, playerId });

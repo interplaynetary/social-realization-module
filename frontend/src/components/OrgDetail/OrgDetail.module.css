@@ -1,11 +1,23 @@
 .orgInfo {
     margin-top: 12px;
+    display: flex;
+    flex-wrap: wrap;
 }
 
 @media (min-width: 900px) {
     .orgInfo {
-        display: flex;
+
+        flex-wrap: wrap;
     }
+}
+
+.orgInfoItem {
+    padding-left: 6px;
+    padding-right: 6px;
+    margin-right: 12px;
+    border: 1px solid var(--c-border);
+    border-radius: 9px;
+    text-wrap: nowrap;
 }
 
 @media (min-width: 900px) {
@@ -13,7 +25,5 @@
         padding-left: 6px;
         padding-right: 6px;
         margin-right: 12px;
-        border: 1px solid #06050547;
-        border-radius: 9px;
     }
 }

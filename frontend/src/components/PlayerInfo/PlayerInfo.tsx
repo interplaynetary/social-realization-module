@@ -49,9 +49,7 @@ const PlayerInfo: React.FC = () => {
         <Container>
             <div className={styles.playerInfo}>
                 {loading && <p>Loading player information...</p>}{" "}
-                {/* Loading message */}
                 {error && <p className={styles.error}>{error}</p>}{" "}
-                {/* Error message */}
                 {playerData && (
                     <div className={styles.playerDetails}>
                         <h2>{playerData.name}</h2>

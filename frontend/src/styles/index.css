@@ -5,6 +5,7 @@
     --c-text: rgba(41, 41, 41, 1);
     --c-primary: #ab244e;
     --c-secondary: #ab244e;
+    --c-border: #00000036;
 }
 
 @media (min-width: 600px) {

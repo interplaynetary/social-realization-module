@@ -1,11 +1,12 @@
 import { useEffect } from "react";
+import * as classes from "./PlayerCard.module.css";
 
 const PlayerCard = ({ org }) => {
     useEffect(() => {
         console.log(org.players);
     }, [org.players]);
     return (
-        <div>
+        <div className={classes.playerCard}>
             <h4>Players</h4>
 
             {Object.keys(org.players).map((playerId) => (
