@@ -6,16 +6,22 @@ import { apiKeyAtom } from "../../state/atoms/apiKeyAtom";
 import { playerDataAtom } from "../../state/atoms/playerDataAtom";
 import { selectedOrgAtom } from "../../state/atoms/selectedOrgAtom"; // New atom for the current organization
 import OrgDetail from "../OrgDetail/OrgDetail";
+import Overlay from "../Overlay/Overlay";
 import Button from "../ui/Button/Button";
 import Card from "../ui/Card/Card";
 import Container from "../ui/Container/Container";
 import * as styles from "./OrgList.module.css";
+import { useParams, useNavigate } from "react-router-dom";
 
 type Org = {
     id: string;
     name: string;
     currentPhase: string;
     players: Record<string, any>;
+};
+
+type OrgParams = {
+    orgId?: string; // Optional param, might not always be in the route
 };
 
 // first i fetch all orgs
@@ -32,9 +38,20 @@ const OrgList = () => {
     const setSelectedOrg = useSetRecoilState(selectedOrgAtom);
     const setPlayerData = useSetRecoilState(playerDataAtom);
 
+    const { orgId } = useParams<OrgParams>(); // Capture orgId from URL params
+    const navigate = useNavigate();
+
     useEffect(() => {
         fetchOrgRegistry();
     }, []);
+
+    // If orgId is present in the URL, open the modal for that org
+    useEffect(() => {
+        if (orgId) {
+            const org = orgs.find((org) => org.id === orgId);
+            org && setSelectedOrg(org);
+        }
+    }, [orgId, orgs]); // Triggered when orgId or orgs changes
 
     const fetchOrgRegistry = async () => {
         setLoading(true);
@@ -84,11 +101,12 @@ const OrgList = () => {
     };
 
     const handleViewOrg = (org: Org) => {
-        // Toggle the organization details when the same org is clicked again
         if (selectedOrg?.id === org.id) {
-            setSelectedOrg(null); // Deselect the org (close the details view)
+            setSelectedOrg(null);
+            navigate("/");
         } else {
-            setSelectedOrg(org); // Set the new org and show its details
+            setSelectedOrg(org);
+            navigate(`/dashboard/${org.id}`);
         }
     };
 
@@ -101,6 +119,11 @@ const OrgList = () => {
         if (playerName !== name) {
             setPlayerData({ id, name });
         }
+    };
+
+    const handleClose = () => {
+        // Use navigate to go back to the previous route
+        navigate(-1); // This will act like history.goBack()
     };
 
     return (
@@ -136,11 +159,18 @@ const OrgList = () => {
             </div>
 
             {selectedOrg && (
-                <OrgDetail
-                    org={selectedOrg}
-                    apiKey={apiKey}
-                    playerId={playerData.id}
-                />
+                <Overlay
+                    onClose={() => {
+                        setSelectedOrg(null);
+                        handleClose(); // Close modal and return to root route
+                    }}
+                >
+                    <OrgDetail
+                        org={selectedOrg}
+                        apiKey={apiKey}
+                        playerId={playerData.id}
+                    />
+                </Overlay>
             )}
         </Container>
     );

@@ -10,6 +10,7 @@
 
 # todos
 
--   adding links / urls to views/screens map them to state
+-   adding links / urls to views/screens map them to state: http://localhost:1234/org/playnet
 -   craft a view for all routes
 -   add drag/drop interaction feature to move values between components
+-   open player-view, when clicking on small icon in header? then details shown:)

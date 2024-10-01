@@ -1,0 +1,27 @@
+.overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: rgba(0, 0, 0, 0.7);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.modal {
+    background-color: white; 
+    padding: calc(var(--page-padding) * 1.5);
+
+    border-radius: 10px;
+
+    /* check / improve this width */
+    width: 60vw;
+    max-width: 90vw;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.3);
+}
+

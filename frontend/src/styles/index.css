@@ -45,3 +45,10 @@ h3 {
     margin-top: 0;
     margin-bottom: 0;
 }
+
+
+/* class used in <Overlay/> component*/
+.body-fixed {
+    width: 100%;
+    overflow: hidden;
+}

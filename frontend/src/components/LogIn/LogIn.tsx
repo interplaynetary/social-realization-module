@@ -28,7 +28,9 @@ const Login = () => {
         if (data.success) {
             // Set in Recoil state
             setApiKey(apiKeyInput);
-            setPlayerData({ id: data.playerId });
+            setPlayerData({
+                id: data.playerId,
+            });
 
             navigate("/dashboard");
         } else {

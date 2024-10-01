@@ -26,12 +26,11 @@ const OrgDetail = ({ org, apiKey, playerId }) => {
 
     return (
         <div className={classes.orgDetails}>
-            <Card>
-                <h2>{org.name}</h2>
+            <h2>{org.name}</h2>
+
                 <p>Cycle: {org.currentCycle}</p>
                 <p>Phase: {org.currentPhase}</p>
                 <p>Potential Value: {org.potentialValue}</p>
-                <p>Realized Value: {org.realizedValue}</p>
                 <p>Shares: {org.shares}</p>
 
                 <PhaseActions org={org} apiKey={apiKey} playerId={playerId} />
@@ -45,7 +44,6 @@ const OrgDetail = ({ org, apiKey, playerId }) => {
                         Shift Phase
                     </Button>
                 )}
-            </Card>
         </div>
     );
 };
