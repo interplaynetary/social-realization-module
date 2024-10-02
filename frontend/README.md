@@ -10,6 +10,7 @@
 
 # todos
 
+-   properly setup the "orgs rendering", and updating 
 -   adding links / urls to views/screens map them to state: http://localhost:1234/org/playnet
 -   craft a view for all routes
 -   add drag/drop interaction feature to move values between components

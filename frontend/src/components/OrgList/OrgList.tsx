@@ -145,7 +145,9 @@ const OrgList = () => {
                     <Card key={org.id}>
                         <div>
                             <Headline level="h3">{org.name}</Headline>
-                            <p>Phase: {org.currentPhase}</p>
+                            <span className={styles.phase}>
+                                Phase: {org.currentPhase}
+                            </span>
 
                             {org.players.hasOwnProperty(playerData.id) ? (
                                 <Button
