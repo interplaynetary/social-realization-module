@@ -9,6 +9,7 @@ import { playerDataAtom } from "../../state/atoms/playerDataAtom"; // Adjusted i
 
 import * as styles from "./LogIn.module.css";
 import { authenticate, registerUser } from "../../api/api";
+import { ROUTES } from "../../core/Routes";
 
 const Login = () => {
     const apiKey = useRecoilValue(apiKeyAtom);
@@ -32,7 +33,7 @@ const Login = () => {
                 id: data.playerId,
             });
 
-            navigate("/dashboard");
+            navigate(ROUTES.ORGS);
         } else {
             alert("Login failed: " + data.error);
         }
@@ -51,19 +52,22 @@ const Login = () => {
                 name: playerName,
             });
 
-            navigate("/dashboard");
+            navigate(ROUTES.ORGS);
         } else {
             alert("Registration failed: " + data.error);
         }
     };
 
     const handleKeyPress = (e: any) => {
+        console.log(e.target.name, "?");
         if (e.key === "Enter") {
+            console.log("???");
+
             if (e.target.name === "login") handleLogin();
-            if (e.target.name === "playerName") handleRegister();
+            if (e.target.name === "register") handleRegister();
         }
     };
-    
+
     return (
         <div className={styles.login}>
             <Card>

@@ -4,6 +4,7 @@ import DashboardView from "./views/DashboardView";
 import OrgDetailView from "./views/OrgDetailView";
 import { RecoilRoot } from "recoil";
 import Header from "./components/Header/Header";
+import { ROUTES } from "./core/Routes";
 
 const App = () => {
     return (
@@ -12,12 +13,9 @@ const App = () => {
                 <Header />
 
                 <Routes>
-                    <Route path="/" element={<LoginView />} />
-                    <Route path="/dashboard" element={<DashboardView />} />
-                    <Route
-                        path="/dashboard/:orgId"
-                        element={<DashboardView />}
-                    />
+                    <Route path={ROUTES.LOGIN} element={<LoginView />} />
+                    <Route path={ROUTES.ORGS} element={<DashboardView />} />
+                    <Route path={ROUTES.ORG} element={<DashboardView />} />
                 </Routes>
             </Router>
         </RecoilRoot>

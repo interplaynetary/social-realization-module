@@ -1,6 +1,7 @@
 import React, { Fragment, HTMLAttributes, useEffect } from "react";
 import { useNavigate } from "react-router-dom"; // Import useNavigate
 import { useRecoilValue } from "recoil";
+import { ROUTES } from "../../core/Routes";
 import { playerDataAtom } from "../../state/atoms/playerDataAtom";
 import { selectedOrgAtom } from "../../state/atoms/selectedOrgAtom";
 import Container from "../ui/Container/Container";
@@ -17,7 +18,7 @@ const Header: React.FC<HeaderProps> = (props) => {
     const navigate = useNavigate();
 
     const handleBackClick = () => {
-        navigate("/"); // Navigate to the login page
+        navigate(ROUTES.LOGIN); // Navigate to the login page
     };
 
     return (

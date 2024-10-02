@@ -13,6 +13,7 @@ import Container from "../ui/Container/Container";
 import * as styles from "./OrgList.module.css";
 import { useParams, useNavigate } from "react-router-dom";
 import Headline from "../ui/Headline/Headline";
+import { ROUTES } from "../../core/Routes";
 
 type Org = {
     id: string;
@@ -110,10 +111,10 @@ const OrgList = () => {
     const handleViewOrg = (org: Org) => {
         if (selectedOrg?.id === org.id) {
             setSelectedOrg(null);
-            navigate("/");
+            navigate(ROUTES.LOGIN);
         } else {
             setSelectedOrg(org);
-            navigate(`/dashboard/${org.id}`);
+            navigate(`${ROUTES.ORGS}${org.id}/`);
         }
     };
 
