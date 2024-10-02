@@ -68,7 +68,7 @@ const OrgList = () => {
         try {
             const data = await fetchOrgs();
 
-            if (data.success) {
+            if (data.success) { 
                 setOrgs(data.registryData);
                 setError(null); // Reset error if fetch is successful
             } else {
@@ -128,37 +128,42 @@ const OrgList = () => {
                 {loading && <p>Loading organizations...</p>}
                 {error && <p>{error}</p>}
 
-                {playerData.id && orgs.map((org) => {
-                    const isPlayerInOrg = Boolean(org.players[playerData.id]);
+                {playerData.id &&
+                    orgs.map((org) => {
+                        const isPlayerInOrg = Boolean(
+                            org.players[playerData.id]
+                        );
 
-                    return (
-                        <Card key={org.id}>
-                            <div>
-                                <Headline level="h3">{org.name}</Headline>
-                                <span className={styles.phase}>
-                                    phase: {org.currentPhase}
-                                </span>
+                        return (
+                            <Card key={org.id}>
+                                <div>
+                                    <Headline level="h3">{org.name}</Headline>
+                                    <span className={styles.phase}>
+                                        phase: {org.currentPhase}
+                                    </span>
 
-                                {isPlayerInOrg ? (
-                                    <Button
-                                        variant="primary"
-                                        onClick={() => handleViewOrg(org)}
-                                    >
-                                        {selectedOrg?.id === org.id
-                                            ? "Close Org"
-                                            : "View Org"}
-                                    </Button>
-                                ) : (
-                                    <Button
-                                        onClick={() => handleJoinOrg(org.id)}
-                                    >
-                                        Join Org
-                                    </Button>
-                                )}
-                            </div>
-                        </Card>
-                    );
-                })}
+                                    {isPlayerInOrg ? (
+                                        <Button
+                                            variant="primary"
+                                            onClick={() => handleViewOrg(org)}
+                                        >
+                                            {selectedOrg?.id === org.id
+                                                ? "Close Org"
+                                                : "View Org"}
+                                        </Button>
+                                    ) : (
+                                        <Button
+                                            onClick={() =>
+                                                handleJoinOrg(org.id)
+                                            }
+                                        >
+                                            Join Org
+                                        </Button>
+                                    )}
+                                </div>
+                            </Card>
+                        );
+                    })}
             </div>
 
             {selectedOrg && (
