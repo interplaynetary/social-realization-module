@@ -1,5 +1,6 @@
 import { useState } from "react";
 import Button from "../ui/Button/Button";
+import NumberInput from "../ui/NumberInput/NumberInput";
 import TextInput from "../ui/TextInput/TextInput";
 
 const PhaseActions = ({ org, apiKey, playerId }) => {
@@ -99,7 +100,6 @@ const PhaseActions = ({ org, apiKey, playerId }) => {
                     />
 
                     <TextInput
-                        type="text"
                         value={offerDetails.offerEffects}
                         onChange={(e) =>
                             setOfferDetails({
@@ -111,8 +111,7 @@ const PhaseActions = ({ org, apiKey, playerId }) => {
                     />
 
                     {/* TODO: check to create number input? */}
-                    <TextInput
-                        type="number"
+                    <NumberInput
                         value={offerDetails.offerAsk}
                         onChange={(e) =>
                             setOfferDetails({
@@ -133,6 +132,7 @@ const PhaseActions = ({ org, apiKey, playerId }) => {
                         }
                         placeholder="Target Goal IDs (comma-separated)"
                     />
+
                     <Button onClick={handleMakeOffer}>Make Offer</Button>
                 </div>
             )}
