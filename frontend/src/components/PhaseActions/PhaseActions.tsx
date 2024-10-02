@@ -1,5 +1,6 @@
-import { useState } from "react";
+import { Fragment, useState } from "react";
 import Button from "../ui/Button/Button";
+import Headline from "../ui/Headline/Headline";
 import NumberInput from "../ui/NumberInput/NumberInput";
 import TextInput from "../ui/TextInput/TextInput";
 import * as classes from "./PhaseActions.module.css";
@@ -57,10 +58,10 @@ const PhaseActions = ({ org, apiKey, playerId }) => {
     };
 
     return (
-        <div>
+        <Fragment>
             {org.currentPhase === "goalExpression" && (
                 <div className={classes.section}>
-                    <h3>Propose Goal</h3>
+                    <Headline level="h4">Propose Goal</Headline>
 
                     <TextInput
                         value={goalDescription}
@@ -76,7 +77,7 @@ const PhaseActions = ({ org, apiKey, playerId }) => {
 
             {org.currentPhase === "offerExpression" && (
                 <div className={classes.section}>
-                    <h3>Make Offer</h3>
+                    <Headline level="h4">Make Offer</Headline>
 
                     <TextInput
                         value={offerDetails.offerName}
@@ -139,7 +140,7 @@ const PhaseActions = ({ org, apiKey, playerId }) => {
             )}
 
             {/* Add other phase-specific actions here */}
-        </div>
+        </Fragment>
     );
 };
 

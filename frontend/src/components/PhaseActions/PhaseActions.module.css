@@ -1,3 +1,4 @@
 .section {
     margin-top: var(--s-l);
+    margin-bottom: var(--s-l);
 }

@@ -1,4 +1,5 @@
 import { Fragment, useEffect, useState } from "react";
+import Headline from "../ui/Headline/Headline";
 import * as classes from "./PlayerCard.module.css";
 import { palette } from "./PlayerColorPalette";
 
@@ -40,8 +41,8 @@ const PlayerCard: React.FC<PlayerCardProps> = ({ org }) => {
     };
     return (
         <Fragment>
-            {" "}
-            <h4>Players</h4>
+            <Headline level="h4">Players</Headline>
+
             <div className={classes.playerCard}>
                 {Object.keys(org.players).map((playerId) => (
                     <div key={playerId} className={classes.avatarContainer}>

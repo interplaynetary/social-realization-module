@@ -9,6 +9,7 @@ import { runPhaseShift } from "../../api/api";
 import * as classes from "./OrgDetail.module.css";
 import PlayerCard from "../PlayerCard/PlayerCard";
 import PhaseActions from "../PhaseActions/PhaseActions";
+import Headline from "../ui/Headline/Headline";
 
 const OrgDetail = ({ org, apiKey, playerId }) => {
     console.log({ apiKey, playerId });
@@ -26,7 +27,7 @@ const OrgDetail = ({ org, apiKey, playerId }) => {
 
     return (
         <div className={classes.orgDetails}>
-            <h2>{org.name}</h2>
+            <Headline level="h3">{org.name}</Headline>
 
             {/* TODO: sort this, prioritize what is most important */}
             <div className={classes.orgInfo}>
