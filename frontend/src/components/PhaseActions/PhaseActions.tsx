@@ -16,17 +16,9 @@ const PhaseActions = ({ org, apiKey, playerId }) => {
         offerAsk: "",
     });
 
-    const handleProposeGoal = async () => {
-        const response = await fetch("http://localhost:3000/player-action", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-                apiKey,
-                actionType: "proposeGoalToOrg",
-                actionParams: [org.id, goalDescription],
-            }),
-        });
 
+
+    const handleProposeGoal = async () => {
         const data = await executePlayerAction(
             apiKey,
             PlayerActionTypes.ProposeGoalToOrg,
@@ -34,6 +26,8 @@ const PhaseActions = ({ org, apiKey, playerId }) => {
         );
 
         if (data.success) {
+            console.log("foo", data);
+
             // Handle success
         }
     };
