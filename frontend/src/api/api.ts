@@ -1,5 +1,5 @@
 import axios from "axios";
-import { ApiKey, Org, Phase } from "../../../sharedTypes";
+import { ApiKey, Org, Phase, PlayerActionType } from "../../../sharedTypes";
 
 const API_BASE_URL = process.env.API_BASE_URL || "http://localhost:3000";
 
@@ -70,9 +70,9 @@ export const fetchAvailableActions = async (playerId: string) => {
     return response.data;
 };
 
-export const playerAction = async (
+export const executePlayerAction = async (
     apiKey: ApiKey,
-    actionType: Phase,
+    actionType: PlayerActionType,
     actionParams: [Org["id"], string]
 ) => {
     const response = await apiClient.post("/player-action", {
