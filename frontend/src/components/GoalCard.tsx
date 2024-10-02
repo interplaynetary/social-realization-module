@@ -1,13 +1,16 @@
+import Headline from "./ui/Headline/Headline";
+
 const GoalCard = ({ org }) => {
     return (
         <div>
-            <h4>Goals</h4>
+            <Headline level="h4">Goals</Headline>
+
             {Object.keys(org.goals).map((goalId) => (
                 <div key={goalId} className="card">
-                    <h3>
+                    <span >
                         Goal:{" "}
                         {org.goals[goalId].description || "No Description"}
-                    </h3>
+                    </span>
 
                     <p>ID: {goalId}</p>
 

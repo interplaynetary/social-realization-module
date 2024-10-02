@@ -1,11 +1,7 @@
 import Login from "../components/LogIn/LogIn";
 
 const LoginView = () => {
-    return (
-        <div>
-            <Login />
-        </div>
-    );
+    return <Login />;
 };
 
 export default LoginView;

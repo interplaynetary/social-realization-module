@@ -1,16 +1,8 @@
 import { Fragment, useEffect, useState } from "react";
+import { Org, Orgs } from "../../../../sharedTypes";
 import Headline from "../ui/Headline/Headline";
 import * as classes from "./PlayerCard.module.css";
 import { palette } from "./PlayerColorPalette";
-
-interface Org {
-    players: {
-        [playerId: string]: {
-            name: string;
-            shares?: number;
-        };
-    };
-}
 
 interface PlayerCardProps {
     org: Org;
@@ -33,15 +25,20 @@ const PlayerCard: React.FC<PlayerCardProps> = ({ org }) => {
             {}
         );
 
+        console.log(org, "?????");
+
         setPlayerColors(colors);
     }, [org.players]);
 
     const getRandomColor = () => {
         return palette[Math.floor(Math.random() * palette.length)];
     };
+
     return (
-        <Fragment>
-            <Headline level="h4">Players</Headline>
+        <div className={classes.section}>
+            <Headline level="h4">
+                Players in <span className={classes.orgName}>{org.name}</span>
+            </Headline>
 
             <div className={classes.playerCard}>
                 {Object.keys(org.players).map((playerId) => (
@@ -77,7 +74,7 @@ const PlayerCard: React.FC<PlayerCardProps> = ({ org }) => {
                     </div>
                 ))}
             </div>
-        </Fragment>
+        </div>
     );
 };
 

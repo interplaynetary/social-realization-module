@@ -40,6 +40,10 @@ const OrgDetail = ({ org, apiKey, playerId }) => {
                 </span>
 
                 <span className={classes.orgInfoItem}>
+                    Realized Value: {org.realizedValue}
+                </span>
+
+                <span className={classes.orgInfoItem}>
                     Potential Value: {org.potentialValue}
                 </span>
 
@@ -50,8 +54,6 @@ const OrgDetail = ({ org, apiKey, playerId }) => {
 
             <PhaseActions org={org} apiKey={apiKey} playerId={playerId} />
 
-            <PlayerCard org={org} />
-
             <GoalCard org={org} />
 
             {playerId === org.id && (
@@ -59,6 +61,8 @@ const OrgDetail = ({ org, apiKey, playerId }) => {
                     Shift Phase
                 </Button>
             )}
+
+            <PlayerCard org={org} />
         </div>
     );
 };
