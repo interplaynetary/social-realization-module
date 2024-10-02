@@ -1,70 +1,81 @@
-import { useState } from "react";
-import { useNavigate } from "react-router-dom"; // Import useNavigate
+import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import Button from "../ui/Button/Button";
 import Card from "../ui/Card/Card";
 import TextInput from "../ui/TextInput/TextInput";
 import { useRecoilValue, useSetRecoilState } from "recoil";
 import { apiKeyAtom } from "../../state/atoms/apiKeyAtom";
-import { playerDataAtom } from "../../state/atoms/playerDataAtom"; // Adjusted import
+import { playerDataAtom } from "../../state/atoms/playerDataAtom";
 
 import * as styles from "./LogIn.module.css";
 import { authenticate, registerUser } from "../../api/api";
 import { ROUTES } from "../../core/Routes";
 
 const Login = () => {
+    // Getters for recoil
     const apiKey = useRecoilValue(apiKeyAtom);
+    const playerData = useRecoilValue(playerDataAtom); // Retrieve entire player data
+    const { id } = playerData; // Extract id from player data
 
+    // Setters for recoil
     const setApiKey = useSetRecoilState(apiKeyAtom);
-    const setPlayerData = useSetRecoilState(playerDataAtom); // Ensure this is an atom
+    const setPlayerData = useSetRecoilState(playerDataAtom);
 
+    // States for UI
     const [playerName, setPlayerName] = useState("");
     const [apiKeyInput, setApiKeyInput] = useState(apiKey || "");
 
     const navigate = useNavigate(); // Initialize useNavigate
 
-    // login currently works with api key
+    // Login function
     const handleLogin = async () => {
-        const data = await authenticate(apiKeyInput);
+        try {
+            const data = await authenticate(apiKeyInput);
+            console.log("Login response:", data); // Log response for debugging
 
-        if (data.success) {
-            // Set in Recoil state
-            setApiKey(apiKeyInput);
-            setPlayerData({
-                id: data.playerId,
-            });
-
-            navigate(ROUTES.ORGS);
-        } else {
-            alert("Login failed: " + data.error);
+            if (data.success) {
+                setApiKey(apiKeyInput);
+                setPlayerData({ id: data.playerId });
+                navigate(ROUTES.ORGS);
+            } else {
+                alert("Login failed: " + data.error);
+            }
+        } catch (error) {
+            console.error("Error during login:", error);
+            alert("An error occurred during login.");
         }
     };
 
+    // Registration function
     const handleRegister = async () => {
-        const data = await registerUser(playerName);
+        try {
+            const data = await registerUser(playerName);
+            console.log("Register response:", data); // Log response for debugging
 
-        if (data.success) {
-            // Set in Recoil state
-            setApiKey(data.apiKey);
-
-            // todo get id by name?
-            setPlayerData({
-                id: data.id,
-                name: playerName,
-            });
-
-            navigate(ROUTES.ORGS);
-        } else {
-            alert("Registration failed: " + data.error);
+            if (data.success) {
+                setApiKey(data.apiKey);
+                setPlayerData({ id: data.playerId });
+                navigate(ROUTES.ORGS);
+            } else {
+                alert("Registration failed: " + data.error);
+            }
+        } catch (error) {
+            console.error("Error during registration:", error);
+            alert("An error occurred during registration.");
         }
     };
 
     const handleKeyPress = (e: any) => {
-        console.log(e.target.name, "?");
         if (e.key === "Enter") {
-            console.log("???");
+            e.preventDefault(); // Prevent default form submission
 
-            if (e.target.name === "login") handleLogin();
-            if (e.target.name === "register") handleRegister();
+            if (e.target.name === "login") {
+                console.log("Login key press detected");
+                handleLogin();
+            } else if (e.target.name === "register") {
+                console.log("Register key press detected");
+                handleRegister();
+            }
         }
     };
 
@@ -98,7 +109,7 @@ const Login = () => {
                     name="register"
                     value={playerName}
                     onChange={(e) => setPlayerName(e.target.value)}
-                    onKeyDown={handleKeyPress} // fires when any key is pressed
+                    onKeyDown={handleKeyPress}
                     placeholder="Enter Name"
                 />
 

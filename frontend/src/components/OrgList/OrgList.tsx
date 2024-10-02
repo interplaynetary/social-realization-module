@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import { useSetRecoilState, useRecoilValue } from "recoil";
 import { fetchOrgs, joinOrg } from "../../api/api";
-import { getPlayersNameById } from "../../helpers/helpers";
 import { apiKeyAtom } from "../../state/atoms/apiKeyAtom";
 import { playerDataAtom } from "../../state/atoms/playerDataAtom";
 import { selectedOrgAtom } from "../../state/atoms/selectedOrgAtom"; // New atom for the current organization
@@ -44,14 +43,16 @@ const OrgList = () => {
     const playerData = useRecoilValue(playerDataAtom);
     const selectedOrg = useRecoilValue(selectedOrgAtom);
     const setSelectedOrg = useSetRecoilState(selectedOrgAtom);
-    const setPlayerData = useSetRecoilState(playerDataAtom);
 
     const { orgId } = useParams<OrgParams>(); // Capture orgId from URL params
     const navigate = useNavigate();
 
+    // Fetch organizations only when playerData.id is set
     useEffect(() => {
-        fetchOrgRegistry();
-    }, []);
+        if (playerData.id) {
+            fetchOrgRegistry();
+        }
+    }, [playerData.id]); // Trigger when playerData.id changes
 
     // If orgId is present in the URL, open the modal for that org
     useEffect(() => {
@@ -69,7 +70,6 @@ const OrgList = () => {
 
             if (data.success) {
                 setOrgs(data.registryData);
-                setPlayersName();
                 setError(null); // Reset error if fetch is successful
             } else {
                 setError("Failed to fetch organizations");
@@ -118,19 +118,7 @@ const OrgList = () => {
         }
     };
 
-    const setPlayersName = () => {
-        const { id, name: playerName } = playerData;
-        const registryName = getPlayersNameById(orgs, id);
-        const name = playerName || registryName;
-
-        // Only update if there's a change in player data
-        if (playerName !== name) {
-            setPlayerData({ id, name });
-        }
-    };
-
     const handleClose = () => {
-        // Use navigate to go back to the previous route
         navigate(-1); // This will act like history.goBack()
     };
 
@@ -138,34 +126,39 @@ const OrgList = () => {
         <Container>
             <div className={styles.orgs}>
                 {loading && <p>Loading organizations...</p>}
-
                 {error && <p>{error}</p>}
 
-                {orgs.map((org) => (
-                    <Card key={org.id}>
-                        <div>
-                            <Headline level="h3">{org.name}</Headline>
-                            <span className={styles.phase}>
-                                phase: {org.currentPhase}
-                            </span>
+                {playerData.id && orgs.map((org) => {
+                    const isPlayerInOrg = Boolean(org.players[playerData.id]);
 
-                            {org.players.hasOwnProperty(playerData.id) ? (
-                                <Button
-                                    variant="primary"
-                                    onClick={() => handleViewOrg(org)}
-                                >
-                                    {selectedOrg?.id === org.id
-                                        ? "Close Org"
-                                        : "View Org"}
-                                </Button>
-                            ) : (
-                                <Button onClick={() => handleJoinOrg(org.id)}>
-                                    Join Org
-                                </Button>
-                            )}
-                        </div>
-                    </Card>
-                ))}
+                    return (
+                        <Card key={org.id}>
+                            <div>
+                                <Headline level="h3">{org.name}</Headline>
+                                <span className={styles.phase}>
+                                    phase: {org.currentPhase}
+                                </span>
+
+                                {isPlayerInOrg ? (
+                                    <Button
+                                        variant="primary"
+                                        onClick={() => handleViewOrg(org)}
+                                    >
+                                        {selectedOrg?.id === org.id
+                                            ? "Close Org"
+                                            : "View Org"}
+                                    </Button>
+                                ) : (
+                                    <Button
+                                        onClick={() => handleJoinOrg(org.id)}
+                                    >
+                                        Join Org
+                                    </Button>
+                                )}
+                            </div>
+                        </Card>
+                    );
+                })}
             </div>
 
             {selectedOrg && (
