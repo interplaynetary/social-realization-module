@@ -1,13 +1,14 @@
-import Headline from "./ui/Headline/Headline";
+import Headline from "../ui/Headline/Headline";
+import * as styles from "./GoalInfo.module.css";
 
-const GoalCard = ({ org }) => {
+const GoalInfo = ({ org }) => {
     return (
-        <div>
+        <div className={styles.section}>
             <Headline level="h4">Goals</Headline>
 
             {Object.keys(org.goals).map((goalId) => (
                 <div key={goalId} className="card">
-                    <span >
+                    <span>
                         Goal:{" "}
                         {org.goals[goalId].description || "No Description"}
                     </span>
@@ -27,4 +28,4 @@ const GoalCard = ({ org }) => {
     );
 };
 
-export default GoalCard;
+export default GoalInfo;

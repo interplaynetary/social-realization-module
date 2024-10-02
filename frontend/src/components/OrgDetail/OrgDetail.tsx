@@ -1,15 +1,11 @@
-import GoalCard from "../GoalCard";
-import { useRecoilValue } from "recoil";
-import { apiKeyAtom } from "../../state/atoms/apiKeyAtom";
-import Card from "../ui/Card/Card";
 import Button from "../ui/Button/Button";
-import { playerDataAtom } from "../../state/atoms/playerDataAtom";
-import { runPhaseShift } from "../../api/api";
-
-import * as classes from "./OrgDetail.module.css";
 import PlayerCard from "../PlayerCard/PlayerCard";
 import PhaseActions from "../PhaseActions/PhaseActions";
 import Headline from "../ui/Headline/Headline";
+import GoalInfo from "../GoalInfo/GoalInfo";
+import { runPhaseShift } from "../../api/api";
+
+import * as classes from "./OrgDetail.module.css";
 
 const OrgDetail = ({ org, apiKey, playerId }) => {
     console.log({ apiKey, playerId });
@@ -54,7 +50,7 @@ const OrgDetail = ({ org, apiKey, playerId }) => {
 
             <PhaseActions org={org} apiKey={apiKey} playerId={playerId} />
 
-            <GoalCard org={org} />
+            <GoalInfo org={org} />
 
             {playerId === org.id && (
                 <Button variant="secondary" onClick={handlePhaseShift}>
