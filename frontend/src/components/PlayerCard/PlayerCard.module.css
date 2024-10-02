@@ -33,7 +33,7 @@
     height: 35px;
     color: white;
     font-weight: bold;
-    font-size: 12px;
+    font-size: var(--f-s);
     text-shadow: 0.21px 0.21px 0.5px #000000d4;
 }
 
@@ -42,7 +42,7 @@
 
 .avatarName {
     margin-top: 3px;
-    font-size: 9px;
+    font-size: var(--f-s);
 }
 
 .orgName {

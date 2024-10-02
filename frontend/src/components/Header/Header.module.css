@@ -17,7 +17,7 @@
     width: 10px;
     height: 10px;
     font-weight: 600;
-    font-size: 11px;
+    font-size: var(--f-s);;
     text-transform: uppercase;
 }
 

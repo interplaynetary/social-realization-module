@@ -26,3 +26,5 @@ export type Org = {
 };
 
 export type Phase =  "goalExpression" | "goalAllocation" | "offerExpression" | "offerAllocation" | "completions" 
+
+export type ApiKey = "string"

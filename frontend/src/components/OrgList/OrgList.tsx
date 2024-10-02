@@ -146,7 +146,7 @@ const OrgList = () => {
                         <div>
                             <Headline level="h3">{org.name}</Headline>
                             <span className={styles.phase}>
-                                Phase: {org.currentPhase}
+                                phase: {org.currentPhase}
                             </span>
 
                             {org.players.hasOwnProperty(playerData.id) ? (

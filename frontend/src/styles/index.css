@@ -8,6 +8,15 @@
     --c-text: rgba(41, 41, 41, 1);
     --c-border: #00000036;
 
+    /* make video from this, include CHAT-GPT and such*/
+    /* sizes */
+    --f-s: 9px; /* Small */
+    --f-m: 12px; /* Medium */
+    --f-l: 18px; /* Large */
+    --f-xl: 22px; /* Extra Large */
+    --f-xxl: 32px; /* 2X Extra Large */
+    --f-xxxl: 48px; /* 3X Extra Large */
+
     /* spacings */
     --s-s: 12px;
     --s-m: 20px;

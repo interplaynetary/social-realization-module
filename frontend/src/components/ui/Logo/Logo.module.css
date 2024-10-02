@@ -3,7 +3,7 @@
     opacity: 0.5;
     padding-top: var(--page-padding);
     padding-left: var(--page-padding);
-    font-size: 12px;
+    font-size: var(--f-m);
     font-family: monospace;
     font-weight: normal;
 }

@@ -1,9 +1,8 @@
 import axios from "axios";
+import { ApiKey, Org, Phase } from "../../../sharedTypes";
 
-//  This can later, based on .env variables, point to an actual server
 const API_BASE_URL = process.env.API_BASE_URL || "http://localhost:3000";
 
-// Create an Axios instance
 const apiClient = axios.create({
     baseURL: API_BASE_URL,
     headers: {
@@ -11,41 +10,33 @@ const apiClient = axios.create({
     },
 });
 
-// Global error handling using interceptors ( improve this one to handle more elegantly all FE errors )
 apiClient.interceptors.response.use(
-    (response) => response, // Pass through if response is successful
+    (response) => response,
     (error) => {
-        // Handle all errors globally here
         console.error(
             "API Error:",
             error.response ? error.response.data : error.message
         );
-
-        // You can throw the error again if you want specific calls to handle it, or customize responses
         return Promise.reject(error);
     }
 );
 
-// Login
-export const authenticate = async (apiKey: string) => {
+export const authenticate = async (apiKey: ApiKey) => {
     const response = await apiClient.post("/login", { apiKey });
     return response.data;
 };
 
-// Register
 export const registerUser = async (playerName: string) => {
     const response = await apiClient.post("/register", { playerName });
     return response.data;
 };
 
-// Fetch Orgs
 export const fetchOrgs = async () => {
     const response = await apiClient.get("/get-org-registry");
     return response.data;
 };
 
-// Join organization
-export const joinOrg = async (orgId: string, apiKey: string) => {
+export const joinOrg = async (orgId: string, apiKey: ApiKey) => {
     const response = await apiClient.post("/player-action", {
         apiKey: apiKey,
         actionType: "joinOrg",
@@ -54,43 +45,49 @@ export const joinOrg = async (orgId: string, apiKey: string) => {
     return response.data;
 };
 
-// Fetch player data
 export const fetchPlayerData = async (playerId: string) => {
     const response = await apiClient.get(`/players/${playerId}`);
     return response.data;
 };
 
-// Fetch player phase
 export const fetchPlayerPhase = async (playerId: string) => {
     const response = await apiClient.get(`/players/${playerId}/phase`);
     return response.data;
 };
 
-// Fetch organization data
 export const fetchOrgData = async (orgId: string) => {
     const response = await apiClient.get(`/organizations/${orgId}`);
     return response.data;
 };
 
-// Fetch organization phase
 export const fetchOrgPhase = async (orgId: string) => {
     const response = await apiClient.get(`/organizations/${orgId}/phase`);
     return response.data;
 };
 
-// Fetch available actions
 export const fetchAvailableActions = async (playerId: string) => {
     const response = await apiClient.get(`/players/${playerId}/actions`);
     return response.data;
 };
 
-// Run phase shift (your specific function)
-export const runPhaseShift = async (apiKey: string) => {
+export const playerAction = async (
+    apiKey: ApiKey,
+    actionType: Phase,
+    actionParams: [Org["id"], string]
+) => {
+    const response = await apiClient.post("/player-action", {
+        apiKey: apiKey,
+        actionType: actionType,
+        actionParams: actionParams,
+    });
+    return response.data;
+};
+
+export const runPhaseShift = async (apiKey: ApiKey) => {
     const response = await apiClient.post("/player-action", {
         apiKey: apiKey,
         actionType: "runPhaseShift",
         actionParams: [],
     });
-
     return response.data;
 };
