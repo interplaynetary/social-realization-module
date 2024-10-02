@@ -1,6 +1,6 @@
 import { useState } from "react";
-import Button from "./ui/Button/Button";
-import TextInput from "./ui/TextInput/TextInput";
+import Button from "../ui/Button/Button";
+import TextInput from "../ui/TextInput/TextInput";
 
 const PhaseActions = ({ org, apiKey, playerId }) => {
     const [goalDescription, setGoalDescription] = useState("");

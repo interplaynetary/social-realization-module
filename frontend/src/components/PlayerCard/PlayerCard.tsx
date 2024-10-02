@@ -1,28 +1,6 @@
 import { Fragment, useEffect, useState } from "react";
 import * as classes from "./PlayerCard.module.css";
-
-const palette = [
-    "#F4A261", // Soft Orange
-    "#E9C46A", // Muted Yellow
-    "#F6BD60", // Light Peach
-    "#A8DADC", // Soft Teal
-    "#BDE0FE", // Pale Sky Blue
-    "#E5989B", // Muted Pink
-    "#B5E48C", // Light Mint Green
-    "#C3A7A6", // Muted Mauve
-    "#F4BFBF", // Soft Rosy Pink
-    "#FFDDC1", // Light Peachy Beige
-    "#C9ADA7", // Muted Taupe
-    "#FFB4A2", // Soft Coral
-    "#A9DEF9", // Pastel Blue
-    "#D4A5A5", // Soft Rose
-    "#D8E2DC", // Soft Grayish Pink
-    "#9CADCE", // Muted Lavender Blue
-    "#EEC4C4", // Light Rosy Beige
-    "#B7E4C7", // Soft Mint
-    "#E9E4E1", // Off-White Grayish Beige
-    "#F4D06F", // Muted Light Gold
-];
+import { palette } from "./PlayerColorPalette";
 
 interface Org {
     players: {
