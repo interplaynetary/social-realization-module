@@ -7,11 +7,12 @@
     --c-secondary: #ab244e;
     --c-text: rgba(41, 41, 41, 1);
     --c-border: #00000036;
-    
+
     /* spacings */
     --s-s: 12px;
     --s-m: 20px;
     --s-l: 32px;
+    --s-xl: 42px;
 }
 
 @media (min-width: 600px) {
@@ -51,6 +52,11 @@ h2,
 h3 {
     margin-top: 0;
     margin-bottom: 0;
+}
+
+h2, 
+h3 {
+    margin-bottom: var(--s-s);
 }
 
 

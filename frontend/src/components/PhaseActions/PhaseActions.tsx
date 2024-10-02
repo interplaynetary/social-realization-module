@@ -2,6 +2,7 @@ import { useState } from "react";
 import Button from "../ui/Button/Button";
 import NumberInput from "../ui/NumberInput/NumberInput";
 import TextInput from "../ui/TextInput/TextInput";
+import * as classes from "./PhaseActions.module.css";
 
 const PhaseActions = ({ org, apiKey, playerId }) => {
     const [goalDescription, setGoalDescription] = useState("");
@@ -58,7 +59,7 @@ const PhaseActions = ({ org, apiKey, playerId }) => {
     return (
         <div>
             {org.currentPhase === "goalExpression" && (
-                <div>
+                <div className={classes.section}>
                     <h3>Propose Goal</h3>
 
                     <TextInput
@@ -74,7 +75,7 @@ const PhaseActions = ({ org, apiKey, playerId }) => {
             )}
 
             {org.currentPhase === "offerExpression" && (
-                <div>
+                <div className={classes.section}>
                     <h3>Make Offer</h3>
 
                     <TextInput

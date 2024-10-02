@@ -12,6 +12,7 @@ import Card from "../ui/Card/Card";
 import Container from "../ui/Container/Container";
 import * as styles from "./OrgList.module.css";
 import { useParams, useNavigate } from "react-router-dom";
+import Headline from "../ui/Headline/Headline";
 
 type Org = {
     id: string;
@@ -142,7 +143,7 @@ const OrgList = () => {
                 {orgs.map((org) => (
                     <Card key={org.id}>
                         <div>
-                            <h3>{org.name}</h3>
+                            <Headline level="h3">{org.name}</Headline>
                             <p>Phase: {org.currentPhase}</p>
 
                             {org.players.hasOwnProperty(playerData.id) ? (
