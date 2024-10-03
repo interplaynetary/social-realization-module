@@ -2,7 +2,7 @@
     margin-top: var(--s-xl);
 }
 
-.playerCard {
+.playerInfo {
     display: flex;
     flex-wrap: wrap;
     align-items: self-start;

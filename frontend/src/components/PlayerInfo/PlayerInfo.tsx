@@ -4,11 +4,11 @@ import Headline from "../ui/Headline/Headline";
 import * as classes from "./PlayerInfo.module.css";
 import { palette } from "./PlayerInfoColorPalette";
 
-interface PlayerCardProps {
+interface PlayerInfoProps {
     org: Org;
 }
 
-const PlayerCard: React.FC<PlayerCardProps> = ({ org }) => {
+const PlayerInfo: React.FC<PlayerInfoProps> = ({ org }) => {
     const [playerColors, setPlayerColors] = useState<Record<string, string>>(
         {}
     );
@@ -26,7 +26,7 @@ const PlayerCard: React.FC<PlayerCardProps> = ({ org }) => {
         );
 
         setPlayerColors(colors);
-    }, [org.players]);
+    }, [org?.players]);
 
     return (
         <div className={classes.section}>
@@ -34,7 +34,7 @@ const PlayerCard: React.FC<PlayerCardProps> = ({ org }) => {
                 Players in <span className={classes.orgName}>{org.name}</span>
             </Headline>
 
-            <div className={classes.playerCard}>
+            <div className={classes.playerInfo}>
                 {Object.keys(org.players).map((playerId) => {
                     const player = org.players[playerId];
                     if (!player.name) return null;
@@ -68,4 +68,4 @@ const PlayerCard: React.FC<PlayerCardProps> = ({ org }) => {
     );
 };
 
-export default PlayerCard;
+export default PlayerInfo;

@@ -15,8 +15,6 @@ const Dashboard = () => {
 
             <OrgList />
 
-            <PlayerInfo />
-
             {CONFIG.dev && <LogoutComponent />}
         </div>
     );
