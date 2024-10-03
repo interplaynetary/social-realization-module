@@ -1,82 +1,71 @@
-import React, { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom"; // Import useNavigate
-import { useRecoilValue } from "recoil";
-import { fetchPlayerData } from "../../api/api";
-import { playerDataAtom } from "../../state/atoms/playerDataAtom";
-import { selectedOrgAtom } from "../../state/atoms/selectedOrgAtom";
-import Container from "../ui/Container/Container";
-import Button from "../ui/Button/Button"; // Assuming there's a Button component for navigation
-import * as styles from "./PlayerInfo.module.css";
+import { useEffect, useState } from "react";
+import { Org } from "../../../../sharedTypes";
+import Headline from "../ui/Headline/Headline";
+import * as classes from "./PlayerInfo.module.css";
+import { palette } from "./PlayerInfoColorPalette";
 
-const PlayerInfo: React.FC = () => {
-    const { id } = useRecoilValue(playerDataAtom);
-    const navigate = useNavigate();
+interface PlayerCardProps {
+    org: Org;
+}
 
-    const [playerData, setPlayerData] = useState<any>(null); // State for player data
-    const [loading, setLoading] = useState<boolean>(true); // Loading state
-    const [error, setError] = useState<string | null>(null); // Error state
+const PlayerCard: React.FC<PlayerCardProps> = ({ org }) => {
+    const [playerColors, setPlayerColors] = useState<Record<string, string>>(
+        {}
+    );
 
     useEffect(() => {
-        if (id) {
-            fetchData();
-        }
-    }, [id]);
+        // Shuffle the palette and assign a unique color to each player
+        const shuffledPalette = [...palette].sort(() => 0.5 - Math.random());
 
-    const fetchData = async () => {
-        setLoading(true);
+        const colors = Object.keys(org.players).reduce(
+            (acc, playerId, index) => {
+                acc[playerId] = shuffledPalette[index % shuffledPalette.length];
+                return acc;
+            },
+            {} as Record<string, string>
+        );
 
-        try {
-            const data = await fetchPlayerData(id);
-
-            if (data.success) {
-                setPlayerData(data);
-                setError(null); // Reset error if fetch is successful
-            } else {
-                setError("Failed to fetch player information.");
-            }
-        } catch (err) {
-            setError("An error occurred while fetching player data.");
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    const handleEditProfile = () => {
-        navigate(`/edit-player/${id}`); // Navigate to edit player page
-    };
+        setPlayerColors(colors);
+    }, [org.players]);
 
     return (
-        <Container>
-            <div className={styles.playerInfo}>
-                {loading && <p>Loading player information...</p>}{" "}
-                {error && <p className={styles.error}>{error}</p>}{" "}
-                {playerData && (
-                    <div className={styles.playerDetails}>
-                        <h2>{playerData.name}</h2>
-                        <p>
-                            <strong>ID:</strong> {playerData.id}
-                        </p>
-                        <p>
-                            <strong>Email:</strong> {playerData.email}
-                        </p>
-                        <p>
-                            <strong>Organization:</strong>{" "}
-                            {playerData.organization || "N/A"}
-                        </p>
-                        <p>
-                            <strong>Joined:</strong>{" "}
-                            {new Date(playerData.joined).toLocaleDateString()}
-                        </p>
+        <div className={classes.section}>
+            <Headline level="h4">
+                Players in <span className={classes.orgName}>{org.name}</span>
+            </Headline>
 
-                        {/* Add a button to edit player profile */}
-                        <Button onClick={handleEditProfile}>
-                            Edit Profile
-                        </Button>
-                    </div>
-                )}
+            <div className={classes.playerCard}>
+                {Object.keys(org.players).map((playerId) => {
+                    const player = org.players[playerId];
+                    if (!player.name) return null;
+
+                    return (
+                        <div key={playerId} className={classes.avatarContainer}>
+                            <div
+                                className={classes.avatar}
+                                style={{
+                                    backgroundColor:
+                                        playerColors[playerId] || "#ccc",
+                                }}
+                                title={player.name}
+                            >
+                                <span>{player.name.charAt(0)}</span>
+                            </div>
+
+                            <span className={classes.avatarName}>
+                                {player.name}
+                            </span>
+
+                            <div className={classes.playerDetails}>
+                                {false && <p>ID: {playerId}</p>}
+                                {false && <p>Shares: {player.shares || 0}</p>}
+                            </div>
+                        </div>
+                    );
+                })}
             </div>
-        </Container>
+        </div>
     );
 };
 
-export default PlayerInfo;
+export default PlayerCard;

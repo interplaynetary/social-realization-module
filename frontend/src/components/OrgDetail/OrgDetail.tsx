@@ -1,13 +1,17 @@
 import Button from "../ui/Button/Button";
-import PlayerCard from "../PlayerCard/PlayerCard";
+import PlayerInfo from "../PlayerInfo/PlayerInfo";
 import PhaseActions from "../PhaseActions/PhaseActions";
 import Headline from "../ui/Headline/Headline";
 import GoalInfo from "../GoalInfo/GoalInfo";
 import { runPhaseShift } from "../../api/api";
-
+import { ApiKey, Org } from "../../../../sharedTypes";
 import * as classes from "./OrgDetail.module.css";
 
-const OrgDetail = ({ org, apiKey, playerId }) => {
+const OrgDetail: React.FunctionComponent<{
+    org: Org;
+    apiKey: ApiKey;
+    playerId: any;
+}> = ({ org, apiKey, playerId }) => {
     console.log({ apiKey, playerId });
 
     const handlePhaseShift = async () => {
@@ -58,7 +62,7 @@ const OrgDetail = ({ org, apiKey, playerId }) => {
                 </Button>
             )}
 
-            <PlayerCard org={org} />
+            <PlayerInfo org={org} />
         </div>
     );
 };
