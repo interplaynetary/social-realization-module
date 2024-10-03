@@ -16,8 +16,6 @@ const PhaseActions = ({ org, apiKey, playerId }) => {
         offerAsk: "",
     });
 
-
-
     const handleProposeGoal = async () => {
         const data = await executePlayerAction(
             apiKey,
@@ -79,62 +77,63 @@ const PhaseActions = ({ org, apiKey, playerId }) => {
                 <div className={classes.section}>
                     <Headline level="h4">Make Offer</Headline>
 
-                    <TextInput
-                        value={offerDetails.offerName}
-                        onChange={(e) =>
-                            setOfferDetails({
-                                ...offerDetails,
-                                offerName: e.target.value,
-                            })
-                        }
-                        placeholder="Offer Name"
-                    />
+                    <div className={classes.inputGroup}>
+                        <TextInput
+                            value={offerDetails.offerName}
+                            onChange={(e) =>
+                                setOfferDetails({
+                                    ...offerDetails,
+                                    offerName: e.target.value,
+                                })
+                            }
+                            placeholder="Offer Name"
+                        />
 
-                    <TextInput
-                        value={offerDetails.offerDescription}
-                        onChange={(e) =>
-                            setOfferDetails({
-                                ...offerDetails,
-                                offerDescription: e.target.value,
-                            })
-                        }
-                        placeholder="Offer Description"
-                    />
+                        <TextInput
+                            value={offerDetails.offerDescription}
+                            onChange={(e) =>
+                                setOfferDetails({
+                                    ...offerDetails,
+                                    offerDescription: e.target.value,
+                                })
+                            }
+                            placeholder="Offer Description"
+                        />
 
-                    <TextInput
-                        value={offerDetails.offerEffects}
-                        onChange={(e) =>
-                            setOfferDetails({
-                                ...offerDetails,
-                                offerEffects: e.target.value,
-                            })
-                        }
-                        placeholder="Offer Effects"
-                    />
+                        <TextInput
+                            value={offerDetails.offerEffects}
+                            onChange={(e) =>
+                                setOfferDetails({
+                                    ...offerDetails,
+                                    offerEffects: e.target.value,
+                                })
+                            }
+                            placeholder="Offer Effects"
+                        />
 
-                    {/* TODO: check to create number input? */}
-                    <NumberInput
-                        value={offerDetails.offerAsk}
-                        onChange={(e) =>
-                            setOfferDetails({
-                                ...offerDetails,
-                                offerAsk: e.target.value,
-                            })
-                        }
-                        placeholder="Offer Ask Amount"
-                    />
+                        {/* TODO: check to create number input? */}
+                        <NumberInput
+                            value={offerDetails.offerAsk}
+                            onChange={(e) =>
+                                setOfferDetails({
+                                    ...offerDetails,
+                                    offerAsk: e.target.value,
+                                })
+                            }
+                            placeholder="Offer Ask Amount"
+                        />
 
-                    <TextInput
-                        value={offerDetails.targetGoals}
-                        onChange={(e) =>
-                            setOfferDetails({
-                                ...offerDetails,
-                                targetGoals: e.target.value,
-                            })
-                        }
-                        placeholder="Target Goal IDs (comma-separated)"
-                    />
-
+                        <TextInput
+                            value={offerDetails.targetGoals}
+                            onChange={(e) =>
+                                setOfferDetails({
+                                    ...offerDetails,
+                                    targetGoals: e.target.value,
+                                })
+                            }
+                            placeholder="Target Goal IDs (comma-separated)"
+                        />
+                    </div>
                     <Button onClick={handleMakeOffer}>Make Offer</Button>
                 </div>
             )}
