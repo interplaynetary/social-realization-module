@@ -1,5 +1,5 @@
-import { Fragment, useEffect, useState } from "react";
-import { Org, Orgs } from "../../../../sharedTypes";
+import { useEffect, useState } from "react";
+import { Org } from "../../../../sharedTypes";
 import Headline from "../ui/Headline/Headline";
 import * as classes from "./PlayerCard.module.css";
 import { palette } from "./PlayerColorPalette";
@@ -9,9 +9,9 @@ interface PlayerCardProps {
 }
 
 const PlayerCard: React.FC<PlayerCardProps> = ({ org }) => {
-    const [playerColors, setPlayerColors] = useState<{
-        [playerId: string]: string;
-    }>({});
+    const [playerColors, setPlayerColors] = useState<Record<string, string>>(
+        {}
+    );
 
     useEffect(() => {
         // Shuffle the palette and assign a unique color to each player
@@ -22,17 +22,11 @@ const PlayerCard: React.FC<PlayerCardProps> = ({ org }) => {
                 acc[playerId] = shuffledPalette[index % shuffledPalette.length];
                 return acc;
             },
-            {}
+            {} as Record<string, string>
         );
-
-        console.log(org, "?????");
 
         setPlayerColors(colors);
     }, [org.players]);
-
-    const getRandomColor = () => {
-        return palette[Math.floor(Math.random() * palette.length)];
-    };
 
     return (
         <div className={classes.section}>
@@ -41,38 +35,34 @@ const PlayerCard: React.FC<PlayerCardProps> = ({ org }) => {
             </Headline>
 
             <div className={classes.playerCard}>
-                {Object.keys(org.players).map((playerId) => (
-                    <div key={playerId} className={classes.avatarContainer}>
-                        <div
-                            className={classes.avatar}
-                            style={{
-                                backgroundColor:
-                                    playerColors[playerId] || "#ccc",
-                            }}
-                            title={org.players[playerId].name}
-                        >
-                            <span>
-                                {(org.players[playerId].name &&
-                                    org.players[playerId].name.charAt(0)) ||
-                                    "U"}
+                {Object.keys(org.players).map((playerId) => {
+                    const player = org.players[playerId];
+                    if (!player.name) return null;
+
+                    return (
+                        <div key={playerId} className={classes.avatarContainer}>
+                            <div
+                                className={classes.avatar}
+                                style={{
+                                    backgroundColor:
+                                        playerColors[playerId] || "#ccc",
+                                }}
+                                title={player.name}
+                            >
+                                <span>{player.name.charAt(0)}</span>
+                            </div>
+
+                            <span className={classes.avatarName}>
+                                {player.name}
                             </span>
+
+                            <div className={classes.playerDetails}>
+                                {false && <p>ID: {playerId}</p>}
+                                {false && <p>Shares: {player.shares || 0}</p>}
+                            </div>
                         </div>
-
-                        <span className={classes.avatarName}>
-                            {org.players[playerId].name}
-                        </span>
-
-                        <div className={classes.playerDetails}>
-                            {false && <p>ID: {playerId}</p>}
-
-                            {false && (
-                                <p>
-                                    Shares: {org.players[playerId].shares || 0}
-                                </p>
-                            )}
-                        </div>
-                    </div>
-                ))}
+                    );
+                })}
             </div>
         </div>
     );
