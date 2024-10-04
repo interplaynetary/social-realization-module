@@ -1,0 +1,9 @@
+.logo {
+    display: block;
+    opacity: 0.5;
+    padding-top: var(--page-padding);
+    padding-left: var(--page-padding);
+    font-size: var(--f-m);
+    font-family: monospace;
+    font-weight: normal;
+}

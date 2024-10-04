@@ -1,0 +1,14 @@
+{
+    "compilerOptions": {
+        "outDir": "./dist",
+        "sourceMap": true,
+        "noImplicitAny": true,
+        "module": "esnext",
+        "moduleResolution": "node",
+        "target": "es6",
+        "jsx": "react-jsx", // For React 17+ (automatically imports React in JSX files)
+        "strict": true, // Optional: Enables all strict type-checking options
+        "esModuleInterop": true // Allows default imports from CommonJS modules
+    },
+    "include": ["./src/**/*"]
+}

@@ -1,0 +1,98 @@
+:root {
+    --page-padding: 20px;
+
+    /* colors */
+    --c-page-background: white;
+    --c-primary: #ab244e;
+    --c-secondary: #ab244e;
+    --c-text: rgba(41, 41, 41, 1);
+    --c-border: #00000036;
+
+    /* make video from this, include CHAT-GPT and such*/
+    /* sizes */
+    --f-s: 9px; /* Small */
+    --f-m: 12px; /* Medium */
+    --f-l: 18px; /* Large */
+    --f-xl: 22px; /* Extra Large */
+    --f-xxl: 32px; /* 2X Extra Large */
+    --f-xxxl: 48px; /* 3X Extra Large */
+
+    /* spacings */
+    --s-s: 12px;
+    --s-m: 20px;
+    --s-l: 32px;
+    --s-xl: 42px;
+}
+
+@media (min-width: 600px) {
+    :root {
+        --component-spacing-large: 100px;
+    }
+}
+
+html {
+    box-sizing: border-box;
+}
+
+*,
+*:before,
+*:after {
+    box-sizing: inherit;
+}
+
+html {
+    font-size: 16px;
+}
+
+body {
+    display: flex;
+    flex-direction: column;
+    margin: 0;
+    background-color: var(--c-page-background);
+    min-height: 100vh;
+    line-height: 1.5222;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    font-family:
+        system-ui,
+        -apple-system,
+        BlinkMacSystemFont,
+        "Segoe UI",
+        Roboto,
+        Oxygen,
+        Ubuntu,
+        Cantarell,
+        "Open Sans",
+        "Helvetica Neue",
+        sans-serif;
+}
+
+h1,
+h2,
+h3,
+h4,
+p {
+    margin-top: 0;
+    margin-bottom: 0;
+}
+
+h2,
+h3,
+h4 {
+    margin-bottom: var(--s-s);
+}
+
+/* class used in <Overlay/> component*/
+.body-fixed {
+    width: 100%;
+    overflow: hidden;
+}
+
+/* 
+    define set of 
+    type-sizes 
+    colors 
+    spacings:) 
+
+    to create more consistency towards UI, but this at the end
+*/

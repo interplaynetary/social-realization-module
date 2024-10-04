@@ -1,0 +1,28 @@
+.orgs {
+    display: grid;
+    grid-template-columns: 1fr;
+    margin-top: var(--page-padding);
+    margin-bottom: var(--page-padding);
+    grid-gap: 20px;
+}
+
+@media (min-width: 600px) {
+    .orgs {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+    }
+}
+
+@media (min-width: 1024px) {
+    .orgs {
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr;
+    }
+}
+
+
+.phase {
+    font-family: monospace;
+    opacity: .5;
+    font-size: var(--f-m);
+}
