@@ -1,0 +1,16 @@
+.tag {
+    margin-right: 12px;
+    border: 1px solid var(--c-border);
+    border-radius: 9px;
+    padding-right: 6px;
+    padding-left: 6px;
+    text-wrap: nowrap;
+}
+
+@media (min-width: 900px) {
+    .tag {
+        margin-right: 12px;
+        padding-right: 6px;
+        padding-left: 6px;
+    }
+}

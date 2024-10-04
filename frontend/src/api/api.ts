@@ -1,5 +1,6 @@
 import axios from "axios";
 import { ApiKey, Org, Phase, PlayerActionType } from "../../../sharedTypes";
+import { OrgDataResponse } from "./responseTypes";
 
 const API_BASE_URL = process.env.API_BASE_URL || "http://localhost:3000";
 
@@ -45,6 +46,19 @@ export const joinOrg = async (orgId: string, apiKey: ApiKey) => {
     return response.data;
 };
 
+// todo: improve typings, maybe improve how express server sents those
+export const getOrgData = async (
+    orgId: string,
+    apiKey: ApiKey
+): Promise<OrgDataResponse> => {
+    const response = await apiClient.post("/player-action", {
+        apiKey: apiKey,
+        actionType: "getOrg",
+        actionParams: [orgId],
+    });
+    return response.data;
+};
+
 export const fetchPlayerData = async (playerId: string) => {
     const response = await apiClient.get(`/players/${playerId}`);
     return response.data;
@@ -80,6 +94,7 @@ export const executePlayerAction = async (
         actionType: actionType,
         actionParams: actionParams,
     });
+
     return response.data;
 };
 
@@ -91,3 +106,5 @@ export const runPhaseShift = async (apiKey: ApiKey) => {
     });
     return response.data;
 };
+
+// within cycle i see goals registry

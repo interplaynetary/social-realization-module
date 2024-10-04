@@ -6,6 +6,7 @@ import GoalInfo from "../GoalInfo/GoalInfo";
 import { runPhaseShift } from "../../api/api";
 import { ApiKey, Org } from "../../../../sharedTypes";
 import * as classes from "./OrgDetail.module.css";
+import Tag from "../ui/Tag/Tag";
 
 const OrgDetail: React.FunctionComponent<{
     org: Org;
@@ -31,25 +32,11 @@ const OrgDetail: React.FunctionComponent<{
 
             {/* TODO: sort this, prioritize what is most important */}
             <div className={classes.orgInfo}>
-                <span className={classes.orgInfoItem}>
-                    Cycle: {org.currentCycle}
-                </span>
-
-                <span className={classes.orgInfoItem}>
-                    Phase: {org.currentPhase}
-                </span>
-
-                <span className={classes.orgInfoItem}>
-                    Realized Value: {org.realizedValue}
-                </span>
-
-                <span className={classes.orgInfoItem}>
-                    Potential Value: {org.potentialValue}
-                </span>
-
-                <span className={classes.orgInfoItem}>
-                    Shares: {org.shares}
-                </span>
+                <Tag>Cycle: {org.currentCycle}</Tag>
+                <Tag>Phase: {org.currentPhase}</Tag>
+                <Tag>Realized Value: {org.realizedValue}</Tag>
+                <Tag>Potential Value: {org.potentialValue}</Tag>
+                <Tag>Shares: {org.shares}</Tag>
             </div>
 
             <PhaseActions org={org} apiKey={apiKey} playerId={playerId} />

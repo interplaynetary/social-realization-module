@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useSetRecoilState, useRecoilValue } from "recoil";
-import { fetchOrgs, joinOrg } from "../../api/api";
+import { fetchOrgs, getOrgData, joinOrg } from "../../api/api";
 import { apiKeyAtom } from "../../state/atoms/apiKeyAtom";
 import { playerDataAtom } from "../../state/atoms/playerDataAtom";
 import { selectedOrgAtom } from "../../state/atoms/selectedOrgAtom"; // New atom for the current organization
@@ -68,7 +68,7 @@ const OrgList = () => {
         try {
             const data = await fetchOrgs();
 
-            if (data.success) { 
+            if (data.success) {
                 setOrgs(data.registryData);
                 setError(null); // Reset error if fetch is successful
             } else {
@@ -114,8 +114,43 @@ const OrgList = () => {
             navigate(ROUTES.LOGIN);
         } else {
             setSelectedOrg(org);
+            getOrg(org.id);
             navigate(`${ROUTES.ORGS}${org.id}/`);
         }
+    };
+
+    const getOrg = async (orgId: string) => {
+        try {
+            const data = await getOrgData(orgId, apiKey);
+
+            if (data.success) {
+                // todo: improve how goals are set; maybe create recoil for curretOrg data?
+                const goals = data.result.cycles[0].goals;
+                const updateOrgs = updateOrgGoals(orgs, orgId, goals);
+                setOrgs(updateOrgs);
+            } else {
+                alert("Failed to join organization");
+            }
+        } catch (error) {
+            alert("An error occurred while joining the organization");
+        }
+    };
+
+    // Function to update goals for a specific org
+    const updateOrgGoals = (
+        orgs: Org[],
+        orgId: string,
+        newGoals: Record<string, any>
+    ): Org[] => {
+        return orgs.map((org) => {
+            if (org.id === orgId) {
+                return {
+                    ...org,
+                    goals: newGoals, // Update the goals
+                };
+            }
+            return org; // Return org unchanged if it doesn't match
+        });
     };
 
     const handleClose = () => {

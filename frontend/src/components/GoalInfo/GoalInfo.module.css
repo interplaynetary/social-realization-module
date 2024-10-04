@@ -1,3 +1,15 @@
 .section {
     margin-top: var(--s-xl);
 }
+
+.tags {
+    display: flex;
+    row-gap: 6px;
+    flex-wrap: wrap;
+}
+
+@media (min-width: 900px) {
+    .tags {
+        flex-wrap: wrap;
+    }
+}
