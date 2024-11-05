@@ -79,7 +79,7 @@ export type PlayerType =
 // Player Actions (TODO: think about better way of representing them as values and type at same time)
 export const PlayerActionTypes = {
     DistributeShares: "distributeShares",
-    ProposeGoalToOrg: "proposeGoalToOrg",
+    ProposeGoalToOrg: "",
     AllocateToGoalFromOrg: "allocateToGoalFromOrg",
     OfferToOrg: "offerToOrg",
     AllocateToOfferFromGoalInOrg: "allocateToOfferFromGoalInOrg",

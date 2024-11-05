@@ -30,7 +30,6 @@ const OrgDetailView = () => {
 
                 <OrgDetail org={orgId} />
             </Container>
-            eheheh
         </div>
     );
 };
