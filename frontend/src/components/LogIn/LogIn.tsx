@@ -14,8 +14,6 @@ import { authService } from "../../api/auth";
 const Login = () => {
     // Getters for recoil
     const apiKey = useRecoilValue(apiKeyAtom);
-    const playerData = useRecoilValue(playerDataAtom); // Retrieve entire player data
-    const { id } = playerData; // Extract id from player data
 
     // Setters for recoil
     const setApiKey = useSetRecoilState(apiKeyAtom);
