@@ -13,19 +13,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import Headline from "../ui/Headline/Headline";
 import { ROUTES } from "../../core/Routes";
 import { organizationService } from "../../api/organisation";
-
-type Org = {
-    id: string;
-    name: string;
-    currentPhase: string;
-    players: Record<string, any>;
-    currentCycle: string;
-    goals: Record<string, any>;
-    offers: Record<string, any>;
-    potentialValue: number;
-    realizedValue: number;
-    shares: number;
-};
+import { Org } from "../../../../sharedTypes";
 
 type OrgParams = {
     orgId?: string; // Optional param, might not always be in the route

@@ -6,6 +6,11 @@ export const organizationService = {
     return response.data;
   },
 
+  async getOrgById(orgId: string) {
+    const response = await api.get(`/get-org/${orgId}`);
+    return response.data;
+  },
+
   async playerAction(actionType: string, actionParams: any[]) {
     const apiKey = localStorage.getItem('apiKey');
     const response = await api.post('/player-action', {

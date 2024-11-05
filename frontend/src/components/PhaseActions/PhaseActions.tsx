@@ -1,10 +1,12 @@
-import { Fragment, useState } from "react";
+import { Fragment, useEffect, useState } from "react";
 import Button from "../ui/Button/Button";
 import Headline from "../ui/Headline/Headline";
 import NumberInput from "../ui/NumberInput/NumberInput";
 import TextInput from "../ui/TextInput/TextInput";
 import * as classes from "./PhaseActions.module.css";
-import { goalService } from "../../api";
+import { goalService, offerService, organizationService } from "../../api";
+import { currentOrgAtom } from "../../state/atoms/currentOrgAtom";
+import { useRecoilState } from "recoil";
 
 const PhaseActions = ({ org, apiKey, playerId }) => {
     const [goalDescription, setGoalDescription] = useState("");
@@ -17,6 +19,8 @@ const PhaseActions = ({ org, apiKey, playerId }) => {
         targetGoals: "",
     });
 
+    const [currentOrg, setCurrentOrg] = useRecoilState(currentOrgAtom);
+
     const handleProposeGoal = async () => {
         if (!goalDescription.trim()) {
             alert("Please enter a goal description");
@@ -24,14 +28,20 @@ const PhaseActions = ({ org, apiKey, playerId }) => {
         }
 
         setIsSubmitting(true);
-        
+
         try {
             const data = await goalService.proposeGoal(org.id, goalDescription);
 
             if (data.success) {
                 setGoalDescription("");
-                // TODO: Add success notification
-                // TODO: Potentially trigger a refresh of goals list
+
+                const data = await organizationService.getOrgById(org.id);
+                setCurrentOrg(data["organization"]);
+
+                const currentCycle = data["organization"].currentCycle;
+
+                console.log(data["organization"].cycles[currentCycle].goals);
+                // update the orgRegistry
             }
         } catch (error) {
             console.error("Failed to propose goal:", error);
@@ -42,27 +52,17 @@ const PhaseActions = ({ org, apiKey, playerId }) => {
     };
 
     const handleMakeOffer = async () => {
-        const response = await fetch("http://localhost:3000/player-action", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-                apiKey,
-                actionType: "offerToOrg",
-                actionParams: [
-                    org.id,
-                    offerDetails.offerName,
-                    offerDetails.offerDescription,
-                    offerDetails.offerEffects,
-                    offerDetails.offerAsk,
-                    offerDetails.targetGoals.split(","),
-                ],
-            }),
-        });
-
-        const data = await response.json();
+        const data = await offerService.createOffer(
+            org.id,
+            offerDetails.offerName,
+            offerDetails.offerDescription,
+            offerDetails.offerEffects,
+            Number(offerDetails.offerAsk),
+            offerDetails.targetGoals.split(",")
+        );
 
         if (data.success) {
-            // Handle success
+            console.log(data, "offer has been made <3");
         }
     };
 
@@ -78,8 +78,8 @@ const PhaseActions = ({ org, apiKey, playerId }) => {
                         placeholder="Goal Description"
                     />
 
-                    <Button 
-                        variant="secondary" 
+                    <Button
+                        variant="secondary"
                         onClick={handleProposeGoal}
                         disabled={isSubmitting}
                     >
@@ -149,6 +149,7 @@ const PhaseActions = ({ org, apiKey, playerId }) => {
                             placeholder="Target Goal IDs (comma-separated)"
                         />
                     </div>
+
                     <Button onClick={handleMakeOffer}>Make Offer</Button>
                 </div>
             )}
