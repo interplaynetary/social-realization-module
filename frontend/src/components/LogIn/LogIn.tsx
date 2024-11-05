@@ -8,8 +8,8 @@ import { apiKeyAtom } from "../../state/atoms/apiKeyAtom";
 import { playerDataAtom } from "../../state/atoms/playerDataAtom";
 
 import * as styles from "./LogIn.module.css";
-import { authenticate, registerUser } from "../../api/api";
 import { ROUTES } from "../../core/Routes";
+import { authService } from "../../api/auth";
 
 const Login = () => {
     // Getters for recoil
@@ -30,7 +30,7 @@ const Login = () => {
     // Login function
     const handleLogin = async () => {
         try {
-            const data = await authenticate(apiKeyInput);
+            const data = await authService.login(apiKeyInput);
             console.log("Login response:", data); // Log response for debugging
 
             if (data.success) {
@@ -49,7 +49,7 @@ const Login = () => {
     // Registration function
     const handleRegister = async () => {
         try {
-            const data = await registerUser(playerName);
+            const data = await   authService.register(playerName)
             console.log("Register response:", data); // Log response for debugging
 
             if (data.success) {

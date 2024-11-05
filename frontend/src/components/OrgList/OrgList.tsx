@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
 import { useSetRecoilState, useRecoilValue } from "recoil";
-import { fetchOrgs, getOrgData, joinOrg } from "../../api/api";
 import { apiKeyAtom } from "../../state/atoms/apiKeyAtom";
 import { playerDataAtom } from "../../state/atoms/playerDataAtom";
 import { selectedOrgAtom } from "../../state/atoms/selectedOrgAtom"; // New atom for the current organization
@@ -13,6 +12,7 @@ import * as styles from "./OrgList.module.css";
 import { useParams, useNavigate } from "react-router-dom";
 import Headline from "../ui/Headline/Headline";
 import { ROUTES } from "../../core/Routes";
+import { organizationService } from "../../api/organisation";
 
 type Org = {
     id: string;
@@ -66,7 +66,8 @@ const OrgList = () => {
         setLoading(true);
 
         try {
-            const data = await fetchOrgs();
+
+            const data = await organizationService.getOrgRegistry()
 
             if (data.success) {
                 setOrgs(data.registryData);
@@ -83,7 +84,8 @@ const OrgList = () => {
 
     const handleJoinOrg = async (orgId: string) => {
         try {
-            const data = await joinOrg(orgId, apiKey);
+
+            const data = await organizationService.joinOrg(orgId)
 
             if (data.success) {
                 // Update the org state without refetching all organizations
@@ -121,7 +123,7 @@ const OrgList = () => {
 
     const getOrg = async (orgId: string) => {
         try {
-            const data = await getOrgData(orgId, apiKey);
+            const data  = await organizationService.getOrgRegistry()
 
             if (data.success) {
                 // todo: improve how goals are set; maybe create recoil for curretOrg data?

@@ -3,10 +3,10 @@ import PlayerInfo from "../PlayerInfo/PlayerInfo";
 import PhaseActions from "../PhaseActions/PhaseActions";
 import Headline from "../ui/Headline/Headline";
 import GoalInfo from "../GoalInfo/GoalInfo";
-import { runPhaseShift } from "../../api/api";
 import { ApiKey, Org } from "../../../../sharedTypes";
 import * as classes from "./OrgDetail.module.css";
 import Tag from "../ui/Tag/Tag";
+import { organizationService } from "../../api/organisation";
 
 const OrgDetail: React.FunctionComponent<{
     org: Org;
@@ -16,7 +16,7 @@ const OrgDetail: React.FunctionComponent<{
     console.log({ apiKey, playerId });
 
     const handlePhaseShift = async () => {
-        const data = await runPhaseShift(apiKey);
+        const data = await organizationService.runPhaseShift()
 
         if (data.success) {
             console.log(data, "data");

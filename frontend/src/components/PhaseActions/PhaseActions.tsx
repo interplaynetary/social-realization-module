@@ -1,11 +1,11 @@
 import { Fragment, useState } from "react";
 import { PlayerActionType, PlayerActionTypes } from "../../../../sharedTypes";
-import { executePlayerAction } from "../../api/api";
 import Button from "../ui/Button/Button";
 import Headline from "../ui/Headline/Headline";
 import NumberInput from "../ui/NumberInput/NumberInput";
 import TextInput from "../ui/TextInput/TextInput";
 import * as classes from "./PhaseActions.module.css";
+import { goalService } from "../../api";
 
 const PhaseActions = ({ org, apiKey, playerId }) => {
     const [goalDescription, setGoalDescription] = useState("");
@@ -17,11 +17,10 @@ const PhaseActions = ({ org, apiKey, playerId }) => {
     });
 
     const handleProposeGoal = async () => {
-        const data = await executePlayerAction(
-            apiKey,
-            PlayerActionTypes.ProposeGoalToOrg,
-            [org.id, goalDescription]
-        );
+
+
+        const data  =await goalService.proposeGoal(org.id,goalDescription)
+        
 
         if (data.success) {
             console.log("foo", data);

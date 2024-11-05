@@ -12,6 +12,7 @@
 }
 
 .modal {
+    position: relative;
     background-color: white;
     padding: calc(var(--page-padding) * 1.5);
     border-radius: 10px;
