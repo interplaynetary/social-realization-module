@@ -338,7 +338,6 @@ export class Org extends Element {
     // These Methods are as a Player:
     joinOrg(orgId) {
         const org = orgRegistry[orgId];
-        console.log(this.name, 'JOINED', org);
         const currentOrg = org.getCurrentSelfData();
         if (!org) throw new Error("Organization not found");
         const joinTime = new Date();
@@ -360,13 +359,31 @@ export class Org extends Element {
     }
 
     proposeGoalToOrg(orgId, description) {
+        console.log('proposeGoalToOrg called with:', { orgId, description });
+        console.log('Current orgRegistry:', orgRegistry);
+        
         if (!description) throw new Error("Description is required");
+        if (!orgId) throw new Error("Organization ID is required");
+        
+        const org = orgRegistry[orgId];
+        console.log('Found org:', org);
+        
+        if (!org) {
+            console.error('Organization not found for ID:', orgId);
+            console.error('Available orgs:', Object.keys(orgRegistry));
+            throw new Error(`Organization with ID ${orgId} not found`);
+        }
+        
         const goal = new Goal(description, this.id);
-            const org = orgRegistry[orgId];
-            if (!org) throw new Error(`Organization with ID ${orgId} not found`);
-            const currentOrg = org.getCurrentSelfData();
-            goal.initForOrg(orgId);
-            currentOrg.goals[goal.id] = goal;
+        console.log('Created new goal:', goal);
+        
+        const currentOrg = org.getCurrentSelfData();
+        console.log('Current org data:', currentOrg);
+        
+        goal.initForOrg(orgId);
+        currentOrg.goals[goal.id] = goal;
+        
+        console.log('Successfully added goal to org');
         return goal.id;
     }
 

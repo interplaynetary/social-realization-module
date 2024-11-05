@@ -20,6 +20,7 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static('public')); // Serve static files from 'public' directory
 
+
 // Set up CORS middleware to allow multiple origins
 const allowedOrigins = [
     "http://127.0.0.1:5501",
