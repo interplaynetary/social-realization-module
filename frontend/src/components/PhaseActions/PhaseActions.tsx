@@ -8,6 +8,7 @@ import { goalService } from "../../api";
 
 const PhaseActions = ({ org, apiKey, playerId }) => {
     const [goalDescription, setGoalDescription] = useState("");
+    const [isSubmitting, setIsSubmitting] = useState(false);
     const [offerDetails, setOfferDetails] = useState({
         offerName: "",
         offerDescription: "",
@@ -17,12 +18,26 @@ const PhaseActions = ({ org, apiKey, playerId }) => {
     });
 
     const handleProposeGoal = async () => {
-        const data = await goalService.proposeGoal(org.id, goalDescription);
+        if (!goalDescription.trim()) {
+            alert("Please enter a goal description");
+            return;
+        }
 
-        if (data.success) {
-            console.log("foo", data);
+        setIsSubmitting(true);
+        
+        try {
+            const data = await goalService.proposeGoal(org.id, goalDescription);
 
-            // Handle success
+            if (data.success) {
+                setGoalDescription("");
+                // TODO: Add success notification
+                // TODO: Potentially trigger a refresh of goals list
+            }
+        } catch (error) {
+            console.error("Failed to propose goal:", error);
+            // TODO: Add error notification
+        } finally {
+            setIsSubmitting(false);
         }
     };
 
@@ -63,8 +78,12 @@ const PhaseActions = ({ org, apiKey, playerId }) => {
                         placeholder="Goal Description"
                     />
 
-                    <Button variant="secondary" onClick={handleProposeGoal}>
-                        Propose Goal
+                    <Button 
+                        variant="secondary" 
+                        onClick={handleProposeGoal}
+                        disabled={isSubmitting}
+                    >
+                        {isSubmitting ? "Proposing..." : "Propose Goal"}
                     </Button>
                 </div>
             )}
