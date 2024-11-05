@@ -79,7 +79,7 @@ export type PlayerType =
 // Player Actions (TODO: think about better way of representing them as values and type at same time)
 export const PlayerActionTypes = {
     DistributeShares: "distributeShares",
-    ProposeGoalToOrg: "",
+    ProposeGoalToOrg: "proposeGoalToOrg",
     AllocateToGoalFromOrg: "allocateToGoalFromOrg",
     OfferToOrg: "offerToOrg",
     AllocateToOfferFromGoalInOrg: "allocateToOfferFromGoalInOrg",
@@ -92,4 +92,3 @@ export const PlayerActionTypes = {
 } as const;
 
 export type PlayerActionType = typeof PlayerActionTypes[keyof typeof PlayerActionTypes];
-    

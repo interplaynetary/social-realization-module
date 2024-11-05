@@ -58,10 +58,23 @@ function debug(...args) {
     }
 }
 
+// Add this near the top of the file with other utility functions
+String.prototype.rsplit = function(sep, maxsplit) {
+    const split = this.split(sep);
+    if (maxsplit) {
+        return [split.slice(0, -maxsplit).join(sep)].concat(split.slice(-maxsplit));
+    }
+    return split;
+};
+
+
 export class Element {
-    constructor() {
-        this.id = uuidv4();
-        debug('Created new Element:', {
+    constructor(id = null) {
+        if(id === null){
+            this.id = uuidv4();
+        } else {
+            this.id = id;
+        }        debug('Created new Element:', {
             type: this.constructor.name,
             id: this.id
         });
@@ -117,8 +130,8 @@ export class Element {
 }
 
 export class Goal extends Element {
-    constructor(description, createdById) {
-        super();
+    constructor(description, createdById, id = null) {
+        super(id);
         this.description = description;
         this.createdById = createdById;
         goalRegistry[this.id] = this;
@@ -134,8 +147,8 @@ export class Goal extends Element {
 }
 
 export class Offer extends Element {
-    constructor(name, description, effects, createdById) {
-        super();
+    constructor(name, description, effects, createdById, id = null) {
+        super(id);
         this.name = name;
         this.description = description;
         this.effects = effects;
@@ -176,8 +189,12 @@ export class Offer extends Element {
 }
 
 export class Completion {
-    constructor(offerId, claimDescription, claimedById) {
-        this.id = uuidv4();
+    constructor(offerId, claimDescription, claimedById, id = null) {
+        if(id === null){
+            this.id = uuidv4();
+        } else {
+            this.id = id;
+        }
         this.offerId = offerId;
         this.claimDescription = claimDescription;
         this.claimedById = claimedById;
@@ -190,9 +207,9 @@ export class Completion {
 }
 
 export class Org extends Element {
-    constructor(name) {
+    constructor(name, id = null	) {
         debug('Creating new Org:', { name });
-        super();
+        super(id);
         this.name = this.getUniqueName(name);
         debug('Generated unique name:', this.name);
 
@@ -224,9 +241,17 @@ export class Org extends Element {
         return [apiKey, this];
     }
     getUniqueName(baseName) {
+        // If this is a name being loaded from persistence that already has a number
+        if (baseName.match(/-\d+$/)) {
+            // Register the existing name and number
+            const [base, num] = baseName.rsplit('-', 1);
+            nameRegistry[base] = Math.max(parseInt(num), nameRegistry[base] || 0);
+            return baseName;
+        }
+
+        // For new names
         if (!nameRegistry[baseName]) {
             nameRegistry[baseName] = 0;
-            // then lets generate a random 4 digit number
             return `${baseName}-0`;
         } else {
             nameRegistry[baseName]++;
@@ -688,7 +713,7 @@ unallocatePointsFromOfferInOrg(orgId, amount, offerId, goalId) {
         const offer = currentOrg.offers[offerId];
         if (!offer) throw new Error("Offer not found");
 
-        const completion = new Completion(offerId, claimDescription, this.id);
+        const completion = new Completion(null, offerId, claimDescription, this.id);
         currentOrg.completions[completion.id] = completion;
         return completion.id;
     }

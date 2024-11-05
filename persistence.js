@@ -29,31 +29,31 @@ export async function ensureDataDir() {
 // Construct objects from JSOG data
 export function constructFromJSOG(data) {
     console.log('Constructing Element of Type', data.type);
-    
+
     let instance;
     
     switch (data.type) {
-        case 'Goal':    
+        case 'Goal':
             instance = Object.create(Goal.prototype);
-            const newGoal = new Goal();
+            const newGoal = new Goal(data.description, data.createdById, data.id);
             Object.assign(instance, newGoal, data);
-            goalRegistry[instance.id] = instance;
+            goalRegistry[data.id] = instance;
             break;
         case 'Offer':    
             instance = Object.create(Offer.prototype);
-            const newOffer = new Offer();
+            const newOffer = new Offer(data.description, data.createdById, data.towardsGoals, data.id);
             Object.assign(instance, newOffer, data);
-            offerRegistry[instance.id] = instance;
+            offerRegistry[data.id] = instance;
             break;
         case 'Completion':  
             instance = Object.create(Completion.prototype);
-            const newCompletion = new Completion();
+            const newCompletion = new Completion(data.description, data.createdById, data.offerId, data.id);
             Object.assign(instance, newCompletion, data);
-            completionRegistry[instance.id] = instance;
+            completionRegistry[data.id] = instance;
             break;
         case 'Org':    
             instance = Object.create(Org.prototype);
-            const newOrg = new Org(data.name);
+            const newOrg = new Org(data.name || "Unknown Organization", data.id);
             Object.assign(instance, newOrg, data);
             orgRegistry[instance.id] = instance;
             if (data.apiKey) {
@@ -74,8 +74,8 @@ export function constructFromJSOG(data) {
     if (instance.__jsogObjectId) {
         delete instance.__jsogObjectId;
     }
-    
-    return instance;
+
+    return instance
 }
 
 // Save element to file
