@@ -1,0 +1,15 @@
+.container {
+  position: relative;
+  width: 100%;
+  padding-top: 100%; /* This creates a square container (pt-full equivalent) */
+}
+
+.circle {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  border-radius: 9999px; /* Full rounded corners */
+  background-color: #3B82F6; /* Tailwind blue-500 */
+  transition: width 0.1s ease-out, height 0.1s ease-out;
+}
