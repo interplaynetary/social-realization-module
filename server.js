@@ -145,6 +145,19 @@ app.get('/get-org-registry', (req, res) => {
     }
 });
 
+app.get('/get-org/:id', (req, res) => {
+    const orgId = req.params.id;
+    const organization = orgRegistry[orgId];
+    
+    if (!organization) {
+        return res.status(404).json({ success: false, error: 'Organization not found' });
+    }
+    
+    // Encode the organization using JSOG to handle circular references
+    const jsogEncodedOrg = JSOG.encode(organization);
+    res.json({ success: true, organization: jsogEncodedOrg });
+});
+
 const PORT = process.env.PORT || 3000;
 
 // Initialize registries at startup
