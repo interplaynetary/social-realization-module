@@ -48,20 +48,49 @@ export const completionRegistry = {};
 export const apiKeyToPlayer = {};
 export const nameRegistry = {}
 
+// Add debug logger utility
+const DEBUG = true;
+function debug(...args) {
+    if (DEBUG) {
+        console.log('[DEBUG]', ...args);
+        // Optionally add timestamp
+        console.log('[DEBUG] Timestamp:', new Date().toISOString());
+    }
+}
+
 export class Element {
     constructor() {
         this.id = uuidv4();
+        debug('Created new Element:', {
+            type: this.constructor.name,
+            id: this.id
+        });
         this.orgData = {};
         this.type = this.constructor.name;
     }
 
     initForOrg(orgId) {
+        debug('Initializing Element for Org:', {
+            elementId: this.id,
+            elementType: this.type,
+            orgId: orgId
+        });
+        
         const org = orgRegistry[orgId];
-        if (!org) throw new Error("Organization not found");
+        if (!org) {
+            debug('Organization not found in registry:', {
+                orgId,
+                availableOrgs: Object.keys(orgRegistry)
+            });
+            throw new Error("Organization not found");
+        }
+
         if (!this.orgData[orgId]) {
+            debug('Creating new org data for element');
             const cycleSpecificOrgData = {};
             cycleSpecificOrgData[org.currentCycle] = this.getInitialOrgData();
             this.orgData[orgId] = cycleSpecificOrgData;
+            debug('Created org data:', this.orgData[orgId]);
         }
     }
 
@@ -126,10 +155,10 @@ export class Offer extends Element {
         };
     }
 
-    initForOrg(orgId, ask, targetGoals) {
+    initForOrg(orgId, ask, targetGoalIds) {
         super.initForOrg(orgId);
         const orgData = this.getCurrentOtherData(orgId);
-        const totalPotentialPoints = Array.from(targetGoals).reduce((sum, goalId) => {
+        const totalPotentialPoints = Array.from(targetGoalIds).reduce((sum, goalId) => {
             const goal = goalRegistry[goalId];
             if (!goal) throw new Error("Target goal not found");
             const goalOrgData = goal.getCurrentOtherData(orgId);
@@ -141,7 +170,7 @@ export class Offer extends Element {
         }
     
         orgData.ask = ask;
-        orgData.towardsGoals = new Set(targetGoals);
+        orgData.towardsGoals = new Set(targetGoalIds);
     }
     
 }
@@ -162,19 +191,36 @@ export class Completion {
 
 export class Org extends Element {
     constructor(name) {
+        debug('Creating new Org:', { name });
         super();
         this.name = this.getUniqueName(name);
+        debug('Generated unique name:', this.name);
 
         this.currentCycle = 0;
         this.currentPhase = 'goalExpression';
         this.cycles = {};
+        
+        debug('Initializing first cycle');
         this.initForSelfCycle();
+        
+        debug('Registering org:', {
+            id: this.id,
+            name: this.name,
+            registrySize: Object.keys(orgRegistry).length
+        });
         orgRegistry[this.id] = this;
+        
         const apiKey = uuidv4();
+        debug('Generated API key:', {
+            orgId: this.id,
+            apiKey: apiKey
+        });
         apiKeyToPlayer[apiKey] = this.id;
-        console.log(this.name, 'ID:', this.id);
-        console.log(this.name, 'API-Key:', apiKey);
-        this.joinOrg(this.id)
+        
+        debug('Joining org to itself');
+        const joinResult = this.joinOrg(this.id);
+        debug('Join result:', joinResult);
+        
         return [apiKey, this];
     }
     getUniqueName(baseName) {
@@ -337,12 +383,33 @@ export class Org extends Element {
 
     // These Methods are as a Player:
     joinOrg(orgId) {
+        debug('Attempting to join org:', {
+            playerId: this.id,
+            targetOrgId: orgId
+        });
+
         const org = orgRegistry[orgId];
+        if (!org) {
+            debug('Failed to find org in registry:', {
+                orgId,
+                availableOrgs: Object.keys(orgRegistry)
+            });
+            throw new Error("Organization not found");
+        }
+
+        debug('Found org:', {
+            orgName: org.name,
+            orgCurrentCycle: org.currentCycle
+        });
+
         const currentOrg = org.getCurrentSelfData();
-        if (!org) throw new Error("Organization not found");
+        debug('Current org data:', currentOrg);
+
         const joinTime = new Date();
+        debug('Join attempt timestamp:', joinTime);
 
         if(!this.orgData[orgId]){
+            debug('Creating new org data for player');
             const cycleSpecificOrgData = {};
             cycleSpecificOrgData[org.currentCycle] = {
                 shares: 0,
@@ -353,18 +420,25 @@ export class Org extends Element {
             };
             this.orgData[orgId] = cycleSpecificOrgData;
             currentOrg.players[this.id] = this;
-            return true
+            debug('Successfully joined org:', {
+                playerId: this.id,
+                orgId: orgId,
+                cycleData: cycleSpecificOrgData
+            });
+            return true;
         }
-        return false
+        
+        debug('Player already member of org:', {
+            playerId: this.id,
+            orgId: orgId
+        });
+        return false;
     }
 
     proposeGoalToOrg(orgId, description) {
         console.log('proposeGoalToOrg called with:', { orgId, description });
         console.log('Current orgRegistry:', orgRegistry);
-        
-        if (!description) throw new Error("Description is required");
-        if (!orgId) throw new Error("Organization ID is required");
-        
+                
         const org = orgRegistry[orgId];
         console.log('Found org:', org);
         
@@ -694,135 +768,118 @@ unallocatePointsFromOfferInOrg(orgId, amount, offerId, goalId) {
 
 
 export async function playerAction(apiKey, actionType, ...actionParams) {
-    console.log('ACTIONPARAM', actionParams);
+    debug('Player action called:', {
+        actionType,
+        params: actionParams,
+        apiKey: apiKey
+    });
+
     const playerId = apiKeyToPlayer[apiKey];
-    if (!playerId) throw new Error("Invalid API key");
+    if (!playerId) {
+        debug('Invalid API key:', {
+            providedKey: apiKey,
+            knownKeys: Object.keys(apiKeyToPlayer)
+        });
+        throw new Error("Invalid API key");
+    }
+
+    debug('Found player ID:', playerId);
 
     const player = orgRegistry[playerId];
-    if (!player) throw new Error("Player not found");
+    if (!player) {
+        debug('Player not found in registry:', {
+            playerId,
+            availableOrgs: Object.keys(orgRegistry)
+        });
+        throw new Error("Player not found");
+    }
 
-    // Set to track modified elements that need saving
+    debug('Found player:', {
+        id: player.id,
+        name: player.name
+    });
+
     const elementsToSave = new Set();
     let result;
 
     try {
-        // Actions that don't require an orgId
         const noOrgIdActions = ['getCurrentSelfData', 'getCurrentPhase', 'issueShares', 'runPhaseShift', 
                                'unIssueShares', 'issuePotential', 'calculateRealizedValue', 
                                'getGoalLeaderboard', 'getOfferLeaderboard', 'acceptOffer'];
         
+        debug('Action category:', {
+            actionType,
+            isNoOrgIdAction: noOrgIdActions.includes(actionType)
+        });
+
         if (noOrgIdActions.includes(actionType)) {
+            debug('Executing no-orgId action');
             result = await player[actionType](...actionParams);
             elementsToSave.add(player);
 
-            // Special case for acceptOffer
             if (actionType === 'acceptOffer') {
                 const offerId = actionParams[0];
                 const offer = player.getOffer(offerId);
                 if (offer) elementsToSave.add(offer);
             }
         } else {
-            // Actions that require an orgId
             const orgId = actionParams[0];
+            debug('Looking up org for action:', {
+                orgId,
+                availableOrgs: Object.keys(orgRegistry)
+            });
+
             const org = orgRegistry[orgId];
-            if (!org) throw new Error(`Organization with ID ${orgId} not found`);
+            if (!org) {
+                debug('Organization not found:', {
+                    requestedId: orgId,
+                    availableIds: Object.keys(orgRegistry)
+                });
+                throw new Error(`Organization with ID ${orgId} not found`);
+            }
 
             const orgCurrentPhase = org.getCurrentPhase();
+            debug('Current org phase:', orgCurrentPhase);
+
+            // Execute action and track modifications
+            debug('Executing action:', {
+                type: actionType,
+                params: actionParams
+            });
+
+            result = await player[actionType](...actionParams);
             
-            // Phase-specific actions mapping to affected elements
-            const actionEffects = {
-                'proposeGoalToOrg': (result) => {
-                    const goal = goalRegistry[result];
-                    if (goal) elementsToSave.add(goal);
-                },
-                'offerToOrg': (result) => {
-                    const offer = offerRegistry[result];
-                    if (offer) elementsToSave.add(offer);
-                },
-                'allocateToGoalFromOrg': () => {
-                    const goalId = actionParams[2];
-                    const goal = goalRegistry[goalId];
-                    if (goal) elementsToSave.add(goal);
-                },
-                'allocateToOfferFromGoalInOrg': () => {
-                    const fromId = actionParams[2];
-                    const toId = actionParams[3];
-                    const goal = goalRegistry[fromId];
-                    const offer = offerRegistry[toId];
-                    if (goal) elementsToSave.add(goal);
-                    if (offer) elementsToSave.add(offer);
-                },
-                'claimCompletion': (result) => {
-                    const completion = completionRegistry[result];
-                    if (completion) elementsToSave.add(completion);
-                },
-                'challengeCompletion': () => {
-                    const completionId = actionParams[1];
-                    const completion = completionRegistry[completionId];
-                    if (completion) elementsToSave.add(completion);
-                },
-                'supportChallenge': () => {
-                    const completionId = actionParams[1];
-                    const completion = completionRegistry[completionId];
-                    if (completion) elementsToSave.add(completion);
-                },
-                'shiftPointsBetweenGoalsInOrg': () => {
-                    const [, , fromGoalId, toGoalId] = actionParams;
-                    const fromGoal = goalRegistry[fromGoalId];
-                    const toGoal = goalRegistry[toGoalId];
-                    if (fromGoal) elementsToSave.add(fromGoal);
-                    if (toGoal) elementsToSave.add(toGoal);
-                },
-                'unallocatePointsFromGoalInOrg': () => {
-                    const goalId = actionParams[2];
-                    const goal = goalRegistry[goalId];
-                    if (goal) elementsToSave.add(goal);
-                },
-                'shiftPointsBetweenOffersInOrg': () => {
-                    const [, , fromOfferId, toOfferId] = actionParams;
-                    const fromOffer = offerRegistry[fromOfferId];
-                    const toOffer = offerRegistry[toOfferId];
-                    if (fromOffer) elementsToSave.add(fromOffer);
-                    if (toOffer) elementsToSave.add(toOffer);
-                },
-                'unallocatePointsFromOfferInOrg': () => {
-                    const [, , offerId, goalId] = actionParams;
-                    const offer = offerRegistry[offerId];
-                    const goal = goalRegistry[goalId];
-                    if (offer) elementsToSave.add(offer);
-                    if (goal) elementsToSave.add(goal);
-                }
-            };
+            debug('Action result:', result);
 
-            // Always available actions
-            const alwaysAvailableActions = ['getOrg', 'getGoal', 'getOffer', 'distributeShares', 'joinOrg'];
-
-            if (alwaysAvailableActions.includes(actionType) || 
-                actionType in actionEffects && org.getCurrentPhase() === getPhaseForAction(actionType)) {
-                
-                // Execute the action
-                result = await player[actionType](...actionParams);
-                
-                // Add basic elements that are always modified
-                elementsToSave.add(player);
-                elementsToSave.add(org);
-
-                // Add action-specific elements
-                if (actionEffects[actionType]) {
-                    actionEffects[actionType](result);
-                }
-            } else {
-                throw new Error(`Action ${actionType} is not allowed in the current phase: ${orgCurrentPhase}`);
-            }
+            // Track modified elements
+            elementsToSave.add(player);
+            elementsToSave.add(org);
         }
 
-        // Save all modified elements in parallel
+        // Save modifications
+        debug('Saving modified elements:', {
+            count: elementsToSave.size,
+            elements: [...elementsToSave].map(e => ({
+                id: e.id,
+                type: e.type
+            }))
+        });
+
         await Promise.all([...elementsToSave].map(element => save(element)));
         
+        debug('Action completed successfully:', {
+            actionType,
+            result
+        });
+
         return result;
 
     } catch (error) {
-        console.error('Error in playerAction:', error);
+        debug('Error in playerAction:', {
+            actionType,
+            error: error.message,
+            stack: error.stack
+        });
         throw error;
     }
 }

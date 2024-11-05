@@ -105,7 +105,7 @@ app.post('/register', (req, res) => {
 app.post('/player-action', (req, res) => {
     const { apiKey, actionType, actionParams } = req.body;
     try {
-        const result = playerAction(apiKey, actionType, actionParams);
+        const result = playerAction(apiKey, actionType, ...actionParams);
         
         // Encode the result using JSOG
         const jsogEncodedResult = JSOG.encode(result);
