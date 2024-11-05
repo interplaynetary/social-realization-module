@@ -74,7 +74,6 @@ const OrgList = () => {
         try {
 
             const data = await organizationService.joinOrg(orgId)
-
             if (data.success) {
                 // Update the org state without refetching all organizations
                 setOrgs((prevOrgs) =>
@@ -94,7 +93,7 @@ const OrgList = () => {
                 alert("Failed to join organization");
             }
         } catch (error) {
-            alert("An error occurred while joining the organization");
+            console.log("An error occurred while joining the organization", error);
         }
     };
 
@@ -112,17 +111,18 @@ const OrgList = () => {
     const getOrg = async (orgId: string) => {
         try {
             const data  = await organizationService.getOrgRegistry()
+            console.log("data", data);
 
             if (data.success) {
                 // todo: improve how goals are set; maybe create recoil for curretOrg data?
-                const goals = data.result.cycles[0].goals;
-                const updateOrgs = updateOrgGoals(orgs, orgId, goals);
+                const goals = data.registryData.find((org) => org.id === orgId).goals;
+                                const updateOrgs = updateOrgGoals(orgs, orgId, goals);
                 setOrgs(updateOrgs);
             } else {
-                alert("Failed to join organization");
+                alert("Failed to view organization");
             }
         } catch (error) {
-            alert("An error occurred while joining the organization");
+            console.log("An error occurred while viewing the organization", error);
         }
     };
 
