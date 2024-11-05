@@ -1,81 +1,72 @@
-import React, { useState, useRef } from 'react';
-import styles from './allocator.module.css';
+import React, { useState, useEffect, useRef } from "react";
 
 interface AllocatorProps {
-    potentialValue: number;
-    maxPotentialAllocatableByPlayer: number;
+    maxPotentialValue?: number;  // Optional prop with default value
 }
 
-const Allocator = ({ potentialValue, maxPotentialAllocatableByPlayer }: AllocatorProps) => {
-  const [selectedValue, setSelectedValue] = useState(0);
-  const containerRef = useRef(null);
+const Allocator: React.FC<AllocatorProps> = ({ maxPotentialValue = 200 }) => {
+    const [isGrowing, setIsGrowing] = useState(false);
+    const [size, setSize] = useState(10);
+    const animationRef = useRef(null);
+    const [potentialValue, setPotentialValue] = useState(0);
+    
+    const maxSize = maxPotentialValue;
 
-  const Potential_Value = 100;
-  const Max_Potential_Allocatable_By_Player = 30;
+    const grow = () => {
+        setSize(prevSize => {
+            const newSize = prevSize + 1;
+            return newSize <= maxSize ? newSize : maxSize;
+        });
+        
+        setPotentialValue(prevValue => {
+            const newValue = Math.round((size / maxSize) * maxPotentialValue);
+            return newValue <= maxPotentialValue ? newValue : maxPotentialValue;
+        });
+        
+        animationRef.current = requestAnimationFrame(grow);
+    };
 
-  const handleMouseDown = (event: { clientX: number; clientY: number; }) => {
-    if (containerRef.current) {
-      const rect = (containerRef.current as HTMLDivElement).getBoundingClientRect();
-      const x = event.clientX - rect.left;
-      const y = event.clientY - rect.top;
-      const distance = Math.sqrt(x * x + y * y);
-      const maxDistance = Math.min(rect.width, rect.height) / 2;
-      const value = (distance / maxDistance) * Max_Potential_Allocatable_By_Player;
-      setSelectedValue(value);
-    }
-  };
+    const handleMouseDown = () => {
+        setIsGrowing(true);
+        animationRef.current = requestAnimationFrame(grow);
+    };
 
-  const handleMouseMove = (event: { clientX: number; clientY: number; }) => {
-    if (containerRef.current) {
-        const rect = (containerRef.current as HTMLDivElement).getBoundingClientRect();
-        const x = event.clientX - rect.left;
-      const y = event.clientY - rect.top;
-      const distance = Math.sqrt(x * x + y * y);
-      const maxDistance = Math.min(rect.width, rect.height) / 2;
-      const value = (distance / maxDistance) * Max_Potential_Allocatable_By_Player;
-      setSelectedValue(value);
-    }
-  };
+    const handleMouseUp = () => {
+        setIsGrowing(false);
+        if (animationRef.current) {
+            cancelAnimationFrame(animationRef.current);
+        }
+    };
 
-  const handleMouseUp = () => {
-    setSelectedValue(0);
-  };
-
-  return (
+    return (
         <div
-          ref={containerRef}
-          className={styles.container}
-          onMouseDown={handleMouseDown}
-          onMouseMove={handleMouseMove}
-          onMouseUp={handleMouseUp}
-          onMouseLeave={handleMouseUp}
+            onMouseDown={handleMouseDown}
+            onMouseUp={handleMouseUp}
+            onMouseLeave={handleMouseUp}
+            style={{
+                width: `${maxSize}px`,
+                height: `${maxSize}px`,
+                borderRadius: "50%",
+                backgroundColor: "#ccc",
+                position: "relative",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                cursor: "pointer",
+            }}
         >
-          <div
-            className={styles.circle}
-            style={{
-              width: `${Potential_Value * 2}px`,
-              height: `${Potential_Value * 2}px`,
-              opacity: 0.2,
-            }}
-          />
-          <div
-            className={styles.circle}
-            style={{
-              width: `${Max_Potential_Allocatable_By_Player * 2}px`,
-              height: `${Max_Potential_Allocatable_By_Player * 2}px`,
-              opacity: 0.4,
-            }}
-          />
-          <div
-            className={styles.circle}
-            style={{
-              width: `${selectedValue * 2}px`,
-              height: `${selectedValue * 2}px`,
-              opacity: 0.6,
-            }}
-          />
+            <div
+                style={{
+                    width: `${size}px`,
+                    height: `${size}px`,
+                    borderRadius: "50%",
+                    backgroundColor: "#bde8bf",
+                }}
+            >
+                {potentialValue}
+            </div>
         </div>
-  );
+    );
 };
 
 export default Allocator;
