@@ -170,7 +170,4 @@ function testCompletions(org, player1, player2, testOrg) {
     console.log(`Completions claimed: ${completion1}, ${completion2}`);
     console.log(`Completion 1 status: ${org.getCurrentSelfData().completions[completion1].status}`);
     console.log(`Completion 2 status: ${org.getCurrentSelfData().completions[completion2].status}`);
-
-    const tester = constructFromJSOG(JSOG.encode(player2));
-    console.log('TESTING Join', tester.joinOrg(testOrg.id));
 }

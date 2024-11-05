@@ -14,6 +14,7 @@ const PhaseActions = ({ org, apiKey, playerId }) => {
         offerDescription: "",
         offerEffects: "",
         offerAsk: "",
+        targetGoals: "",
     });
 
     const handleProposeGoal = async () => {

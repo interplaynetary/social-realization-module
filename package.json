@@ -5,6 +5,8 @@
   "engine": {
     "node": ">=20"
   },
+  "scripts": {
+  },
   "dependencies": {
     "@angular/animations": "^15.0.4",
     "@angular/cdk": "^15.0.3",
