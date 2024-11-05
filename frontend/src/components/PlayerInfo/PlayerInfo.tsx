@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { Org } from "../../../../sharedTypes";
+import PlayerAvatar from "../PlayerAvatar/PlayerAvatar";
 import Headline from "../ui/Headline/Headline";
 import * as classes from "./PlayerInfo.module.css";
 import { palette } from "./PlayerInfoColorPalette";
@@ -13,7 +14,7 @@ const PlayerInfo: React.FC<PlayerInfoProps> = ({ org }) => {
         {}
     );
 
-    useEffect(() => {
+    useEffect(() => {   
         // Shuffle the palette and assign a unique color to each player
         const shuffledPalette = [...palette].sort(() => 0.5 - Math.random());
 
@@ -41,20 +42,10 @@ const PlayerInfo: React.FC<PlayerInfoProps> = ({ org }) => {
 
                     return (
                         <div key={playerId} className={classes.avatarContainer}>
-                            <div
-                                className={classes.avatar}
-                                style={{
-                                    backgroundColor:
-                                        playerColors[playerId] || "#ccc",
-                                }}
-                                title={player.name}
-                            >
-                                <span>{player.name.charAt(0)}</span>
-                            </div>
-
-                            <span className={classes.avatarName}>
-                                {player.name}
-                            </span>
+                            <PlayerAvatar
+                                color={playerColors[playerId] || "#ccc"}
+                                name={player.name}
+                            />
 
                             <div className={classes.playerDetails}>
                                 {false && <p>ID: {playerId}</p>}

@@ -1,5 +1,4 @@
 import { Fragment, useState } from "react";
-import { PlayerActionType, PlayerActionTypes } from "../../../../sharedTypes";
 import Button from "../ui/Button/Button";
 import Headline from "../ui/Headline/Headline";
 import NumberInput from "../ui/NumberInput/NumberInput";
@@ -17,10 +16,7 @@ const PhaseActions = ({ org, apiKey, playerId }) => {
     });
 
     const handleProposeGoal = async () => {
-
-
-        const data  =await goalService.proposeGoal(org.id,goalDescription)
-        
+        const data = await goalService.proposeGoal(org.id, goalDescription);
 
         if (data.success) {
             console.log("foo", data);
