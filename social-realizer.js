@@ -208,8 +208,8 @@ export class Completion {
 
 export class Org extends Element {
     constructor(name, id = null	) {
-        debug('Creating new Org:', { name });
         super(id);
+        debug('Creating new Org:', { name });
         this.name = this.getUniqueName(name);
         debug('Generated unique name:', this.name);
 
@@ -242,19 +242,24 @@ export class Org extends Element {
     }
     getUniqueName(baseName) {
         // If this is a name being loaded from persistence that already has a number
+        console.log('[nameRegistry:]', nameRegistry);
+        
         if (baseName.match(/-\d+$/)) {
             // Register the existing name and number
             const [base, num] = baseName.rsplit('-', 1);
             nameRegistry[base] = Math.max(parseInt(num), nameRegistry[base] || 0);
+            console.log('[Loaded name:]', nameRegistry[base]);
             return baseName;
         }
 
         // For new names
-        if (!nameRegistry[baseName]) {
+        if (nameRegistry[baseName] == undefined) {
+            console.log('[New name:]', nameRegistry[baseName]);
             nameRegistry[baseName] = 0;
             return `${baseName}-0`;
         } else {
             nameRegistry[baseName]++;
+            console.log('[Incremented name:]', nameRegistry[baseName]);
             return `${baseName}-${nameRegistry[baseName]}`;
         }
     }
