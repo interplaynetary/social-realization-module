@@ -8,16 +8,18 @@ import { goalService, offerService, organizationService } from "../../api";
 import { currentOrgAtom } from "../../state/atoms/currentOrgAtom";
 import { useRecoilState } from "recoil";
 
+const initialOfferDetails = {
+    offerName: "",
+    offerDescription: "",
+    offerEffects: "",
+    offerAsk: "",
+    targetGoals: "",
+};
+
 const PhaseActions = ({ org, apiKey, playerId }) => {
     const [goalDescription, setGoalDescription] = useState("");
     const [isSubmitting, setIsSubmitting] = useState(false);
-    const [offerDetails, setOfferDetails] = useState({
-        offerName: "",
-        offerDescription: "",
-        offerEffects: "",
-        offerAsk: "",
-        targetGoals: "",
-    });
+    const [offerDetails, setOfferDetails] = useState(initialOfferDetails);
 
     const [currentOrg, setCurrentOrg] = useRecoilState(currentOrgAtom);
 
@@ -63,6 +65,7 @@ const PhaseActions = ({ org, apiKey, playerId }) => {
 
         if (data.success) {
             console.log(data, "offer has been made <3");
+            setOfferDetails(initialOfferDetails);
         }
     };
 

@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useSetRecoilState, useRecoilValue } from "recoil";
+import { useSetRecoilState, useRecoilValue, useRecoilState } from "recoil";
 import { apiKeyAtom } from "../../state/atoms/apiKeyAtom";
 import { playerDataAtom } from "../../state/atoms/playerDataAtom";
 import { selectedOrgAtom } from "../../state/atoms/selectedOrgAtom"; // New atom for the current organization
@@ -14,6 +14,7 @@ import Headline from "../ui/Headline/Headline";
 import { ROUTES } from "../../core/Routes";
 import { organizationService } from "../../api/organisation";
 import { Org } from "../../../../sharedTypes";
+import { currentOrgAtom } from "../../state/atoms/currentOrgAtom";
 
 type OrgParams = {
     orgId?: string; // Optional param, might not always be in the route
@@ -31,6 +32,8 @@ const OrgList = () => {
     const playerData = useRecoilValue(playerDataAtom);
     const selectedOrg = useRecoilValue(selectedOrgAtom);
     const setSelectedOrg = useSetRecoilState(selectedOrgAtom);
+
+    const [currentOrg, setCurrentOrg] = useRecoilState(currentOrgAtom);
 
     const { orgId } = useParams<OrgParams>(); // Capture orgId from URL params
     const navigate = useNavigate();
@@ -54,8 +57,7 @@ const OrgList = () => {
         setLoading(true);
 
         try {
-
-            const data = await organizationService.getOrgRegistry()
+            const data = await organizationService.getOrgRegistry();
 
             if (data.success) {
                 setOrgs(data.registryData);
@@ -72,20 +74,19 @@ const OrgList = () => {
 
     const handleJoinOrg = async (orgId: string) => {
         try {
-
-            const data = await organizationService.joinOrg(orgId)
+            const data = await organizationService.joinOrg(orgId);
             if (data.success) {
                 // Update the org state without refetching all organizations
                 setOrgs((prevOrgs) =>
                     prevOrgs.map((org) =>
                         org.id === orgId
                             ? {
-                                  ...org,
-                                  players: {
-                                      ...org.players,
-                                      [playerData.id]: true,
-                                  },
-                              } // Update the players
+                                ...org,
+                                players: {
+                                    ...org.players,
+                                    [playerData.id]: true,
+                                },
+                            } // Update the players
                             : org
                     )
                 );
@@ -93,7 +94,10 @@ const OrgList = () => {
                 alert("Failed to join organization");
             }
         } catch (error) {
-            console.log("An error occurred while joining the organization", error);
+            console.log(
+                "An error occurred while joining the organization",
+                error
+            );
         }
     };
 
@@ -102,6 +106,7 @@ const OrgList = () => {
             setSelectedOrg(null);
             navigate(ROUTES.LOGIN);
         } else {
+            console.log(org.id, "???");
             setSelectedOrg(org);
             getOrg(org.id);
             navigate(`${ROUTES.ORGS}${org.id}/`);
@@ -110,37 +115,27 @@ const OrgList = () => {
 
     const getOrg = async (orgId: string) => {
         try {
-            const data  = await organizationService.getOrgRegistry()
-            console.log("data", data);
+            const data = await organizationService.getOrgById(orgId);
 
             if (data.success) {
+                const org = data["organization"];
+
+                setCurrentOrg(org);
+
                 // todo: improve how goals are set; maybe create recoil for curretOrg data?
-                const goals = data.registryData.find((org) => org.id === orgId).goals;
-                                const updateOrgs = updateOrgGoals(orgs, orgId, goals);
-                setOrgs(updateOrgs);
+                console.log(org, "data2???");
+
+                console.log("update it all!");
+
             } else {
                 alert("Failed to view organization");
             }
         } catch (error) {
-            console.log("An error occurred while viewing the organization", error);
+            console.log(
+                "An error occurred while viewing the organization",
+                error
+            );
         }
-    };
-
-    // Function to update goals for a specific org
-    const updateOrgGoals = (
-        orgs: Org[],
-        orgId: string,
-        newGoals: Record<string, any>
-    ): Org[] => {
-        return orgs.map((org) => {
-            if (org.id === orgId) {
-                return {
-                    ...org,
-                    goals: newGoals, // Update the goals
-                };
-            }
-            return org; // Return org unchanged if it doesn't match
-        });
     };
 
     const handleClose = () => {
@@ -199,6 +194,7 @@ const OrgList = () => {
                     }}
                 >
                     <OrgDetail
+                        currentOrg={currentOrg}
                         org={selectedOrg}
                         apiKey={apiKey}
                         playerId={playerData.id}

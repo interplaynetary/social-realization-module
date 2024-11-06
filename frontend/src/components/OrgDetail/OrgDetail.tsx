@@ -7,16 +7,24 @@ import { ApiKey, Org } from "../../../../sharedTypes";
 import * as classes from "./OrgDetail.module.css";
 import Tag from "../ui/Tag/Tag";
 import { organizationService } from "../../api/organisation";
+import Allocator from "../ui/Allocator/Allocator";
+import { useEffect } from "react";
+
+const allocator = true;
 
 const OrgDetail: React.FunctionComponent<{
     org: Org;
+    currentOrg?: any;
     apiKey: ApiKey;
     playerId: any;
-}> = ({ org, apiKey, playerId }) => {
-    console.log({ apiKey, playerId });
+}> = ({ org, currentOrg, apiKey, playerId }) => {
+
+    useEffect(() => {
+        console.log(currentOrg, "currentOrg!!")
+    }, [currentOrg])
 
     const handlePhaseShift = async () => {
-        const data = await organizationService.runPhaseShift()
+        const data = await organizationService.runPhaseShift();
 
         if (data.success) {
             console.log(data, "data");
@@ -41,7 +49,14 @@ const OrgDetail: React.FunctionComponent<{
 
             <PhaseActions org={org} apiKey={apiKey} playerId={playerId} />
 
-            <GoalInfo org={org} />
+            {
+                <Allocator
+                    potentialValue={0}
+                    maxPotentialAllocatableByPlayer={0}
+                />
+            }
+
+            {currentOrg && <GoalInfo org={currentOrg} />}
 
             {playerId === org.id && (
                 <Button variant="secondary" onClick={handlePhaseShift}>

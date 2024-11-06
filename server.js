@@ -146,16 +146,40 @@ app.get('/get-org-registry', (req, res) => {
 });
 
 app.get('/get-org/:id', (req, res) => {
-    const orgId = req.params.id;
-    const organization = orgRegistry[orgId];
-    
-    if (!organization) {
-        return res.status(404).json({ success: false, error: 'Organization not found' });
+    try {
+        const orgId = req.params.id;
+        const org = orgRegistry[orgId];
+        
+        if (!org) {
+            return res.status(404).json({ success: false, error: 'Organization not found' });
+        }
+        
+        // Get current cycle data
+        const currentCycleData = org.getCurrentSelfData();
+        
+        // Build response object
+        const orgData = {
+            id: orgId,
+            name: org.name,
+            currentCycle: org.currentCycle,
+            currentPhase: org.currentPhase,
+            // Current goals at top level of organization
+            goals: currentCycleData.goals,
+            // Other current cycle data
+            players: currentCycleData.players,
+            offers: currentCycleData.offers,
+            potentialValue: currentCycleData.potentialValue,
+            shares: currentCycleData.shares,
+            realizedValue: currentCycleData.realizedValue,
+            cycles: org.cycles
+        };
+        
+        const jsogEncodedOrg = JSOG.encode(orgData);
+        res.json({ success: true, organization: jsogEncodedOrg });
+    } catch (error) {
+        console.error('Error in /get-org/:id:', error);
+        res.status(500).json({ success: false, error: error.message });
     }
-    
-    // Encode the organization using JSOG to handle circular references
-    const jsogEncodedOrg = JSOG.encode(organization);
-    res.json({ success: true, organization: jsogEncodedOrg });
 });
 
 const PORT = process.env.PORT || 3000;
