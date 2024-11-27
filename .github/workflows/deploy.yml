@@ -1,0 +1,61 @@
+name: Deploy to Social Realizer
+on:
+  push:
+    branches:
+      - main
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Deploy using SSH
+        run: |
+          export SSHPASS='${{ secrets.SSH_PASSWORD }}'
+          sshpass -e ssh -o StrictHostKeyChecking=no ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }} '
+            set -e  # Exit on error
+            
+            echo "Setting up environment..."
+            export NVM_DIR="$HOME/.nvm"
+            [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+            
+            echo "Navigating to project..."
+            cd ~/social-realization-module
+            
+            echo "Updating from git..."
+            git fetch origin main
+            git reset --hard origin/main
+            
+            echo "Identifying and terminating existing Social Realizer processes..."
+            # Find and terminate backend processes
+            pm2 list | grep "social-backend" && pm2 delete "social-backend" || true
+            pm2 list | grep "server.js" && pm2 delete "server.js" || true
+            
+            # Find and terminate frontend processes
+            pm2 list | grep "social-frontend" && pm2 delete "social-frontend" || true
+            
+            # Ensure no lingering Node processes
+            pkill -f "node.*social-realization-module" || true
+            
+            echo "Starting backend server with PM2..."
+            pm2 start server.js --name "social-backend"
+            
+            echo "Navigating to frontend..."
+            cd frontend
+            
+            echo "Installing frontend dependencies..."
+            npm install
+            
+            echo "Starting frontend with PM2..."
+            pm2 start npm --name "social-frontend" -- start
+            
+            echo "Verifying running processes..."
+            pm2 list
+            
+            echo "Saving PM2 process list for auto-restart..."
+            pm2 save
+            
+            echo "Deployment complete!"
+            exit 0
+          '
