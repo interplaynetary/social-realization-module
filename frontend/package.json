@@ -3,7 +3,9 @@
     "version": "1.0.0",
     "scripts": {
         "start": "parcel src/index.html && parcel watch src/index.html",
-        "test": "echo \"Error: no test specified\" && exit 1"
+        "build": "react-scripts build",
+        "test": "react-scripts test",
+        "eject": "react-scripts eject"
     },
     "author": "",
     "license": "ISC",
