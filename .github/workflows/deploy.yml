@@ -56,6 +56,6 @@ jobs:
             echo "Saving PM2 process list for auto-restart..."
             pm2 save
             
-            echo "Deployment complete!"
+            echo "Deployment complete! <3"
             exit 0
           '
