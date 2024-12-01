@@ -32,9 +32,6 @@ jobs:
             pm2 list | grep "social-backend" && pm2 delete "social-backend" || true
             pm2 list | grep "server.js" && pm2 delete "server.js" || true
             
-            # Find and terminate frontend processes
-            pm2 list | grep "social-frontend" && pm2 delete "social-frontend" || true
-            
             # Ensure no lingering Node processes
             pkill -f "node.*social-realization-module" || true
             
@@ -45,13 +42,10 @@ jobs:
             cd frontend
             
             echo "Installing frontend dependencies..."
-            npm install
+            npm ci
             
             echo "Building frontend..."
             npm run build
-            
-            echo "Starting frontend with PM2..."
-            pm2 start npm --name "social-frontend" -- start
             
             echo "Verifying running processes..."
             pm2 list

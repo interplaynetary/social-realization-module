@@ -25,7 +25,7 @@ app.use(express.static('public')); // Serve static files from 'public' directory
 const allowedOrigins = [
     "http://127.0.0.1:5501",
     "http://localhost:1234",
-    "http://realizer.playnet.lol"
+    "https://realizer.playnet.lol"
 ];
 
 app.use(
