@@ -96,5 +96,5 @@ Uncaught (in promise) ReferenceError: selectedGoalId is not defined
     at HTMLButtonElement.submitOfferAllocations (player_interface.html:322:49)
 
 - When allocating points from another goal to an offer that has already been allocated to:
-POST http://localhost:3000/allocatePointsToOffer 400 (Bad Request)
+POST http://localhost:3001/allocatePointsToOffer 400 (Bad Request)
 form.onsubmit @ player_interface.html:211
