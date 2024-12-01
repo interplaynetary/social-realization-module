@@ -3,9 +3,7 @@
     "version": "1.0.0",
     "scripts": {
         "start": "parcel src/index.html && parcel watch src/index.html",
-        "build": "react-scripts build",
-        "test": "react-scripts test",
-        "eject": "react-scripts eject"
+        "build": "parcel build src/index.html"
     },
     "author": "",
     "license": "ISC",
