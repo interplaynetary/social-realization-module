@@ -47,6 +47,9 @@ jobs:
             echo "Installing frontend dependencies..."
             npm install
             
+            echo "Building frontend..."
+            npm run build
+            
             echo "Starting frontend with PM2..."
             pm2 start npm --name "social-frontend" -- start
             

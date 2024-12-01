@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Org } from "../../../../sharedTypes";
 import PlayerAvatar from "../PlayerAvatar/PlayerAvatar";
 import Headline from "../ui/Headline/Headline";
+import * as avatarClasses from "../PlayerAvatar/PlayerAvatar.module.css";
 import * as classes from "./PlayerInfo.module.css";
 import { palette } from "./PlayerInfoColorPalette";
 
@@ -41,7 +42,7 @@ const PlayerInfo: React.FC<PlayerInfoProps> = ({ org }) => {
                     if (!player.name) return null;
 
                     return (
-                        <div key={playerId} className={classes.avatarContainer}>
+                        <div key={playerId} className={avatarClasses.avatarContainer}>
                             <PlayerAvatar
                                 color={playerColors[playerId] || "#ccc"}
                                 name={player.name}

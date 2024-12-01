@@ -1,4 +1,4 @@
-import classes from "./PlayerAvatar.module.css";
+import * as classes from "./PlayerAvatar.module.css";
 
 interface PlayerAvatarProps {
     name: string;

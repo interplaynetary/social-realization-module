@@ -10,7 +10,10 @@
     margin-top: 24px;
 }
 
-
 .orgName {
     text-decoration: underline;
+}
+
+.playerDetails {
+    text-align: center;
 }

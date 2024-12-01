@@ -1,3 +1,7 @@
+.orgDetails {
+    padding: 20px;
+}
+
 .orgInfo {
     display: flex;
     row-gap: 6px;

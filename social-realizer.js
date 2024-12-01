@@ -1,5 +1,7 @@
 import { v4 as uuidv4 } from 'uuid';
 import { save } from './persistence.js';
+import JSOG from 'jsog';
+//import { Token, issueRightObligationPairs, issueMultipleRightObligationPairs } from './right-obligation.js';
 
 // Points from each goal should be recognizable a from them in the data structure.
 // Tags on goals in Orgs
@@ -19,7 +21,6 @@ import { save } from './persistence.js';
 
 // We need to ensure that we are using UUIDs everywhere instead of Object References
 // So we can save the each object with JSOG and reconstruct the state from JSOG simply by reinstantiating the object corresponding to the UUID in the appropriate registry, with the updated JSOG Data.
-
 
 // mantain ordering, when an org is made, it's reference should be stored here, to have playstate-0, playstate-1 etc. names
 //introduce name counter into Org class so names don't repeat with a dash, and are followed with -0, -1
