@@ -24,7 +24,8 @@ app.use(express.static('public')); // Serve static files from 'public' directory
 // Set up CORS middleware to allow multiple origins
 const allowedOrigins = [
     "http://127.0.0.1:5501",
-    "http://localhost:1234"
+    "http://localhost:1234",
+    "http://realizer.playnet.lol"
 ];
 
 app.use(
@@ -180,6 +181,20 @@ app.get('/get-org/:id', (req, res) => {
         console.error('Error in /get-org/:id:', error);
         res.status(500).json({ success: false, error: error.message });
     }
+});
+
+app.get('/api', (req, res) => {
+    res.json({ 
+        status: 'ok',
+        message: 'API is running',
+        endpoints: [
+            '/api/login',
+            '/api/register',
+            '/api/player-action',
+            '/api/get-org-registry',
+            '/api/get-org/:id'
+        ]
+    });
 });
 
 const PORT = process.env.PORT || 3000;
