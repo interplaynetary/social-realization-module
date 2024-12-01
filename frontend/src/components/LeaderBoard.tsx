@@ -5,7 +5,7 @@ const Leaderboard = ({ apiKey, currentOrgId }) => {
     const [dimension, setDimension] = useState("potentialValue");
 
     const fetchLeaderboard = async () => {
-        const response = await fetch("http://localhost:3000/player-action", {
+        const response = await fetch("http://localhost:3001/player-action", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({

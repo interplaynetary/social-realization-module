@@ -1,11 +1,12 @@
 import axios from 'axios';
 
-const API_BASE_URL = 'http://localhost:3001';
+export const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://realizer.playnet.lol/api';
 
 export const api = axios.create({
   baseURL: API_BASE_URL,
   headers: {
     'Content-Type': 'application/json',
+    'Accept': 'application/json'
   },
 });
 
