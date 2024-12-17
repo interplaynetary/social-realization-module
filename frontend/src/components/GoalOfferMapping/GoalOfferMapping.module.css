@@ -2,6 +2,45 @@
 .mappingContainer {
     margin: 1rem 0;
 }
+
+/* Organization cards */
+.orgCard {
+    background-color: #e8f5e9; /* Light green */
+    border: 1px solid #81c784;
+    margin-bottom: 1rem;
+    padding: 1rem;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Goal cards */
+.goalCard {
+    background-color: #fff8e1; /* Light gold */
+    border: 1px solid #ffd54f;
+    margin-bottom: 1rem;
+    padding: 1rem;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Offer cards */
+.offerCard {
+    background-color: #e3f2fd; /* Light blue */
+    border: 1px solid #90caf9;
+    margin-top: 0.5rem;
+    padding: 0.75rem;
+    border-radius: 4px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+/* Hover effects */
+.orgCard:hover,
+.goalCard:hover,
+.offerCard:hover {
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+    transition: box-shadow 0.3s ease;
+}
+
 .section {
     margin: 1rem 0;
 }
@@ -11,17 +50,6 @@
     grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
     gap: 1rem;
     margin-top: 1rem;
-}
-
-.goalCard,
-.offerCard {
-    margin: 1rem;
-    border: 1px solid #dddfdf;
-    border-radius: 16px;
-    padding: 32px;
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
 }
 
 .goalTitle,
@@ -45,13 +73,6 @@
     font-size: 0.9rem;
 }
 
-/* Add hover effect similar to OrgList cards */
-.goalCard:hover,
-.offerCard:hover {
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-    transition: box-shadow 0.3s ease;
-}
-
 .offersList {
     margin-top: 0.5rem;
 }
@@ -60,4 +81,18 @@
     list-style-type: none; /* Remove bullet points */
     padding: 0; /* Remove padding */
     margin: 0; /* Remove margin */
+}
+
+.goalAllocationInfo {
+    background-color: rgba(255, 255, 255, 0.5);
+    padding: 0.75rem;
+    margin: 0.5rem 0;
+    border-radius: 4px;
+    border: 1px solid #ffd54f;
+}
+
+.goalAllocationInfo p {
+    margin: 0.25rem 0;
+    font-size: 0.9rem;
+    color: #666;
 }

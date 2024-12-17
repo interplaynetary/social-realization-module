@@ -1,10 +1,31 @@
 .section {
-    margin-top: var(--s-xl);
-    margin-bottom: var(--s-xl);
+    margin: 1rem 0;
+}
+
+.section h4 {
+    margin-bottom: 0.5rem;
+}
+
+.submitButton {
+    margin-top: 1rem;
 }
 
 .inputGroup {
     display: flex;
     row-gap: 10px;
     flex-direction: column;
+}
+
+.orgAllocationInfo {
+    background-color: #e8f5e9; /* Light green */
+    border: 1px solid #81c784;    
+    padding: 0.75rem;
+    margin: 0.5rem 0;
+    border-radius: 4px;
+}
+
+.orgAllocationInfo p {
+    margin: 0.25rem 0;
+    font-size: 0.9rem;
+    color: #666;
 }

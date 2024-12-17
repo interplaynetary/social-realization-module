@@ -10,6 +10,7 @@ import { useRecoilState } from "recoil";
 import GoalInfo from "../GoalInfo/GoalInfo";
 import { palette } from "../PlayerInfo/PlayerInfoColorPalette"; // Assuming you have a color palette
 import GoalOfferMapping from "../GoalOfferMapping/GoalOfferMapping";
+import { useGoalAllocationCalculations } from '../../helpers/helpers';
 
 
 const initialOfferDetails = {
@@ -26,6 +27,8 @@ const PhaseActions = ({ org, apiKey, playerId }) => {
     const [selectedGoals, setSelectedGoals] = useState<string[]>([]);
     const [allocations, setAllocations] = useState<Record<string, number>>({});
     const [playerColors, setPlayerColors] = useState<Record<string, string>>({});
+    const [allocationData, setAllocationData] = useState(null);
+    const [isLoading, setIsLoading] = useState(false);
 
     const [currentOrg, setCurrentOrg] = useRecoilState(currentOrgAtom);
 
@@ -147,6 +150,29 @@ const PhaseActions = ({ org, apiKey, playerId }) => {
     }
     }, [org?.players]);
 
+    useEffect(() => {
+        const fetchData = async () => {
+            if (org.currentPhase === "goalAllocation") {
+                setIsLoading(true);
+                try {
+                    const result = await organizationService.fetchGoalAllocationData(org.id, playerId);
+                    console.log('Goal allocation data:', result);
+                    if (result.data.success) {
+                        setAllocationData(result.data.data);
+                    }
+                } catch (error) {
+                    console.error('Error fetching allocation data:', error);
+                } finally {
+                    setIsLoading(false);
+                }
+            }
+        };
+        
+        fetchData();
+    }, [org.currentPhase, org.id, playerId]);
+
+    const calculations = useGoalAllocationCalculations(allocationData);
+
     return (
         <Fragment>
             {org.currentPhase === "goalExpression" && (
@@ -171,27 +197,39 @@ const PhaseActions = ({ org, apiKey, playerId }) => {
 
             {org.currentPhase === "goalAllocation" && (
                 <div className={classes.section}>
-                    <Headline level="h4">Your Share of Potential Value to Allocate</Headline>
-                    <Headline level="h4">Allocated</Headline>
-                    <Headline level="h4">Left to Allocate</Headline>
+                    {isLoading ? (
+                        <p>Loading allocation data...</p>
+                    ) : (
+                        <>
+                            <div className={classes.orgAllocationInfo}>
+                                <p>Your Portion of Potential Value to Allocate: {calculations.allocatorPortion}</p>
+                                <p>Already Allocated: {calculations.alreadyDistributed}</p>
+                                <p>Left to Allocate: {calculations.leftToAllocate}</p>
+                            </div>
+                            {/* make already allocated and left to allocateuse State to reload based on form inputs */}
+                            {/* I should be able to reallocate at will while the phase is open */}
+                            {/* Value in the input field should be the value of left to allocated */}
+                            {/* These require changes to social-realizer.js, we are currently not tracking who allocates how much to which goal/offer, only that one has distributed points from goals to offers towards them */}
 
-                    <Headline level="h4">Allocate Potential Value to Goals</Headline>
-                    <GoalInfo 
-                        org={currentOrg} 
-                        playerColors={playerColors}
-                        onGoalSelect={handleGoalSelect}
-                        selectedGoals={selectedGoals}
-                        isSelectable={false}
-                        onAllocateValue={(goalId, value) => {
-                            setAllocations(prev => ({
-                                ...prev,
-                                [goalId]: value
-                            }));
-                        }}
-                    />
-                    <Button onClick={handleSubmitAllocations} disabled={isSubmitting}>
-                        Submit Allocations
-                    </Button>
+                            <Headline level="h4">Allocate Potential Value to Goals</Headline>
+                            <GoalInfo 
+                                org={currentOrg} 
+                                playerColors={playerColors}
+                                onGoalSelect={handleGoalSelect}
+                                selectedGoals={selectedGoals}
+                                isSelectable={false}
+                                onAllocateValue={(goalId, value) => {
+                                    setAllocations(prev => ({
+                                        ...prev,
+                                        [goalId]: value
+                                    }));
+                                }}
+                            />
+                            <Button onClick={handleSubmitAllocations} disabled={isSubmitting}>
+                                Submit Allocations
+                            </Button>
+                        </>
+                    )}
                 </div>
             )}
 
@@ -263,7 +301,7 @@ const PhaseActions = ({ org, apiKey, playerId }) => {
             {org.currentPhase === "offerAllocation" && (
                 <div>
                     <Headline level="h4">Allocate Value from Goals to Offers towards them</Headline>
-                    <GoalOfferMapping org={org} />
+                    <GoalOfferMapping org={org} currentCycle={org.currentCycle} playerId={playerId}/>
                 </div>
             )}
         </Fragment>

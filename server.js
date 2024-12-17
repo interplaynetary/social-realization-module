@@ -197,6 +197,77 @@ app.get('/api', (req, res) => {
     });
 });
 
+app.get('/get-goal-allocation-data/:orgId/:playerId', (req, res) => {
+    try {
+        const { orgId, playerId } = req.params;
+        const org = orgRegistry[orgId];
+        const currentOrg = org.getCurrentSelfData();
+        const allocator = currentOrg.players[playerId];
+        const allocatorOrgData = allocator.getCurrentOtherData(orgId);
+
+        const allocationData = {
+            orgPotentialValue: currentOrg.potentialValue,
+            orgDistributedValue: currentOrg.potentialValueDistributedFromSelfToGoals,
+            totalShares: currentOrg.shares,
+            allocatorShares: allocatorOrgData.shares,
+            allocatorDistributed: allocatorOrgData.potentialValueDistributedFromOrgToGoals
+        };
+
+        res.json({ success: true, data: allocationData });
+    } catch (error) {
+        res.status(400).json({ success: false, error: error.message });
+    }
+});
+
+app.get('/get-offer-allocation-data/:orgId/:playerId/:goalId', (req, res) => {
+    try {
+        const { orgId, playerId, goalId } = req.params;
+        const org = orgRegistry[orgId];
+        const currentOrg = org.getCurrentSelfData();
+        const allocator = currentOrg.players[playerId];
+        const goal = currentOrg.goals[goalId];
+
+        if (!goal) {
+            throw new Error("Goal not found");
+        }
+
+        // Get the raw data needed for calculations
+        const goalOrgData = goal.getCurrentOtherData(orgId);
+        const allocatorOrgData = allocator.getCurrentOtherData(orgId);
+        
+        // Get data for each offer towards this goal
+        const offersData = goalOrgData.offersTowardsSelf.reduce((acc, offerId) => {
+            const offer = currentOrg.offers[offerId];
+            if (offer) {
+                const offerOrgData = offer.getCurrentOtherData(orgId);
+                acc[offerId] = {
+                    name: offer.name,
+                    description: offer.description,
+                    ask: offerOrgData.ask,
+                    currentPotentialValue: offerOrgData.potentialValue
+                };
+            }
+            return acc;
+        }, {});
+
+        const allocationData = {
+            goalData: {
+                potentialValue: goalOrgData.potentialValue,
+                potentialValueDistributedFromSelf: goalOrgData.potentialValueDistributedFromSelf,
+            },
+            allocatorData: {
+                shares: allocatorOrgData.shares,
+                totalShares: currentOrg.shares,
+                distributedToOffers: allocatorOrgData.potentialValueDistributedFromGoalToOffers[goalId] || 0
+            },
+            offers: offersData
+        };
+
+        res.json({ success: true, data: allocationData });
+    } catch (error) {
+        res.status(400).json({ success: false, error: error.message });
+    }
+});
 const PORT = process.env.PORT || 3001;
 
 // Initialize registries at startup

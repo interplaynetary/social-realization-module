@@ -13,21 +13,6 @@ export const goalService = {
 
     return { success: true };
     // we should also allow for reallocations - resubmitting = batch - reallocation
-
-    /*
-      const allocatorPortion = remainingPotentialValue * (allocatorOrgData.shares / currentOrg.shares);
-        const alreadyDistributed = allocatorOrgData.potentialValueDistributedFromOrgToGoals;
-
-        if (amount <= allocatorPortion - alreadyDistributed) {
-            currentOrg.potentialValueDistributedFromSelfToGoals += amount;
-            allocatorOrgData.potentialValueDistributedFromOrgToGoals += amount;
-            const goalOrgData = goal.getCurrentOtherData(orgId);
-            goalOrgData.potentialValue += amount;
-            return true;
-        } else {
-            throw new Error("Insufficient allocation rights.");
-        }
-    */
   },
 
   async allocateToGoal(orgId: string, amount: number, goalId: string) {

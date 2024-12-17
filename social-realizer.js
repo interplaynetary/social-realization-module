@@ -453,6 +453,9 @@ export class Org extends Element {
             };
             this.orgData[orgId] = cycleSpecificOrgData;
             currentOrg.players[this.id] = this;
+            // FOR TESTING ONLY: AUTO distribute shares upon joining
+            org.issueShares(100);
+            org.distributeShares(this.id, 100);
             debug('Successfully joined org:', {
                 playerId: this.id,
                 orgId: orgId,
@@ -465,6 +468,7 @@ export class Org extends Element {
             playerId: this.id,
             orgId: orgId
         });
+
         return false;
     }
 

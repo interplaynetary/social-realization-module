@@ -6,17 +6,16 @@
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
     gap: 1rem;
-    margin-top: 1rem;
 }
 
-.goalCard,
-.offerCard {
-    border: 1px solid #dddfdf;
-    border-radius: 16px;
-    padding: 32px;
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
+
+.goalCard {
+    background-color: #fff8e1; /* Light gold */
+    border: 1px solid #ffd54f;
+    margin-bottom: 1rem;
+    padding: 1rem;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .goalTitle,
@@ -33,6 +32,24 @@
     gap: 0.5rem;
 }
 
+/* Add hover effect similar to OrgList cards */
+.goalCard:hover,
+.offerCard:hover {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    transition: box-shadow 0.3s ease;
+}
+
+.selected {
+    border: 2px solid #007bff;
+    background-color: rgba(0, 123, 255, 0.05);
+}
+
+.cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1rem;
+}
+
 .goalDetails p,
 .offerDetails p {
     margin: 0;
@@ -46,12 +63,6 @@
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
     transition: box-shadow 0.3s ease;
 }
-
-.selected {
-    border: 2px solid #007bff;
-    background-color: rgba(0, 123, 255, 0.05);
-}
-
 
 /* Input container styling */
 .inputContainer {

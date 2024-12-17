@@ -40,5 +40,13 @@ export const organizationService = {
 
   async runPhaseShift() {
     return this.playerAction('runPhaseShift', []);
-  }
+  },
+
+  async fetchGoalAllocationData(orgId: string, playerId: string) {
+    return await api.get(`/get-goal-allocation-data/${orgId}/${playerId}`);
+  },
+
+  async fetchOfferAllocationData(orgId: string, playerId: string, goalId: string) {
+      return await api.get(`/get-offer-allocation-data/${orgId}/${playerId}/${goalId}`);
+  },
 };

@@ -26,3 +26,17 @@
     opacity: .5;
     font-size: var(--f-m);
 }
+
+.orgCard {
+    background-color: #e8f5e9; /* Light green */
+    border: 1px solid #81c784;
+    margin-bottom: 1rem;
+    padding: 1rem;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.orgCard:hover {
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+    transition: box-shadow 0.3s ease;
+}

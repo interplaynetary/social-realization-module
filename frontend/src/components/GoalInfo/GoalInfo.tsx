@@ -81,14 +81,13 @@ const GoalInfo = ({
 
                             {org.currentPhase === "goalAllocation" && (
                                 <div className={classes.inputContainer}>
-                                    <label htmlFor={`allocate-${goalId}`}>Allocate Value:</label>
                                     <input
                                         type="number"
                                         id={`allocate-${goalId}`}
                                         className={classes.inputField}
                                         value={allocatedValues[goalId] || ''}
                                         onChange={(e) => handleValueChange(goalId, Number(e.target.value))}
-                                        placeholder="Enter value"
+                                        placeholder="Enter value allocation"
                                     />
                                 </div>
                             )}

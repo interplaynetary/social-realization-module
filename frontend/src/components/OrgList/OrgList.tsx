@@ -155,7 +155,7 @@ const OrgList = () => {
                         );
 
                         return (
-                            <Card key={org.id}>
+                            <Card key={org.id} className={styles.orgCard}>
                                 <div>
                                     <Headline level="h3">{org.name}</Headline>
                                     <span className={styles.phase}>
