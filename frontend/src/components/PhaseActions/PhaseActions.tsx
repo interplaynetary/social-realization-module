@@ -10,7 +10,7 @@ import { useRecoilState } from "recoil";
 import GoalInfo from "../GoalInfo/GoalInfo";
 import { palette } from "../PlayerInfo/PlayerInfoColorPalette"; // Assuming you have a color palette
 import GoalOfferMapping from "../GoalOfferMapping/GoalOfferMapping";
-import { useGoalAllocationCalculations } from '../../helpers/helpers';
+import { useGoalAllocationCalculations, useOfferAllocationCalculations } from '../../helpers/helpers';
 
 
 const initialOfferDetails = {
@@ -25,10 +25,12 @@ const PhaseActions = ({ org, apiKey, playerId }) => {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [offerDetails, setOfferDetails] = useState(initialOfferDetails);
     const [selectedGoals, setSelectedGoals] = useState<string[]>([]);
-    const [allocations, setAllocations] = useState<Record<string, number>>({});
+    const [goalAllocations, setGoalAllocations] = useState<Record<string, number>>({});
     const [playerColors, setPlayerColors] = useState<Record<string, string>>({});
-    const [allocationData, setAllocationData] = useState(null);
+    const [goalAllocationData, setGoalAllocationData] = useState(null);
     const [isLoading, setIsLoading] = useState(false);
+    const [offerAllocations, setOfferAllocations] = useState<Record<string, {goalId: string, amount: number}>>({});
+    const [offerAllocationData, setOfferAllocationData] = useState(null);
 
     const [currentOrg, setCurrentOrg] = useRecoilState(currentOrgAtom);
 
@@ -70,18 +72,34 @@ const PhaseActions = ({ org, apiKey, playerId }) => {
         }
     };
 
-    const handleSubmitAllocations = async () => {
+    const handleSubmitGoalAllocations = async () => {
         try {
-            const response = await goalService.allocateValues(org.id, allocations);
+            console.log('Starting goal allocation submission with:', goalAllocations);
+            
+            if (Object.keys(goalAllocations).length === 0) {
+                alert("No allocations to submit");
+                return;
+            }
+
+            const response = await goalService.allocateValues(org.id, goalAllocations);
+            console.log('Received response:', response);
+
             if (response.success) {
                 alert("Allocations submitted successfully!");
-                setAllocations({});
+                setGoalAllocations({});
+                
+                // Refresh org data
+                const data = await organizationService.getOrgById(org.id);
+                if (data.success) {
+                    setCurrentOrg(data.organization);
+                }
             } else {
-                alert("Failed to submit allocations");
+                console.error('Failed to submit allocations:', response);
+                alert("Failed to submit Goal Allocations");
             }
         } catch (error) {
-            console.error("Error submitting allocations:", error);
-            alert("An error occurred while submitting allocations.");
+            console.error("Error submitting Goal Allocations:", error);
+            alert(`Error submitting Goal Allocations: ${error.message}`);
         }
     };
 
@@ -158,7 +176,7 @@ const PhaseActions = ({ org, apiKey, playerId }) => {
                     const result = await organizationService.fetchGoalAllocationData(org.id, playerId);
                     console.log('Goal allocation data:', result);
                     if (result.data.success) {
-                        setAllocationData(result.data.data);
+                        setGoalAllocationData(result.data.data);
                     }
                 } catch (error) {
                     console.error('Error fetching allocation data:', error);
@@ -169,9 +187,42 @@ const PhaseActions = ({ org, apiKey, playerId }) => {
         };
         
         fetchData();
-    }, [org.currentPhase, org.id, playerId]);
+    }, [org.currentPhase, org.id, playerId, currentOrg]);
 
-    const calculations = useGoalAllocationCalculations(allocationData);
+    const goalCalculations = useGoalAllocationCalculations(goalAllocationData);
+
+    const handleAllocationChange = (goalId: string, offerId: string, amount: number) => {
+        setOfferAllocations(prev => ({
+            ...prev,
+            [offerId]: {
+                goalId,
+                amount
+            }
+        }));
+    };
+
+    const handleSubmitOfferAllocations = async () => {
+        try {
+            const response = await offerService.allocateValues(org.id, offerAllocations);
+            if (response.success) {
+                alert("Offer Allocations submitted successfully!");
+                setOfferAllocations({});
+                
+                // Optionally refresh org data
+                const orgData = await organizationService.getOrgById(org.id);
+                if (orgData.success) {
+                    setCurrentOrg(orgData.organization);
+                }
+            } else {
+                alert("Failed to submit Offer Allocations");
+            }
+        } catch (error) {
+            console.error("Error submitting allocations:", error);
+            alert("Error submitting allocations. Please try again.");
+        }
+    };
+
+    const offerCalculations = useOfferAllocationCalculations(offerAllocationData);
 
     return (
         <Fragment>
@@ -202,9 +253,9 @@ const PhaseActions = ({ org, apiKey, playerId }) => {
                     ) : (
                         <>
                             <div className={classes.orgAllocationInfo}>
-                                <p>Your Portion of Potential Value to Allocate: {calculations.allocatorPortion}</p>
-                                <p>Already Allocated: {calculations.alreadyDistributed}</p>
-                                <p>Left to Allocate: {calculations.leftToAllocate}</p>
+                                <p>Your Portion of Potential Value to Allocate: {goalCalculations.allocatorPortion}</p>
+                                <p>Already Allocated: {goalCalculations.alreadyDistributed}</p>
+                                <p>Left to Allocate: {goalCalculations.leftToAllocate}</p>
                             </div>
                             {/* make already allocated and left to allocateuse State to reload based on form inputs */}
                             {/* I should be able to reallocate at will while the phase is open */}
@@ -218,14 +269,15 @@ const PhaseActions = ({ org, apiKey, playerId }) => {
                                 onGoalSelect={handleGoalSelect}
                                 selectedGoals={selectedGoals}
                                 isSelectable={false}
+                                playerId={playerId}
                                 onAllocateValue={(goalId, value) => {
-                                    setAllocations(prev => ({
+                                    setGoalAllocations(prev => ({
                                         ...prev,
                                         [goalId]: value
                                     }));
                                 }}
                             />
-                            <Button onClick={handleSubmitAllocations} disabled={isSubmitting}>
+                            <Button onClick={handleSubmitGoalAllocations} disabled={isSubmitting}>
                                 Submit Allocations
                             </Button>
                         </>
@@ -290,6 +342,7 @@ const PhaseActions = ({ org, apiKey, playerId }) => {
                                 onGoalSelect={handleGoalSelect}
                                 selectedGoals={selectedGoals}
                                 isSelectable={true}
+                                playerId={playerId}
                             />
                         )}
                     </div>
@@ -301,7 +354,12 @@ const PhaseActions = ({ org, apiKey, playerId }) => {
             {org.currentPhase === "offerAllocation" && (
                 <div>
                     <Headline level="h4">Allocate Value from Goals to Offers towards them</Headline>
-                    <GoalOfferMapping org={org} currentCycle={org.currentCycle} playerId={playerId}/>
+                    <GoalOfferMapping 
+                        org={org} 
+                        playerId={playerId}
+                        onAllocationChange={handleAllocationChange}
+                    />
+                    <Button onClick={handleSubmitOfferAllocations}>Submit Offer Allocations</Button>
                 </div>
             )}
         </Fragment>

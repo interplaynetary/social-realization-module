@@ -1,27 +1,77 @@
+import { useState, useEffect } from "react";
 import Card from "../ui/Card/Card";
-import Headline from "../ui/Headline/Headline";
 import * as classes from "./GoalInfo.module.css";
-import { useState } from "react";
 import PlayerAvatar from "../PlayerAvatar/PlayerAvatar";
+import { organizationService } from "../../api/organisation";
 
 type GoalInfoProps = {
     org: any;
-    playerColors: Record<string, string>; // Accept playerColors as a prop
+    playerColors: Record<string, string>;
     onGoalSelect?: (goalId: string) => void;
     selectedGoals?: string[];
     isSelectable?: boolean;
     onAllocateValue?: (goalId: string, value: number) => void;
+    playerId: string; // Add playerId prop
 };
 
 const GoalInfo = ({ 
     org, 
-    playerColors, // Destructure playerColors from props
+    playerColors,
     onGoalSelect, 
     selectedGoals = [], 
     isSelectable = false,
-    onAllocateValue 
+    onAllocateValue,
+    playerId
 }: GoalInfoProps) => {
     const [allocatedValues, setAllocatedValues] = useState<Record<string, number>>({});
+    const [goalAllocations, setGoalAllocations] = useState<Record<string, any>>({});
+    const [isLoading, setIsLoading] = useState(false);
+
+    // Fetch allocation data for each goal
+    useEffect(() => {
+        let mounted = true;
+        
+        const fetchGoalData = async () => {
+            setIsLoading(true);
+            try {
+                const validGoals = org?.goals ? Object.keys(org.goals).filter(goalId => {
+                    const goal = org.goals[goalId];
+                    return goal && goal.id && goal.description;
+                }) : [];
+
+                const allocationPromises = validGoals.map(goalId => 
+                    organizationService.fetchOfferAllocationData(org.id, playerId, goalId)
+                );
+                
+                const results = await Promise.all(allocationPromises);
+                
+                if (!mounted) return;
+
+                const newAllocations = results.reduce((acc, result, index) => {
+                    if (result.data.success) {
+                        acc[validGoals[index]] = result.data.data;
+                    }
+                    return acc;
+                }, {});
+                
+                setGoalAllocations(newAllocations);
+            } catch (error) {
+                console.error('Error fetching goal allocation data:', error);
+            } finally {
+                if (mounted) {
+                    setIsLoading(false);
+                }
+            }
+        };
+
+        if (org?.id && playerId) {
+            fetchGoalData();
+        }
+
+        return () => {
+            mounted = false;
+        };
+    }, [org?.id, playerId, org?.goals]);
 
     const handleValueChange = (goalId: string, value: number) => {
         setAllocatedValues(prev => ({
@@ -33,7 +83,7 @@ const GoalInfo = ({
 
     const validGoals = org?.goals ? Object.keys(org.goals).filter(goalId => {
         const goal = org.goals[goalId];
-        return goal && goal.id && goal.description; // Ensure goal has an ID and description
+        return goal && goal.id && goal.description;
     }) : [];
 
     if (validGoals.length === 0) {
@@ -46,55 +96,61 @@ const GoalInfo = ({
 
     return (
         <div className={classes.section}>
-            <div className={classes.cards}>
-                {validGoals.map((goalId) => {
-                    const goal = org.goals[goalId];
-                    const isSelected = selectedGoals?.includes(goalId);
-                    
-                    // Check if createdById exists and is valid
-                    const creatorId = goal.createdById;
-                    const creatorName = org.players[creatorId]?.name || "Unknown";
-                    const creatorColor = playerColors[creatorId] || "#ccc"; // Fallback to default color
+            {isLoading ? (
+                <p>Loading goal data...</p>
+            ) : (
+                <div className={classes.cards}>
+                    {validGoals.map((goalId) => {
+                        const goal = org.goals[goalId];
+                        const isSelected = selectedGoals?.includes(goalId);
+                        const goalAllocation = goalAllocations[goalId];
+                        
+                        const creatorId = goal.createdById;
+                        const creatorName = org.players[creatorId]?.name || "Unknown";
+                        const creatorColor = playerColors[creatorId] || "#ccc";
 
-                    return (
-                        <Card 
-                            key={goalId} 
-                            className={`${classes.goalCard} ${isSelected ? classes.selected : ''}`}
-                            data-goal-id={goalId}
-                            id={`goal-${goalId}`}
-                            onClick={() => isSelectable && onGoalSelect?.(goalId)}
-                            style={{ cursor: isSelectable ? 'pointer' : 'default' }}
-                        >
-                            <h5 className={classes.goalTitle}>
-                                {goal.description}
-                            </h5>
-                            <div className={classes.goalDetails}>
-                            {org.currentPhase !== "goalExpression" && (
-                                    <p>Potential Value: {goal.potentialValue || 0}</p>
-                                )}
-                            <p>Proposed by:</p>
-                                <PlayerAvatar
-                                    color={creatorColor} // Use the color for the creator
-                                    name={creatorName} // Use the name for the creator
-                                />
-                            </div>
-
-                            {org.currentPhase === "goalAllocation" && (
-                                <div className={classes.inputContainer}>
-                                    <input
-                                        type="number"
-                                        id={`allocate-${goalId}`}
-                                        className={classes.inputField}
-                                        value={allocatedValues[goalId] || ''}
-                                        onChange={(e) => handleValueChange(goalId, Number(e.target.value))}
-                                        placeholder="Enter value allocation"
+                        return (
+                            <Card 
+                                key={goalId} 
+                                className={`${classes.goalCard} ${isSelected ? classes.selected : ''}`}
+                                data-goal-id={goalId}
+                                id={`goal-${goalId}`}
+                                onClick={() => isSelectable && onGoalSelect?.(goalId)}
+                                style={{ cursor: isSelectable ? 'pointer' : 'default' }}
+                            >
+                                <h5 className={classes.goalTitle}>
+                                    {goal.description}
+                                </h5>
+                                <div className={classes.goalDetails}>
+                                    {goalAllocation && (
+                                        <div className={classes.allocationInfo}>
+                                            <p>Potential Value: {goalAllocation.goalData.potentialValue}</p>
+                                        </div>
+                                    )}
+                                    <p>Proposed by:</p>
+                                    <PlayerAvatar
+                                        color={creatorColor}
+                                        name={creatorName}
                                     />
                                 </div>
-                            )}
-                        </Card>
-                    );
-                })}
-            </div>
+
+                                {org.currentPhase === "goalAllocation" && (
+                                    <div className={classes.inputContainer}>
+                                        <input
+                                            type="number"
+                                            id={`allocate-${goalId}`}
+                                            className={classes.inputField}
+                                            value={allocatedValues[goalId] || ''}
+                                            onChange={(e) => handleValueChange(goalId, Number(e.target.value))}
+                                            placeholder="Enter value allocation"
+                                        />
+                                    </div>
+                                )}
+                            </Card>
+                        );
+                    })}
+                </div>
+            )}
         </div>
     );
 };

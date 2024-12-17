@@ -84,10 +84,11 @@ export class Element {
     }
 
     initForOrg(orgId) {
-        debug('Initializing Element for Org:', {
-            elementId: this.id,
-            elementType: this.type,
-            orgId: orgId
+        try {
+            debug('Initializing Element for Org:', {
+                elementId: this.id,
+                elementType: this.type,
+                orgId: orgId
         });
         
         const org = orgRegistry[orgId];
@@ -105,6 +106,9 @@ export class Element {
             cycleSpecificOrgData[org.currentCycle] = this.getInitialOrgData();
             this.orgData[orgId] = cycleSpecificOrgData;
             debug('Created org data:', this.orgData[orgId]);
+        }
+    } catch (error) {
+            console.error('Error in initForOrg:', error);
         }
     }
 
@@ -170,9 +174,10 @@ export class Offer extends Element {
     }
 
     initForOrg(orgId, ask, targetGoalIds) {
-        super.initForOrg(orgId);
-        const orgData = this.getCurrentOtherData(orgId);
-        const totalPotentialPoints = Array.from(targetGoalIds).reduce((sum, goalId) => {
+        try {
+            super.initForOrg(orgId);
+            const orgData = this.getCurrentOtherData(orgId);
+            const totalPotentialPoints = Array.from(targetGoalIds).reduce((sum, goalId) => {
             const goal = goalRegistry[goalId];
             if (!goal) throw new Error("Target goal not found");
             const goalOrgData = goal.getCurrentOtherData(orgId);
@@ -185,9 +190,12 @@ export class Offer extends Element {
             throw new Error("Offer ask exceeds the aggregate potential points of the target goals");
         }
     
-        orgData.ask = ask;
-        orgData.towardsGoals = targetGoalIds;
-    }
+            orgData.ask = ask;
+            orgData.towardsGoals = targetGoalIds;
+        } catch (error) {
+            console.error('Error in initForOrg:', error);
+        }
+        }
     
 }
 
@@ -328,21 +336,31 @@ export class Org extends Element {
     }
 
     issueShares(amount) {
-        const org = this.getCurrentSelfData();
-        if (amount <= 0) throw new Error("Amount must be positive");
-        org.shares += amount;
-        return org.shares;
+        try {
+            const org = this.getCurrentSelfData();
+            if (amount <= 0) throw new Error("Amount must be positive");
+            org.shares += amount;
+            return org.shares;
+    } catch (error) {
+            console.error('Error in issueShares:', error);
+        }
     }
 
     unIssueShares(amount) {
+        try {
         const org = this.getCurrentSelfData();
         if (amount <= 0) throw new Error("Amount must be positive");
         if (amount > org.shares) throw new Error("Not enough shares to un-issue");
         org.shares -= amount;
         return org.shares;
+    } catch (error) {
+        console.error('Error in unIssueShares:', error);
+        throw error;
+    }
     }
 
     distributeShares(playerId, amount) {
+        try {
         const org = this.getCurrentSelfData();
         if (amount <= 0) throw new Error("Amount must be positive");
         if (amount > (org.shares - org.sharesDistributed)) throw new Error("Not enough shares to distribute");
@@ -355,19 +373,28 @@ export class Org extends Element {
         playerOrgData.shares += amount;
         org.sharesDistributed += amount;
         return playerOrgData.shares;
+        } catch (error) {
+            console.error('Error in distributeShares:', error);
+            throw error;
+        }
     }
     
     issuePotential(amount) {
-        const org = this.getCurrentSelfData();
-        if (amount <= 0) throw new Error("Amount must be positive");
-        org.potentialValue += amount;
-        return org.potentialValue;
+        try {
+            const org = this.getCurrentSelfData();
+            if (amount <= 0) throw new Error("Amount must be positive");
+            org.potentialValue += amount;
+            return org.potentialValue;
+        } catch (error) {
+            console.error('Error in issuePotential:', error);
+        }
     }
 
     acceptOffer(offerId) {
-        const org = this.getCurrentSelfData();
-        const offer = org.offers[offerId];
-        if (!offer) throw new Error("Offer not found");
+        try {
+            const org = this.getCurrentSelfData();
+            const offer = org.offers[offerId];
+            if (!offer) throw new Error("Offer not found");
 
         const offerOrgData = offer.getCurrentOtherData(this.id);
         const recievedPotentialValue = offerOrgData.potentialValue;
@@ -393,7 +420,11 @@ export class Org extends Element {
                 newAsk: recievedPotentialValue
             };
         }
+    } catch (error) {
+        console.error('Error in acceptOffer:', error);
     }
+    }
+
 
     calculateRealizedValue() {
         const org = this.getCurrentSelfData();
@@ -416,10 +447,11 @@ export class Org extends Element {
 
     // These Methods are as a Player:
     joinOrg(orgId) {
+        try {
         debug('Attempting to join org:', {
-            playerId: this.id,
-            targetOrgId: orgId
-        });
+                playerId: this.id,
+                targetOrgId: orgId
+            });
 
         const org = orgRegistry[orgId];
         if (!org) {
@@ -470,9 +502,13 @@ export class Org extends Element {
         });
 
         return false;
+    } catch (error) {
+        console.error('Error in joinOrg:', error);
+    }
     }
 
     proposeGoalToOrg(orgId, description) {
+        try {
         console.log('proposeGoalToOrg called with:', { orgId, description });
         console.log('Current orgRegistry:', orgRegistry);
                 
@@ -496,12 +532,16 @@ export class Org extends Element {
         
         console.log('Successfully added goal to org');
         return goal.id;
+    } catch (error) {
+        console.error('Error in proposeGoalToOrg:', error);
+    }
     }
 
     offerToOrg(orgId, name, description, effects, ask, targetGoalIds) {
-    if (!name || !description || !effects || ask <= 0 || !targetGoalIds || targetGoalIds.length === 0) {
-        throw new Error("Invalid offer parameters");
-    }
+        try {   
+            if (!name || !description || !effects || ask <= 0 || !targetGoalIds || targetGoalIds.length === 0) {
+                throw new Error("Invalid offer parameters");
+            }
 
     const org = orgRegistry[orgId];
     if (!org) throw new Error(`Organization with ID ${orgId} not found`);
@@ -524,11 +564,15 @@ export class Org extends Element {
     console.log('DEBUGGING IF TARGETGOALS ARE EVER SET', offer.orgData[orgId][org.currentCycle].towardsGoals);
     currentOrg.offers[offer.id] = offer;
 
-    return offer.id;
-}
+        return offer.id;
+    } catch (error) {
+        console.error('Error in offerToOrg:', error);
+    }
+    }
 
 
     allocateToGoalFromOrg(orgId, amount, goalId) {
+        try {
         const org = orgRegistry[orgId];
         const currentOrg = org.getCurrentSelfData();
         const allocator = currentOrg.players[this.id];
@@ -553,9 +597,13 @@ export class Org extends Element {
         } else {
             throw new Error("Insufficient allocation rights.");
         }
+    } catch (error) {
+        console.error('Error in allocateToGoalFromOrg:', error);
+    }
     }
 
     allocateToOfferFromGoalInOrg(orgId, amount, fromId, toId) {
+        try {
         const org = orgRegistry[orgId];
         const currentOrg = org.getCurrentSelfData();
 
@@ -587,12 +635,16 @@ export class Org extends Element {
         } else {
             throw new Error("Insufficient allocation rights.");
         }
+    } catch (error) {
+        console.error('Error in allocateToOfferFromGoalInOrg:', error);
+    }
     }
 
     // Shifts allocated points from one goal to another within the same organization.
-shiftPointsBetweenGoalsInOrg(orgId, amount, fromGoalId, toGoalId) {
-    const org = orgRegistry[orgId];
-    const currentOrg = org.getCurrentSelfData();
+    shiftPointsBetweenGoalsInOrg(orgId, amount, fromGoalId, toGoalId) {
+        try {
+            const org = orgRegistry[orgId];
+            const currentOrg = org.getCurrentSelfData();
 
     const fromGoal = currentOrg.goals[fromGoalId];
     const toGoal = currentOrg.goals[toGoalId];
@@ -609,13 +661,17 @@ shiftPointsBetweenGoalsInOrg(orgId, amount, fromGoalId, toGoalId) {
     fromGoalOrgData.potentialValue -= amount;
     toGoalOrgData.potentialValue += amount;
 
-    return true;
-}
+            return true;
+        } catch (error) {
+            console.error('Error in shiftPointsBetweenGoalsInOrg:', error);
+        }
+    }
 
-// Unallocates points from a specific goal.
-unallocatePointsFromGoalInOrg(orgId, amount, goalId) {
-    const org = orgRegistry[orgId];
-    const currentOrg = org.getCurrentSelfData();
+    // Unallocates points from a specific goal.
+    unallocatePointsFromGoalInOrg(orgId, amount, goalId) {
+        try {
+            const org = orgRegistry[orgId];
+            const currentOrg = org.getCurrentSelfData();
 
     const goal = currentOrg.goals[goalId];
     if (!goal) throw new Error("Goal not found");
@@ -630,13 +686,17 @@ unallocatePointsFromGoalInOrg(orgId, amount, goalId) {
     goalOrgData.potentialValue -= amount;
     currentOrg.potentialValueDistributedFromSelfToGoals -= amount;
 
-    return true;
-}
+            return true;
+        } catch (error) {
+            console.error('Error in unallocatePointsFromGoalInOrg:', error);
+        }
+    }
 
-// Shifts allocated points from one offer to another under the same goal.
-shiftPointsBetweenOffersInOrg(orgId, amount, fromOfferId, toOfferId, goalId) {
-    const org = orgRegistry[orgId];
-    const currentOrg = org.getCurrentSelfData();
+    // Shifts allocated points from one offer to another under the same goal.
+    shiftPointsBetweenOffersInOrg(orgId, amount, fromOfferId, toOfferId, goalId) {  
+        try {
+            const org = orgRegistry[orgId];
+            const currentOrg = org.getCurrentSelfData();
 
     const goal = currentOrg.goals[goalId];
     if (!goal) throw new Error("Goal not found");
@@ -660,13 +720,17 @@ shiftPointsBetweenOffersInOrg(orgId, amount, fromOfferId, toOfferId, goalId) {
     fromOfferOrgData.potentialValue -= amount;
     toOfferOrgData.potentialValue += amount;
 
-    return true;
-}
+            return true;
+        } catch(error) {
+            console.error('Error in shiftPointsBetweenOffersInOrg:', error);
+        }
+    }
 
 // Unallocates points from a specific offer.
-unallocatePointsFromOfferInOrg(orgId, amount, offerId, goalId) {
-    const org = orgRegistry[orgId];
-    const currentOrg = org.getCurrentSelfData();
+    unallocatePointsFromOfferInOrg(orgId, amount, offerId, goalId) {
+        try {
+            const org = orgRegistry[orgId];
+            const currentOrg = org.getCurrentSelfData();
 
     const goal = currentOrg.goals[goalId];
     if (!goal) throw new Error("Goal not found");
@@ -685,20 +749,24 @@ unallocatePointsFromOfferInOrg(orgId, amount, offerId, goalId) {
         throw new Error("Insufficient points in the offer to unallocate");
     }
 
-    // Unallocate points
-    offerOrgData.potentialValue -= amount;
-    goalOrgData.potentialValueDistributedFromSelf -= amount;
+            // Unallocate points
+            offerOrgData.potentialValue -= amount;
+            goalOrgData.potentialValueDistributedFromSelf -= amount;
 
-    return true;
-}
+            return true;
+        } catch (error) {
+            console.error('Error in unallocatePointsFromOfferInOrg:', error);
+        }
+    }
 
 
     acceptCounterOffer(orgId, counterofferId, accepted) {
-        const org = orgRegistry[orgId];
-        if (!org) throw new Error("Organization not found");
-        const currentOrg = org.getCurrentSelfData();
-        const counteroffer = currentOrg.offers[counterofferId];
-        if (!counteroffer) throw new Error("Counteroffer not found");
+        try {
+            const org = orgRegistry[orgId];
+            if (!org) throw new Error("Organization not found");
+            const currentOrg = org.getCurrentSelfData();
+            const counteroffer = currentOrg.offers[counterofferId];
+            if (!counteroffer) throw new Error("Counteroffer not found");
 
         const counterofferOrgData = counteroffer.getCurrentOtherData(orgId);
         if (counterofferOrgData.status !== 'counteroffered') {
@@ -717,52 +785,68 @@ unallocatePointsFromOfferInOrg(orgId, amount, offerId, goalId) {
             originalOfferOrgData.status = 'active';
             return { status: 'rejected', offerId: originalOfferOrgData.originalOfferId };
         }
+    } catch (error) {
+        console.error('Error in acceptCounterOffer:', error);
+    }
     }
 
     claimCompletion(orgId, offerId, claimDescription) {
-        const org = orgRegistry[orgId];
-        if (!org) throw new Error("Organization not found");
-        const currentOrg = org.getCurrentSelfData();
-        const offer = currentOrg.offers[offerId];
-        if (!offer) throw new Error("Offer not found");
+        try {
+                const org = orgRegistry[orgId];
+            if (!org) throw new Error("Organization not found");
+            const currentOrg = org.getCurrentSelfData();
+            const offer = currentOrg.offers[offerId];
+            if (!offer) throw new Error("Offer not found");
 
         const completion = new Completion(null, offerId, claimDescription, this.id);
-        currentOrg.completions[completion.id] = completion;
-        return completion.id;
+            currentOrg.completions[completion.id] = completion;
+            return completion.id;
+        } catch (error) {
+            console.error('Error in claimCompletion:', error);
+        }
     }
 
     challengeCompletion(orgId, completionId, challengeDescription) {
-        const org = orgRegistry[orgId];
-        if (!org) throw new Error("Organization not found");
-        const currentOrg = org.getCurrentSelfData();
-        const completion = currentOrg.completions[completionId];
-        if (!completion) throw new Error("Completion Claim not found");
-        completion.challenges[this.id] = challengeDescription;
+        try {
+                const org = orgRegistry[orgId];
+            if (!org) throw new Error("Organization not found");
+            const currentOrg = org.getCurrentSelfData();
+            const completion = currentOrg.completions[completionId];
+            if (!completion) throw new Error("Completion Claim not found");
+            completion.challenges[this.id] = challengeDescription;
+        } catch (error) {
+            console.error('Error in challengeCompletion:', error);
+        }
     }
 
     supportChallenge(orgId, completionId, support) {
-        const org = orgRegistry[orgId];
-        if (!org) throw new Error("Organization not found");
-        const currentOrg = org.getCurrentSelfData();
-        const completion = currentOrg.completions[completionId];
-        if (!completion) throw new Error("Completion Claim not found");
-        completion.supportVotes[this.id] = support;
+        try {
+            const org = orgRegistry[orgId];
+            if (!org) throw new Error("Organization not found");
+            const currentOrg = org.getCurrentSelfData();
+            const completion = currentOrg.completions[completionId];
+            if (!completion) throw new Error("Completion Claim not found");
+            completion.supportVotes[this.id] = support;
 
-        const totalVotes = Object.keys(completion.supportVotes).length;
-        const supportVotes = Object.values(completion.supportVotes).filter(v => v).length;
-        const supportRatio = supportVotes / totalVotes;
+            const totalVotes = Object.keys(completion.supportVotes).length;
+            const supportVotes = Object.values(completion.supportVotes).filter(v => v).length;
+            const supportRatio = supportVotes / totalVotes;
 
-        const acceptanceThreshold = 0.5;
+                const acceptanceThreshold = 0.5;
 
-        completion.status = supportRatio >= acceptanceThreshold ? 'accepted' : 'rejected';
-        return completion.status;
+            completion.status = supportRatio >= acceptanceThreshold ? 'accepted' : 'rejected';
+            return completion.status;
+        } catch (error) {
+            console.error('Error in supportChallenge:', error);
+        }
     }
 
     getGoalLeaderboard(dimension = 'potentialValue') {
-        const org = orgRegistry[orgId];
-        if (!org) throw new Error("Organization not found");
-        const currentOrg = org.getCurrentSelfData();
-        if (!['potentialValue', 'realizedValue'].includes(dimension)) {
+        try {
+            const org = orgRegistry[orgId];
+            if (!org) throw new Error("Organization not found");
+            const currentOrg = org.getCurrentSelfData();
+            if (!['potentialValue', 'realizedValue'].includes(dimension)) {
             throw new Error("Invalid dimension. Use 'potentialValue' or 'realizedValue'.");
         }
 
@@ -778,13 +862,17 @@ unallocatePointsFromOfferInOrg(orgId, amount, offerId, goalId) {
         });
 
         return leaderboard.sort((a, b) => b[dimension] - a[dimension]);
+    } catch (error) {
+            console.error('Error in getGoalLeaderboard:', error);
+        }
     }
 
     getOfferLeaderboard(dimension = 'potentialValue') {
-        const org = orgRegistry[orgId];
-        if (!org) throw new Error("Organization not found");
-        const currentOrg = org.getCurrentSelfData();
-        if (!['potentialValue', 'realizedValue'].includes(dimension)) {
+        try {
+            const org = orgRegistry[orgId];
+            if (!org) throw new Error("Organization not found");
+            const currentOrg = org.getCurrentSelfData();
+            if (!['potentialValue', 'realizedValue'].includes(dimension)) {
             throw new Error("Invalid dimension. Use 'potentialValue' or 'realizedValue'.");
         }
 
@@ -801,6 +889,9 @@ unallocatePointsFromOfferInOrg(orgId, amount, offerId, goalId) {
         });
 
         return leaderboard.sort((a, b) => b[dimension] - a[dimension]);
+    } catch (error) {
+        console.error('Error in getOfferLeaderboard:', error);
+    }
     }
 }
 

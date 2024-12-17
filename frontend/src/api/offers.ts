@@ -21,6 +21,25 @@ export const offerService = {
     ]);
   },
 
+  async allocateValues(orgId: string, offerAllocations: Record<string, { goalId: string , amount: number}>) {
+    try {
+      await Promise.all(
+        Object.entries(offerAllocations).map(async ([offerId, allocation]) => {
+          await organizationService.playerAction('allocateToOfferFromGoalInOrg', [
+            orgId,
+            allocation.amount,
+            allocation.goalId,
+            offerId
+          ]);
+        })
+      );
+      return { success: true };
+    } catch (error) {
+      console.error('Error allocating values:', error);
+      return { success: false, error };
+    }
+  },
+
   async acceptOffer(offerId: string) {
     return organizationService.playerAction('acceptOffer', [offerId]);
   },

@@ -122,7 +122,7 @@ function testOfferAllocation(org, player1, player2) {
 
     org.issueShares(100);
     org.distributeShares(player1.id, 50);
-    org.distributeShares(player2.id, 50);
+    org.distributeShares(player2.id, 40);
 
     const goal1 = player1.proposeGoalToOrg(org.id, "++love");
     const goal2 = player2.proposeGoalToOrg(org.id, "++care");
@@ -130,7 +130,7 @@ function testOfferAllocation(org, player1, player2) {
     org.runPhaseShift(); // Move to Goal Allocation phase
     org.issuePotential(1000);
     player1.allocateToGoalFromOrg(org.id, 250, goal1);
-    player2.allocateToGoalFromOrg(org.id, 250, goal2);
+    player2.allocateToGoalFromOrg(org.id, 100, goal2);
 
     org.runPhaseShift(); // Move to Offer Expression phase
     const offer1 = player1.offerToOrg(
@@ -153,7 +153,7 @@ function testOfferAllocation(org, player1, player2) {
     org.runPhaseShift(); // Move to Offer Allocation phase
 
     player1.allocateToOfferFromGoalInOrg(org.id, 50, goal1, offer1);
-    player2.allocateToOfferFromGoalInOrg(org.id, 50, goal2, offer2);
+    player2.allocateToOfferFromGoalInOrg(org.id, 30, goal2, offer2);
 
     console.log(`Org ${org.name} current phase: ${org.getCurrentPhase()}`);
     console.log(`Allocated to offers: ${offer1}, ${offer2}`);
@@ -173,7 +173,7 @@ function testCompletions(org, player1, player2, testOrg) {
     org.runPhaseShift(); // Move to Goal Allocation phase
     org.issuePotential(1000);
     player1.allocateToGoalFromOrg(org.id, 250, goal1);
-    player2.allocateToGoalFromOrg(org.id, 250, goal2);
+    player2.allocateToGoalFromOrg(org.id, 160, goal2);
 
     org.runPhaseShift(); // Move to Offer Expression phase
     const offer1 = player1.offerToOrg(
@@ -195,7 +195,7 @@ function testCompletions(org, player1, player2, testOrg) {
 
     org.runPhaseShift(); // Move to Offer Allocation phase
     player1.allocateToOfferFromGoalInOrg(org.id, 50, goal1, offer1);
-    player2.allocateToOfferFromGoalInOrg(org.id, 50, goal2, offer2);
+    player2.allocateToOfferFromGoalInOrg(org.id, 30, goal2, offer2);
 
     org.runPhaseShift(); // Move to Completions phase
 

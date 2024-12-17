@@ -6,17 +6,16 @@ import { organizationService } from '../../api/organisation';
 
 type GoalOfferMappingProps = {
     org: any;
-    currentCycle: string;
     playerId: string;
+    onAllocationChange: (goalId: string, offerId: string, amount: number) => void;
 };
 
-function GoalOfferMapping({ org, currentCycle, playerId }: GoalOfferMappingProps) {
+function GoalOfferMapping({ org, playerId, onAllocationChange }: GoalOfferMappingProps) {
     const goals = React.useMemo(() => 
         org.goals ? Object.keys(org.goals).map(goalId => org.goals[goalId]) : []
     , [org.goals]);
     
     const [isLoading, setIsLoading] = useState(false);
-    const [offerInputs, setOfferInputs] = useState<{ [key: string]: number }>({});
     const [allocationData, setAllocationData] = useState<{ [goalId: string]: any }>({});
     const [selectedGoalId, setSelectedGoalId] = useState<string | null>(null);
 
@@ -69,12 +68,9 @@ function GoalOfferMapping({ org, currentCycle, playerId }: GoalOfferMappingProps
         selectedGoalId ? allocationData[selectedGoalId] : null
     );
 
-    const handleInputChange = React.useCallback((offerId: string, value: number) => {
-        setOfferInputs(prev => ({
-            ...prev,
-            [offerId]: value,
-        }));
-    }, []);
+    const handleInputChange = React.useCallback((goalId: string, offerId: string, value: number) => {
+        onAllocationChange(goalId, offerId, value);
+    }, [onAllocationChange]);
 
     const handleGoalSelect = React.useCallback((goalId: string) => {
         setSelectedGoalId(goalId);
@@ -95,12 +91,14 @@ function GoalOfferMapping({ org, currentCycle, playerId }: GoalOfferMappingProps
                             onClick={() => handleGoalSelect(goal.id)}
                         >
                             <h5 className={classes.goalTitle}>{goal.description}</h5>
+                            <p className={classes.goalPotentialValue}>
+                                Potential Value: {goal.orgData[org.id]?.[org.currentCycle]?.potentialValue || 0}
+                            </p>
 
                             {isSelected && goalCalculations && (
                                 <>
                                     <div className={classes.goalAllocationInfo}>
-                                        <p>Potential Value: {goal.orgData[org.id]?.[currentCycle]?.potentialValue || 0}</p>
-                                        <p>Your Portion to Allocate: {goalCalculations.allocatorPortion}</p>
+                                        <p>Your Portion of Potential Value to Allocate: {goalCalculations.allocatorPortion}</p>
                                         <p>Allocated: {goalCalculations.alreadyDistributed}</p>
                                         <p>Left to Allocate: {goalCalculations.leftToAllocate}</p>
                                     </div>
@@ -118,9 +116,12 @@ function GoalOfferMapping({ org, currentCycle, playerId }: GoalOfferMappingProps
                                                             
                                                             <input
                                                                 type="number"
-                                                                value={offerInputs[offerId] || ''}
-                                                                onChange={(e) => handleInputChange(offerId, Number(e.target.value))}
-                                                                placeholder="Enter value allocation"
+                                                                onChange={(e) => handleInputChange(
+                                                                    goal.id,
+                                                                    offerId,
+                                                                    Number(e.target.value)
+                                                                )}
+                                                                placeholder="Enter value"
                                                                 className={classes.inputField}
                                                                 max={goalCalculations.leftToAllocate}
                                                             />
