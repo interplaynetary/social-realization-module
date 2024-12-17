@@ -45,7 +45,7 @@ export type Offer = {
     description: string; // Description of the offer
     effects: string[]; // Effects of the offer
     createdById: string; // ID of the player who created the offer
-    askAmount: number; // Amount requested in the offer
+    ask: number; // Amount requested in the offer
     targetGoalIds: string[]; // IDs of the goals targeted by the offer
 };
 

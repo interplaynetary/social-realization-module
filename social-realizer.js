@@ -142,7 +142,7 @@ export class Goal extends Element {
         return {
             potentialValue: 0,
             potentialValueDistributedFromSelf: 0,
-            offersTowardsSelf: new Set()
+            offersTowardsSelf: []
         };
     }
 }
@@ -160,7 +160,7 @@ export class Offer extends Element {
     getInitialOrgData() {
         return {
             ask: 0,
-            towardsGoals: new Set(),
+            towardsGoals: [],
             potentialValue: 0,
             distributedFromSelf: 0,
             credits: 0,
@@ -176,6 +176,8 @@ export class Offer extends Element {
             const goal = goalRegistry[goalId];
             if (!goal) throw new Error("Target goal not found");
             const goalOrgData = goal.getCurrentOtherData(orgId);
+            goalOrgData.offersTowardsSelf.push(this.id);
+            console.log('DEBUGGING IF Offers towardsSelf in Goals ARE EVER SET', goalOrgData.offersTowardsSelf);
             return sum + goalOrgData.potentialValue;
         }, 0);
     
@@ -184,7 +186,7 @@ export class Offer extends Element {
         }
     
         orgData.ask = ask;
-        orgData.towardsGoals = new Set(targetGoalIds);
+        orgData.towardsGoals = targetGoalIds;
     }
     
 }
@@ -515,6 +517,7 @@ export class Org extends Element {
 
     const offer = new Offer(name, description, effects, this.id);
     offer.initForOrg(orgId, ask, targetGoalIds);
+    console.log('DEBUGGING IF TARGETGOALS ARE EVER SET', offer.orgData[orgId][org.currentCycle].towardsGoals);
     currentOrg.offers[offer.id] = offer;
 
     return offer.id;
@@ -562,7 +565,7 @@ export class Org extends Element {
         if (!offer) throw new Error("Offer not found");
 
         const offerOrgData = offer.getCurrentOtherData(orgId);
-        if (!offerOrgData.towardsGoals.has(fromId)) {
+        if (!offerOrgData.towardsGoals.includes(fromId)) {
             throw new Error("This offer is not towards the specified goal");
         }
 
@@ -641,7 +644,7 @@ shiftPointsBetweenOffersInOrg(orgId, amount, fromOfferId, toOfferId, goalId) {
     const fromOfferOrgData = fromOffer.getCurrentOtherData(orgId);
     const toOfferOrgData = toOffer.getCurrentOtherData(orgId);
 
-    if (!fromOfferOrgData.towardsGoals.has(goalId) || !toOfferOrgData.towardsGoals.has(goalId)) {
+    if (!fromOfferOrgData.towardsGoals.includes(goalId) || !toOfferOrgData.towardsGoals.includes(goalId)) {
         throw new Error("Both offers must be linked to the specified goal");
     }
 
@@ -670,7 +673,7 @@ unallocatePointsFromOfferInOrg(orgId, amount, offerId, goalId) {
     const offerOrgData = offer.getCurrentOtherData(orgId);
     const goalOrgData = goal.getCurrentOtherData(orgId);
 
-    if (!offerOrgData.towardsGoals.has(goalId)) {
+    if (!offerOrgData.towardsGoals.includes(goalId)) {
         throw new Error("This offer is not linked to the specified goal");
     }
 

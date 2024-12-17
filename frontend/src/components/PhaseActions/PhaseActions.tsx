@@ -7,21 +7,38 @@ import * as classes from "./PhaseActions.module.css";
 import { goalService, offerService, organizationService } from "../../api";
 import { currentOrgAtom } from "../../state/atoms/currentOrgAtom";
 import { useRecoilState } from "recoil";
+import GoalInfo from "../GoalInfo/GoalInfo";
+import { palette } from "../PlayerInfo/PlayerInfoColorPalette"; // Assuming you have a color palette
+import GoalOfferMapping from "../GoalOfferMapping/GoalOfferMapping";
+
 
 const initialOfferDetails = {
     offerName: "",
     offerDescription: "",
     offerEffects: "",
     offerAsk: "",
-    targetGoals: "",
 };
 
 const PhaseActions = ({ org, apiKey, playerId }) => {
     const [goalDescription, setGoalDescription] = useState("");
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [offerDetails, setOfferDetails] = useState(initialOfferDetails);
+    const [selectedGoals, setSelectedGoals] = useState<string[]>([]);
+    const [allocations, setAllocations] = useState<Record<string, number>>({});
+    const [playerColors, setPlayerColors] = useState<Record<string, string>>({});
 
     const [currentOrg, setCurrentOrg] = useRecoilState(currentOrgAtom);
+
+    const handleGoalSelect = (goalId: string) => {
+        console.log('Selected goal ID:', goalId);
+        
+        setSelectedGoals(prev => {
+            if (prev.includes(goalId)) {
+                return prev.filter(id => id !== goalId);
+            }
+            return [...prev, goalId];
+        });
+    };
 
     const handleProposeGoal = async () => {
         if (!goalDescription.trim()) {
@@ -41,33 +58,94 @@ const PhaseActions = ({ org, apiKey, playerId }) => {
                 setCurrentOrg(data["organization"]);
 
                 const currentCycle = data["organization"].currentCycle;
-
                 console.log(data["organization"].cycles[currentCycle].goals);
-                // update the orgRegistry
             }
         } catch (error) {
             console.error("Failed to propose goal:", error);
-            // TODO: Add error notification
         } finally {
             setIsSubmitting(false);
         }
     };
 
-    const handleMakeOffer = async () => {
-        const data = await offerService.createOffer(
-            org.id,
-            offerDetails.offerName,
-            offerDetails.offerDescription,
-            offerDetails.offerEffects,
-            Number(offerDetails.offerAsk),
-            offerDetails.targetGoals.split(",")
-        );
-
-        if (data.success) {
-            console.log(data, "offer has been made <3");
-            setOfferDetails(initialOfferDetails);
+    const handleSubmitAllocations = async () => {
+        try {
+            const response = await goalService.allocateValues(org.id, allocations);
+            if (response.success) {
+                alert("Allocations submitted successfully!");
+                setAllocations({});
+            } else {
+                alert("Failed to submit allocations");
+            }
+        } catch (error) {
+            console.error("Error submitting allocations:", error);
+            alert("An error occurred while submitting allocations.");
         }
     };
+
+    const handleMakeOffer = async () => {
+        if (selectedGoals.length === 0) {
+            alert("Please select at least one goal");
+            return;
+        }
+
+        console.log('Making offer with:', {
+            orgId: org.id,
+            name: offerDetails.offerName,
+            description: offerDetails.offerDescription,
+            effects: offerDetails.offerEffects,
+            ask: Number(offerDetails.offerAsk),
+            targetGoalIds: selectedGoals
+        });
+
+        try {
+            const offerId = await offerService.createOffer(
+                org.id,
+                offerDetails.offerName,
+                offerDetails.offerDescription,
+                offerDetails.offerEffects,
+                Number(offerDetails.offerAsk),
+                selectedGoals
+            );
+
+            console.log('Offer created with ID:', offerId);
+
+            // Immediately fetch updated org data
+            const updatedOrgData = await organizationService.getOrgById(org.id);
+            console.log('Updated org data:', updatedOrgData);
+
+            if (updatedOrgData.success) {
+                setCurrentOrg(updatedOrgData.organization);
+                setOfferDetails(initialOfferDetails);
+                setSelectedGoals([]);
+            } else {
+                console.error('Failed to fetch updated org data');
+            }
+        } catch (error: unknown) {
+            console.error("Error creating offer:", error);
+            if (error instanceof Error) {
+                alert("Failed to create offer: " + error.message);
+            } else {
+                alert("Failed to create offer");
+            }
+        }
+    };
+
+    useEffect(() => {
+        console.log('Current org structure:', JSON.stringify(currentOrg, null, 2));
+    }, [currentOrg]);
+
+    useEffect(() => {
+        if(org?.players){
+        // Shuffle the palette and assign a unique color to each player
+        const shuffledPalette = [...palette].sort(() => 0.5 - Math.random());
+        const colors = Object.keys(org.players).reduce((acc, playerId, index) => {
+            acc[playerId] = shuffledPalette[index % shuffledPalette.length];
+            return acc;
+        }, {} as Record<string, string>);
+
+        setPlayerColors(colors);
+    }
+    }, [org?.players]);
 
     return (
         <Fragment>
@@ -91,6 +169,32 @@ const PhaseActions = ({ org, apiKey, playerId }) => {
                 </div>
             )}
 
+            {org.currentPhase === "goalAllocation" && (
+                <div className={classes.section}>
+                    <Headline level="h4">Your Share of Potential Value to Allocate</Headline>
+                    <Headline level="h4">Allocated</Headline>
+                    <Headline level="h4">Left to Allocate</Headline>
+
+                    <Headline level="h4">Allocate Potential Value to Goals</Headline>
+                    <GoalInfo 
+                        org={currentOrg} 
+                        playerColors={playerColors}
+                        onGoalSelect={handleGoalSelect}
+                        selectedGoals={selectedGoals}
+                        isSelectable={false}
+                        onAllocateValue={(goalId, value) => {
+                            setAllocations(prev => ({
+                                ...prev,
+                                [goalId]: value
+                            }));
+                        }}
+                    />
+                    <Button onClick={handleSubmitAllocations} disabled={isSubmitting}>
+                        Submit Allocations
+                    </Button>
+                </div>
+            )}
+
             {org.currentPhase === "offerExpression" && (
                 <div className={classes.section}>
                     <Headline level="h4">Make Offer</Headline>
@@ -104,7 +208,7 @@ const PhaseActions = ({ org, apiKey, playerId }) => {
                                     offerName: e.target.value,
                                 })
                             }
-                            placeholder="Offer Name"
+                            placeholder="Name"
                         />
 
                         <TextInput
@@ -115,7 +219,7 @@ const PhaseActions = ({ org, apiKey, playerId }) => {
                                     offerDescription: e.target.value,
                                 })
                             }
-                            placeholder="Offer Description"
+                            placeholder="Description"
                         />
 
                         <TextInput
@@ -126,10 +230,9 @@ const PhaseActions = ({ org, apiKey, playerId }) => {
                                     offerEffects: e.target.value,
                                 })
                             }
-                            placeholder="Offer Effects"
+                            placeholder="Effects"
                         />
 
-                        {/* TODO: check to create number input? */}
                         <NumberInput
                             value={offerDetails.offerAsk}
                             onChange={(e) =>
@@ -138,26 +241,31 @@ const PhaseActions = ({ org, apiKey, playerId }) => {
                                     offerAsk: e.target.value,
                                 })
                             }
-                            placeholder="Offer Ask Amount"
+                            placeholder="Ask Amount"
                         />
 
-                        <TextInput
-                            value={offerDetails.targetGoals}
-                            onChange={(e) =>
-                                setOfferDetails({
-                                    ...offerDetails,
-                                    targetGoals: e.target.value,
-                                })
-                            }
-                            placeholder="Target Goal IDs (comma-separated)"
-                        />
+                        <Headline level="h4">Select Target Goals:</Headline>
+                        {currentOrg && (
+                            <GoalInfo 
+                                org={currentOrg} 
+                                playerColors={playerColors}
+                                onGoalSelect={handleGoalSelect}
+                                selectedGoals={selectedGoals}
+                                isSelectable={true}
+                            />
+                        )}
                     </div>
 
                     <Button onClick={handleMakeOffer}>Make Offer</Button>
                 </div>
             )}
 
-            {/* Add other phase-specific actions here */}
+            {org.currentPhase === "offerAllocation" && (
+                <div>
+                    <Headline level="h4">Allocate Value from Goals to Offers towards them</Headline>
+                    <GoalOfferMapping org={org} />
+                </div>
+            )}
         </Fragment>
     );
 };

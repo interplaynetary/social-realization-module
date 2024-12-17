@@ -1,0 +1,63 @@
+/* frontend/src/components/GoalOfferMapping/GoalOfferMapping.module.css */
+.mappingContainer {
+    margin: 1rem 0;
+}
+.section {
+    margin: 1rem 0;
+}
+
+.cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
+.goalCard,
+.offerCard {
+    margin: 1rem;
+    border: 1px solid #dddfdf;
+    border-radius: 16px;
+    padding: 32px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.goalTitle,
+.offerTitle {
+    margin: 0;
+    font-size: 1.1rem;
+    font-weight: bold;
+}
+
+.goalDetails,
+.offerDetails {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.goalDetails p,
+.offerDetails p {
+    margin: 0;
+    color: #666;
+    font-size: 0.9rem;
+}
+
+/* Add hover effect similar to OrgList cards */
+.goalCard:hover,
+.offerCard:hover {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    transition: box-shadow 0.3s ease;
+}
+
+.offersList {
+    margin-top: 0.5rem;
+}
+
+.offersList ul {
+    list-style-type: none; /* Remove bullet points */
+    padding: 0; /* Remove padding */
+    margin: 0; /* Remove margin */
+}

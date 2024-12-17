@@ -1,10 +1,10 @@
 import axios from 'axios';
 
 // For development
-//const API_BASE_URL = 'http://localhost:3001';
+const API_BASE_URL = 'http://localhost:3001';
 
 // For production
-const API_BASE_URL = 'https://realizer.playnet.lol';
+// const API_BASE_URL = 'https://realizer.playnet.lol';
 
 export const api = axios.create({
   baseURL: API_BASE_URL,

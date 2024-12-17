@@ -106,7 +106,7 @@ const OrgList = () => {
             setSelectedOrg(null);
             navigate(ROUTES.LOGIN);
         } else {
-            console.log(org.id, "???");
+            console.log(org.id);
             setSelectedOrg(org);
             getOrg(org.id);
             navigate(`${ROUTES.ORGS}${org.id}/`);

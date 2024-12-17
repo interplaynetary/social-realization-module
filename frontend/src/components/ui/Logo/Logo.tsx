@@ -4,7 +4,7 @@ import * as styles from "./Logo.module.css";
 interface LogoProps extends InputHTMLAttributes<HTMLInputElement> {}
 
 const Logo: React.FC<LogoProps> = (props) => {
-    return <h1 {...props} className={styles.logo}>⚹ social-realization-module</h1>;
+    return <h1 {...props} className={styles.logo}>⚹ social-realizer</h1>;
 };
 
 export default Logo;

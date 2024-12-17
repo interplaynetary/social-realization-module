@@ -1,15 +1,88 @@
 .section {
-    margin-top: var(--s-xl);
+    margin: 1rem 0;
 }
 
-.tags {
+.cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
+.goalCard,
+.offerCard {
+    border: 1px solid #dddfdf;
+    border-radius: 16px;
+    padding: 32px;
     display: flex;
-    row-gap: 6px;
-    flex-wrap: wrap;
+    flex-direction: column;
+    gap: 12px;
 }
 
-@media (min-width: 900px) {
-    .tags {
-        flex-wrap: wrap;
-    }
+.goalTitle,
+.offerTitle {
+    margin: 0;
+    font-size: 1.1rem;
+    font-weight: bold;
+}
+
+.goalDetails,
+.offerDetails {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.goalDetails p,
+.offerDetails p {
+    margin: 0;
+    color: #666;
+    font-size: 0.9rem;
+}
+
+/* Add hover effect similar to OrgList cards */
+.goalCard:hover,
+.offerCard:hover {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    transition: box-shadow 0.3s ease;
+}
+
+.selected {
+    border: 2px solid #007bff;
+    background-color: rgba(0, 123, 255, 0.05);
+}
+
+
+/* Input container styling */
+.inputContainer {
+    margin-top: 1rem; /* Space above the input */
+    display: flex;
+    flex-direction: column; /* Stack label and input */
+}
+
+/* Label styling */
+.inputContainer label {
+    margin-bottom: 0.5rem; /* Space between label and input */
+    font-weight: 600; /* Bold label */
+}
+
+/* Input field styling */
+.inputField {
+    padding: 0.5rem; /* Padding inside the input */
+    border: 1px solid #ccc; /* Border color */
+    border-radius: 4px; /* Rounded corners */
+    width: 100%; /* Full width */
+    transition: border-color 0.2s; /* Smooth transition for border color */
+}
+
+/* Input field focus effect */
+.inputField:focus {
+    border-color: #007bff; /* Change border color on focus */
+    outline: none; /* Remove default outline */
+    box-shadow: 0 0 5px rgba(0, 123, 255, 0.5); /* Add shadow on focus */
+}
+
+/* Input field hover effect */
+.inputField:hover {
+    border-color: #007bff; /* Change border color on hover */
 }
