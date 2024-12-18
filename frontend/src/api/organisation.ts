@@ -1,4 +1,5 @@
 import { api } from './config';
+import JSOG from 'jsog';
 
 export const organizationService = {
   async getOrgRegistry() {
@@ -49,4 +50,9 @@ export const organizationService = {
   async fetchOfferAllocationData(orgId: string, playerId: string, goalId: string) {
       return await api.get(`/get-offer-allocation-data/${orgId}/${playerId}/${goalId}`);
   },
+
+  async acceptOffer(offerId: string) {
+    return await this.playerAction('acceptOffer', [offerId]);
+  },
+  
 };

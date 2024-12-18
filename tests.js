@@ -41,7 +41,8 @@ export function runTests() {
     console.log("--- Phase Tests Completed ---");
 
     console.log(`player-1 API key: ${player1ApiKey}`);
-console.log(`player-2 API key: ${player2ApiKey}`);
+    console.log(`player-2 API key: ${player2ApiKey}`);
+    console.log(`Tanzania API key: ${org5ApiKey}`);
 }
 
 function testGoalExpression(org, player1, player2) {
@@ -187,21 +188,22 @@ function testCompletions(org, player1, player2, testOrg) {
         100,
         [goal1]
     );
-    const offer3 = player1.offerToOrg(
-        org.id,
-        "Temperance Training Program",
-        "Create a structured program for practicing moderation and self-control",
-        "Enhanced decision-making capabilities across the organization",
-        75,
-        [goal1]
-    );
     const offer2 = player2.offerToOrg(
         org.id,
         "Humble Leadership Workshop",
         "Interactive session on practicing humble leadership",
         "Improved listening and collaborative decision making",
-        100,
+        25,
         [goal2]
+    );
+
+    const offer3 = player1.offerToOrg(
+        org.id,
+        "Temperance Training Program",
+        "Create a structured program for practicing moderation and self-control",
+        "Enhanced decision-making capabilities across the organization",
+        1,
+        [goal1]
     );
 
     org.runPhaseShift(); // Move to Offer Allocation phase

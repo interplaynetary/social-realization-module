@@ -458,14 +458,14 @@ const PhaseActions = ({ org, apiKey, playerId }) => {
                                     (completion: any) => completion.offerId === offerId
                                 );
                                 
-                                console.log('Offer check:', {
+                                /*console.log('Offer check:', {
                                     offerId,
                                     createdById: offer.createdById,
                                     playerId,
                                     isCreator,
                                     hasCompletion,
                                     completions: org.completions
-                                });
+                                });*/
 
                                 if (!isCreator || hasCompletion) return null;
 

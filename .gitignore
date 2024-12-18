@@ -6,3 +6,10 @@ frontend/dist
 data
 cards
 .cursorignore
+bundle.js
+right-obligation.js
+server.ts
+social-realizer.ts
+tsconfig.json
+ts-node-esm.config.json
+unified.js

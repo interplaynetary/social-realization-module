@@ -122,7 +122,7 @@ const useOfferAllocationCalculations = (allocationData: OfferAllocationData | nu
 
     useEffect(() => {
         if (!allocationData) {
-            console.log('allocationData is null');
+            //console.log('allocationData is null');
             return;
         }
 
@@ -133,7 +133,7 @@ const useOfferAllocationCalculations = (allocationData: OfferAllocationData | nu
             allocatorData,
             offers
         } = allocationData;
-
+        
         // Calculate values using the same logic as allocateToOfferFromGoalInOrg
         const remainingPotentialValue = goalData.potentialValue - goalData.potentialValueDistributedFromSelf;
         const allocatorPortion = goalData.potentialValue * (allocatorData.shares / allocatorData.totalShares);

@@ -34,36 +34,46 @@
 - ✅ give each offer an allocation input field
 
 - ✅ Add Submit Offer Allocations Button
-- leftToAllocate should be the sum of all inputFields, and calculated on the frontend
-- ensure the frontend calculations are accurate!
 
+- ensure the frontend calculations are accurate!
+    - leftToAllocate should be the sum of all inputFields, and calculated on the frontend
+- ensure backend calculations are accurate!
 - ensure that bad inputs in frontend are: 
     - caught and displayed
     - don't submit
-    ✅ don't crash back-end
-
+    - don't crash back-end
 - we need to ensure that we can save/load data from the backend
+
+- ✅ Completion-phase
+    - adding challenges to completions (text response)
 
 - What does completion phase interface look like?
 
 - ✅ viewing certain routes while not logged in leads to server-side error! Server crashes.
 
 Reloading:
+- OrgDetail: Completion-phase
 - Shift Phase live-reload
 - ✅ Potential-Value live-reload (goal-allocation, offer-allocation)
-- players in org is not updating when new players join
+- ✅ players in org is not updating when new players join: (This was done unintentionally in OrgDetail.tsx)
+
+OrgDetail:
+- ✅ offer accept/counteroffer interface
+- counteroffer accept/reject interface
+- settings (for self)
+    - 
 
 - Creating exact opposite of GoalOfferMapping component during phaseAction: Offer-expression:
     - showing cards for goals, within each offer-card.
-- offer accept/reject interface
-- credits? (social-realizer.js)
-- allow offers to be offered to multiple orgs
+
 - orgView, offerView, goalView
+    - allow offers to be offered to multiple orgs (and be accepted by multiple orgs)
+
 - player colors should be consistent within an orgDetail (and logic should not be scattered around)
 - Order goals/offers by potential value
 
-- Eventually we will add a offer-concretization phase:
-- adding offer-dependencies
+- PhaseActions: Add a offer-concretization phase:
+    - adding offer-dependencies
 
 - We will eventually need to change social-realizer.js, we are currently not tracking who allocates how much to which goal/offer, only that one has distributed points from goals to offers towards them in general. This is valuable information, and we should track it. It will make the backend more closely reflect frontend.
 

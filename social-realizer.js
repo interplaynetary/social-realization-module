@@ -194,6 +194,7 @@ export class Offer extends Element {
             orgData.towardsGoals = targetGoalIds;
         } catch (error) {
             console.error('Error in initForOrg:', error);
+            throw error;
         }
         }
     
@@ -343,6 +344,7 @@ export class Org extends Element {
             return org.shares;
     } catch (error) {
             console.error('Error in issueShares:', error);
+            throw error;
         }
     }
 
@@ -387,6 +389,7 @@ export class Org extends Element {
             return org.potentialValue;
         } catch (error) {
             console.error('Error in issuePotential:', error);
+            throw error;
         }
     }
 
@@ -401,7 +404,12 @@ export class Org extends Element {
 
         if (recievedPotentialValue >= offerOrgData.ask) {
             offerOrgData.status = 'accepted';
-            return { status: 'accepted', credits: offerOrgData.credits };
+            return { status: 'accepted', credits: recievedPotentialValue };
+            // Value distributed to an offer by the "members" becomes the value allocated for the offer:
+            // If the allocation for the offers exceeds the cap of the goal they address:
+            // - The allocations (for different offers) can be used as a ratio:
+                // E.g. If the amount allocated for offers to a particular goal is double the cap of the goal, all allocations for the offers to that goal are halved.
+
         } else {
             const counterofferId = uuidv4();
             const counteroffer = new Offer(offer.name, offer.description, offer.effects, offer.createdById);
@@ -422,6 +430,7 @@ export class Org extends Element {
         }
     } catch (error) {
         console.error('Error in acceptOffer:', error);
+        throw error;
     }
     }
 
@@ -504,6 +513,7 @@ export class Org extends Element {
         return false;
     } catch (error) {
         console.error('Error in joinOrg:', error);
+        throw error;
     }
     }
 
@@ -534,6 +544,7 @@ export class Org extends Element {
         return goal.id;
     } catch (error) {
         console.error('Error in proposeGoalToOrg:', error);
+        throw error;
     }
     }
 
@@ -561,12 +572,12 @@ export class Org extends Element {
 
     const offer = new Offer(name, description, effects, this.id);
     offer.initForOrg(orgId, ask, targetGoalIds);
-    console.log('DEBUGGING IF TARGETGOALS ARE EVER SET', offer.orgData[orgId][org.currentCycle].towardsGoals);
     currentOrg.offers[offer.id] = offer;
 
         return offer.id;
     } catch (error) {
         console.error('Error in offerToOrg:', error);
+        throw error;
     }
     }
 
@@ -599,6 +610,7 @@ export class Org extends Element {
         }
     } catch (error) {
         console.error('Error in allocateToGoalFromOrg:', error);
+        throw error;
     }
     }
 
@@ -637,6 +649,7 @@ export class Org extends Element {
         }
     } catch (error) {
         console.error('Error in allocateToOfferFromGoalInOrg:', error);
+        throw error;
     }
     }
 
@@ -664,6 +677,7 @@ export class Org extends Element {
             return true;
         } catch (error) {
             console.error('Error in shiftPointsBetweenGoalsInOrg:', error);
+            throw error;
         }
     }
 
@@ -689,6 +703,7 @@ export class Org extends Element {
             return true;
         } catch (error) {
             console.error('Error in unallocatePointsFromGoalInOrg:', error);
+            throw error;
         }
     }
 
@@ -723,6 +738,7 @@ export class Org extends Element {
             return true;
         } catch(error) {
             console.error('Error in shiftPointsBetweenOffersInOrg:', error);
+            throw error;
         }
     }
 
@@ -756,6 +772,7 @@ export class Org extends Element {
             return true;
         } catch (error) {
             console.error('Error in unallocatePointsFromOfferInOrg:', error);
+            throw error;
         }
     }
 
@@ -787,6 +804,7 @@ export class Org extends Element {
         }
     } catch (error) {
         console.error('Error in acceptCounterOffer:', error);
+        throw error;
     }
     }
 
@@ -803,6 +821,7 @@ export class Org extends Element {
             return completion.id;
         } catch (error) {
             console.error('Error in claimCompletion:', error);
+            throw error;
         }
     }
 
@@ -816,6 +835,7 @@ export class Org extends Element {
             completion.challenges[this.id] = challengeDescription;
         } catch (error) {
             console.error('Error in challengeCompletion:', error);
+            throw error;
         }
     }
 
@@ -838,6 +858,7 @@ export class Org extends Element {
             return completion.status;
         } catch (error) {
             console.error('Error in supportChallenge:', error);
+            throw error;
         }
     }
 
@@ -864,6 +885,7 @@ export class Org extends Element {
         return leaderboard.sort((a, b) => b[dimension] - a[dimension]);
     } catch (error) {
             console.error('Error in getGoalLeaderboard:', error);
+            throw error;
         }
     }
 
@@ -891,6 +913,7 @@ export class Org extends Element {
         return leaderboard.sort((a, b) => b[dimension] - a[dimension]);
     } catch (error) {
         console.error('Error in getOfferLeaderboard:', error);
+        throw error;
     }
     }
 }

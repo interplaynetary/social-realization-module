@@ -13,3 +13,80 @@
         flex-wrap: wrap;
     }
 }
+
+/* New styles for organization actions section */
+.orgActions {
+    margin-top: 2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+/* Enhanced offer card styles */
+.offerCard {
+    background-color: #e3f2fd;
+    border: 1px solid #90caf9;
+    border-radius: 16px;
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    position: relative;
+    transition: box-shadow 0.3s ease, transform 0.2s ease;
+}
+
+.offerCard:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    transform: translateY(-2px);
+}
+
+.offerCard h6 {
+    margin: 0;
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #1565c0;
+}
+
+.offerCard p {
+    margin: 0;
+    color: #546e7a;
+    font-size: 0.9rem;
+    line-height: 1.4;
+}
+
+/* Status badges */
+.offerStatus {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    padding: 0.25rem 0.75rem;
+    border-radius: 12px;
+    font-size: 0.8rem;
+    font-weight: 500;
+}
+
+.statusPending {
+    background-color: #fff3e0;
+    color: #ef6c00;
+    border: 1px solid #ffcc80;
+}
+
+.statusAccepted {
+    background-color: #e8f5e9;
+    color: #2e7d32;
+    border: 1px solid #a5d6a7;
+}
+
+.statusCounteroffered {
+    background-color: #e3f2fd;
+    color: #1565c0;
+    border: 1px solid #90caf9;
+}
+
+/* Grid layout for offer cards */
+.offersGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1rem;
+    margin-top: 1rem;
+}
