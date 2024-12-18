@@ -28,7 +28,7 @@ const OrgDetailView = () => {
             <Container>
                 <h1>Welcome to OrgDetail</h1>
 
-                <OrgDetail org={orgId} />
+                <OrgDetail org={orgId} currentOrg={org}/>
             </Container>
         </div>
     );

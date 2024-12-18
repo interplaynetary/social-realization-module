@@ -32,13 +32,19 @@
 ✅ phaseAction: Offer-allocation:
 - ✅ display table-mapping of goals to offers towards them:
 - ✅ give each offer an allocation input field
-- What does completion phase interface look like?
 
 - ✅ Add Submit Offer Allocations Button
 - leftToAllocate should be the sum of all inputFields, and calculated on the frontend
+- ensure the frontend calculations are accurate!
 
-- ensure that bad inputs in frontend are caught and displayed + don't submit, or crash back-end
+- ensure that bad inputs in frontend are: 
+    - caught and displayed
+    - don't submit
+    ✅ don't crash back-end
+
 - we need to ensure that we can save/load data from the backend
+
+- What does completion phase interface look like?
 
 - ✅ viewing certain routes while not logged in leads to server-side error! Server crashes.
 

@@ -75,7 +75,7 @@ const OrgDetail: React.FunctionComponent<{
             {(org.currentPhase === "goalExpression") && currentOrg && (
                 <>
                     <Headline level="h4">Goals</Headline>
-                    <GoalInfo org={JSOG.decode(currentOrg)} playerColors={playerColors} />
+                    <GoalInfo org={JSOG.decode(currentOrg)} playerColors={playerColors} playerId={playerId} />
                 </>
             )}
 
@@ -86,13 +86,14 @@ const OrgDetail: React.FunctionComponent<{
                 </>
             )}
 
+            {/* Here we will add phase specific actions for player as org: issue-potential, issue shares, distribute share, settings: max-goals-per-player etc.*/}
             {playerId === org.id && (
                 <Button variant="secondary" onClick={handlePhaseShift}>
                     Shift Phase
                 </Button>
             )}
 
-            <PlayerInfo org={org} />
+            <PlayerInfo org={org}/>
         </div>
     );
 };

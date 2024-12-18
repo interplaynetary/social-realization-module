@@ -132,7 +132,8 @@ app.get('/get-org-registry', (req, res) => {
                 offers: currentCycleData.offers,
                 potentialValue: currentCycleData.potentialValue,
                 shares: currentCycleData.shares,
-                realizedValue: currentCycleData.realizedValue
+                realizedValue: currentCycleData.realizedValue,
+                completions: currentCycleData.completions
             };
         });
         
@@ -172,6 +173,7 @@ app.get('/get-org/:id', (req, res) => {
             potentialValue: currentCycleData.potentialValue,
             shares: currentCycleData.shares,
             realizedValue: currentCycleData.realizedValue,
+            completions: currentCycleData.completions,
             cycles: org.cycles
         };
         

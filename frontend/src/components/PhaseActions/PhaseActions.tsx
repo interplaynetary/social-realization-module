@@ -4,13 +4,14 @@ import Headline from "../ui/Headline/Headline";
 import NumberInput from "../ui/NumberInput/NumberInput";
 import TextInput from "../ui/TextInput/TextInput";
 import * as classes from "./PhaseActions.module.css";
-import { goalService, offerService, organizationService } from "../../api";
+import { goalService, offerService, organizationService, completionService } from "../../api";
 import { currentOrgAtom } from "../../state/atoms/currentOrgAtom";
 import { useRecoilState } from "recoil";
 import GoalInfo from "../GoalInfo/GoalInfo";
 import { palette } from "../PlayerInfo/PlayerInfoColorPalette"; // Assuming you have a color palette
 import GoalOfferMapping from "../GoalOfferMapping/GoalOfferMapping";
 import { useGoalAllocationCalculations, useOfferAllocationCalculations } from '../../helpers/helpers';
+import Card from "../ui/Card/Card";
 
 
 const initialOfferDetails = {
@@ -97,7 +98,7 @@ const PhaseActions = ({ org, apiKey, playerId }) => {
                 console.error('Failed to submit allocations:', response);
                 alert("Failed to submit Goal Allocations");
             }
-        } catch (error) {
+        } catch (error: any) {
             console.error("Error submitting Goal Allocations:", error);
             alert(`Error submitting Goal Allocations: ${error.message}`);
         }
@@ -223,6 +224,79 @@ const PhaseActions = ({ org, apiKey, playerId }) => {
     };
 
     const offerCalculations = useOfferAllocationCalculations(offerAllocationData);
+
+    const handleClaimCompletion = async (offerId: string) => {
+        try {
+            const response = await completionService.claimCompletion(
+                org.id,
+                offerId,
+                "Completed offer: " + org.offers[offerId]?.name
+            );
+            
+            if (response.success) {
+                alert("Completion claimed successfully!");
+                // Refresh org data
+                const data = await organizationService.getOrgById(org.id);
+                if (data.success) {
+                    setCurrentOrg(data.organization);
+                }
+            } else {
+                console.error('Failed to claim completion:', response);
+                alert("Failed to claim completion");
+            }
+        } catch (error) {
+            console.error("Error claiming completion:", error);
+            alert(`Error claiming completion: ${error.message}`);
+        }
+    };
+
+    const handleChallengeCompletion = async (completionId: string) => {
+        try {
+            const response = await completionService.challengeCompletion(
+                org.id,
+                completionId,
+                "Challenge: Completion requirements not met"
+            );
+            
+            if (response.success) {
+                alert("Challenge submitted successfully!");
+                const data = await organizationService.getOrgById(org.id);
+                if (data.success) {
+                    setCurrentOrg(data.organization);
+                }
+            } else {
+                console.error('Failed to submit challenge:', response);
+                alert("Failed to submit challenge");
+            }
+        } catch (error) {
+            console.error("Error submitting challenge:", error);
+            alert(`Error submitting challenge: ${error.message}`);
+        }
+    };
+
+    const handleSupportChallenge = async (completionId: string, support: boolean) => {
+        try {
+            const response = await completionService.supportChallenge(
+                org.id,
+                completionId,
+                support
+            );
+            
+            if (response.success) {
+                alert(`Successfully ${support ? 'supported' : 'opposed'} the challenge!`);
+                const data = await organizationService.getOrgById(org.id);
+                if (data.success) {
+                    setCurrentOrg(data.organization);
+                }
+            } else {
+                console.error('Failed to support/oppose challenge:', response);
+                alert("Failed to support/oppose challenge");
+            }
+        } catch (error) {
+            console.error("Error supporting/opposing challenge:", error);
+            alert(`Error supporting/opposing challenge: ${error.message}`);
+        }
+    };
 
     return (
         <Fragment>
@@ -360,6 +434,116 @@ const PhaseActions = ({ org, apiKey, playerId }) => {
                         onAllocationChange={handleAllocationChange}
                     />
                     <Button onClick={handleSubmitOfferAllocations}>Submit Offer Allocations</Button>
+                </div>
+            )}
+
+            {org.currentPhase === "completions" && (
+                <div className={classes.section}>
+                    <Headline level="h4">Completions Phase</Headline>
+                    
+                    {/* Debug information */}
+                    {/* <div style={{ fontSize: '12px', color: '#666', marginBottom: '1rem' }}>
+                        <p>Current Player ID: {playerId}</p>
+                        <p>Completions Data: {JSON.stringify(org.completions || {}, null, 2)}</p>
+                    </div> */}
+
+                    {/* List of Offers that can be claimed as complete */}
+                    <div className={classes.completionsSection}>
+                        <h5>Your Offers</h5>
+                        <div className={classes.offersList}>
+                            {Object.entries(org.offers || {}).map(([offerId, offer]: [string, any]) => {
+                                const isCreator = offer.createdById === playerId;
+                                // Check if this offer has a completion in the current cycle
+                                const hasCompletion = Object.values(org.completions || {}).some(
+                                    (completion: any) => completion.offerId === offerId
+                                );
+                                
+                                console.log('Offer check:', {
+                                    offerId,
+                                    createdById: offer.createdById,
+                                    playerId,
+                                    isCreator,
+                                    hasCompletion,
+                                    completions: org.completions
+                                });
+
+                                if (!isCreator || hasCompletion) return null;
+
+                                return (
+                                    <Card key={offerId} className={classes.offerCard}>
+                                        <h6>{offer.name}</h6>
+                                        <p>{offer.description}</p>
+                                        <Button onClick={() => handleClaimCompletion(offerId)}>
+                                            Claim Completion
+                                        </Button>
+                                    </Card>
+                                );
+                            })}
+                        </div>
+                    </div>
+
+                    {/* List of Claimed Completions */}
+                    <div className={classes.completionsSection}>
+                        <h5>Claimed Completions</h5>
+                        <div className={classes.completionsList}>
+                            {Object.entries(org.completions || {}).map(([completionId, completion]: [string, any]) => {
+                                const offer = org.offers[completion.offerId];
+                                
+                                console.log('Completion:', {
+                                    completionId,
+                                    completion,
+                                    offer,
+                                    cycle: org.cycles?.[0]
+                                });
+
+                                return (
+                                    <Card key={completionId} className={classes.completionCard}>
+                                        <h6>{offer?.name || 'Unknown Offer'}</h6>
+                                        <div className={`${classes.completionStatus} ${
+                                            completion.status === 'rejected' ? classes.statusRejected :
+                                            completion.status === 'accepted' ? classes.statusAccepted :
+                                            classes.statusPending
+                                        }`}>
+                                            {completion.status}
+                                        </div>
+                                        <p>Claimed by: {completion.claimedById}</p>
+                                        
+                                        {completion.challenges && (
+                                            <p>Challenges: {Object.keys(completion.challenges).length}</p>
+                                        )}
+                                        
+                                        {!completion.challenges && completion.claimedById !== playerId && (
+                                            <Button 
+                                                onClick={() => handleChallengeCompletion(completionId)}
+                                                variant="secondary"
+                                            >
+                                                Challenge Completion
+                                            </Button>
+                                        )}
+
+                                        {completion.challenges && completion.claimedById !== playerId && (
+                                            <div className={classes.challengeActions}>
+                                                <Button 
+                                                    onClick={() => handleSupportChallenge(completionId, true)}
+                                                    disabled={completion.supportVotes?.[playerId] !== undefined}
+                                                    variant={completion.supportVotes?.[playerId] === true ? "primary" : "secondary"}
+                                                >
+                                                    Support Challenge
+                                                </Button>
+                                                <Button 
+                                                    onClick={() => handleSupportChallenge(completionId, false)}
+                                                    disabled={completion.supportVotes?.[playerId] !== undefined}
+                                                    variant={completion.supportVotes?.[playerId] === false ? "primary" : "secondary"}
+                                                >
+                                                    Oppose Challenge
+                                                </Button>
+                                            </div>
+                                        )}
+                                    </Card>
+                                );
+                            })}
+                        </div>
+                    </div>
                 </div>
             )}
         </Fragment>

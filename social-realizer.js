@@ -798,7 +798,7 @@ export class Org extends Element {
             const offer = currentOrg.offers[offerId];
             if (!offer) throw new Error("Offer not found");
 
-        const completion = new Completion(null, offerId, claimDescription, this.id);
+        const completion = new Completion(offerId, claimDescription, this.id);
             currentOrg.completions[completion.id] = completion;
             return completion.id;
         } catch (error) {
@@ -897,6 +897,7 @@ export class Org extends Element {
 
 
 export async function playerAction(apiKey, actionType, ...actionParams) {
+    try {
     debug('Player action called:', {
         actionType,
         params: actionParams,
@@ -926,12 +927,11 @@ export async function playerAction(apiKey, actionType, ...actionParams) {
     debug('Found player:', {
         id: player.id,
         name: player.name
-    });
+    }); 
 
     const elementsToSave = new Set();
     let result;
 
-    try {
         const noOrgIdActions = ['getCurrentSelfData', 'getCurrentPhase', 'issueShares', 'runPhaseShift', 
                                'unIssueShares', 'issuePotential', 'calculateRealizedValue', 
                                'getGoalLeaderboard', 'getOfferLeaderboard', 'acceptOffer'];

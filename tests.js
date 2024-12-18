@@ -39,6 +39,9 @@ export function runTests() {
     testCompletions(org5, player1, player2, org1);
 
     console.log("--- Phase Tests Completed ---");
+
+    console.log(`player-1 API key: ${player1ApiKey}`);
+console.log(`player-2 API key: ${player2ApiKey}`);
 }
 
 function testGoalExpression(org, player1, player2) {
@@ -184,6 +187,14 @@ function testCompletions(org, player1, player2, testOrg) {
         100,
         [goal1]
     );
+    const offer3 = player1.offerToOrg(
+        org.id,
+        "Temperance Training Program",
+        "Create a structured program for practicing moderation and self-control",
+        "Enhanced decision-making capabilities across the organization",
+        75,
+        [goal1]
+    );
     const offer2 = player2.offerToOrg(
         org.id,
         "Humble Leadership Workshop",
@@ -196,6 +207,7 @@ function testCompletions(org, player1, player2, testOrg) {
     org.runPhaseShift(); // Move to Offer Allocation phase
     player1.allocateToOfferFromGoalInOrg(org.id, 50, goal1, offer1);
     player2.allocateToOfferFromGoalInOrg(org.id, 30, goal2, offer2);
+    player1.allocateToOfferFromGoalInOrg(org.id, 1, goal1, offer3);
 
     org.runPhaseShift(); // Move to Completions phase
 
@@ -212,4 +224,6 @@ function testCompletions(org, player1, player2, testOrg) {
     console.log(`Completions claimed: ${completion1}, ${completion2}`);
     console.log(`Completion 1 status: ${org.getCurrentSelfData().completions[completion1].status}`);
     console.log(`Completion 2 status: ${org.getCurrentSelfData().completions[completion2].status}`);
+
 }
+
